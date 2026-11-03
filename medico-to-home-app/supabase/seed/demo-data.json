@@ -1,0 +1,3974 @@
+{
+ "CATS": {
+  "doctor": {
+   "label": "Doctors",
+   "one": "Doctor",
+   "plural": "doctors",
+   "brand": "Doctor",
+   "unit": "visit",
+   "plan": false,
+   "allowPlan": true,
+   "mode": "session",
+   "reg": "TCMC Reg. No.",
+   "svcs": [
+    [
+     "General check-up",
+     1,
+     "30 min"
+    ],
+    [
+     "Fever & infection",
+     1,
+     "30 min"
+    ],
+    [
+     "BP & diabetes review",
+     1,
+     "30 min"
+    ],
+    [
+     "Elderly check-up",
+     1.2,
+     "45 min"
+    ],
+    [
+     "Prescription renewal",
+     0.6,
+     "20 min"
+    ],
+    [
+     "Palliative care visit",
+     1.5,
+     "60 min"
+    ]
+   ]
+  },
+  "nurse": {
+   "label": "Nurses",
+   "one": "Nurse",
+   "plural": "nurses",
+   "brand": "Nurse",
+   "unit": "visit",
+   "plan": true,
+   "allowPlan": true,
+   "mode": "session",
+   "reg": "KNMC Reg. No.",
+   "svcs": [
+    [
+     "Injection",
+     0.5,
+     "15 min"
+    ],
+    [
+     "IV drip",
+     1.4,
+     "60–90 min"
+    ],
+    [
+     "Wound dressing",
+     1,
+     "30 min"
+    ],
+    [
+     "Catheter care",
+     1.2,
+     "30 min"
+    ],
+    [
+     "Ryles tube care",
+     1.2,
+     "30 min"
+    ],
+    [
+     "Post-surgery care",
+     1.5,
+     "60 min"
+    ]
+   ]
+  },
+  "physio": {
+   "label": "Physiotherapists",
+   "one": "Physiotherapist",
+   "plural": "physiotherapists",
+   "brand": "Physio",
+   "unit": "session",
+   "plan": true,
+   "allowPlan": true,
+   "mode": "session",
+   "reg": "KSAHPC Reg. No.",
+   "svcs": [
+    [
+     "Back & neck pain",
+     1,
+     "45 min"
+    ],
+    [
+     "Knee & joint pain",
+     1,
+     "45 min"
+    ],
+    [
+     "Stroke rehabilitation",
+     1.2,
+     "60 min"
+    ],
+    [
+     "Post-surgery rehab",
+     1.1,
+     "45 min"
+    ],
+    [
+     "Sports injury",
+     1.1,
+     "45 min"
+    ],
+    [
+     "Elderly mobility",
+     1,
+     "45 min"
+    ]
+   ]
+  },
+  "ot": {
+   "label": "Occupational Therapists",
+   "one": "Occupational Therapist",
+   "plural": "occupational therapists",
+   "brand": "Therapy",
+   "unit": "session",
+   "plan": true,
+   "allowPlan": true,
+   "mode": "session",
+   "reg": "AIOTA Reg. No.",
+   "svcs": [
+    [
+     "Occupational therapy",
+     1,
+     "45 min"
+    ],
+    [
+     "Hand therapy",
+     1,
+     "45 min"
+    ],
+    [
+     "Daily-living skills training",
+     1,
+     "60 min"
+    ],
+    [
+     "Child development therapy",
+     1.1,
+     "45 min"
+    ]
+   ]
+  },
+  "speech": {
+   "label": "Speech Therapists",
+   "one": "Speech Therapist",
+   "plural": "speech therapists",
+   "brand": "Therapy",
+   "unit": "session",
+   "plan": true,
+   "allowPlan": true,
+   "mode": "session",
+   "reg": "RCI CRR No.",
+   "svcs": [
+    [
+     "Speech therapy",
+     1,
+     "45 min"
+    ],
+    [
+     "Swallowing (dysphagia) therapy",
+     1.15,
+     "45 min"
+    ],
+    [
+     "Child language therapy",
+     1,
+     "45 min"
+    ],
+    [
+     "Voice & fluency therapy",
+     1,
+     "45 min"
+    ]
+   ]
+  },
+  "psych": {
+   "label": "Psychologists",
+   "one": "Psychologist",
+   "plural": "psychologists",
+   "brand": "Mind",
+   "unit": "session",
+   "plan": true,
+   "allowPlan": true,
+   "mode": "session",
+   "reg": "RCI CRR No.",
+   "svcs": [
+    [
+     "Counselling session",
+     0.8,
+     "50 min"
+    ],
+    [
+     "Clinical psychology session",
+     1,
+     "60 min"
+    ],
+    [
+     "Elderly & caregiver support",
+     0.8,
+     "50 min"
+    ],
+    [
+     "Child behaviour session",
+     1,
+     "50 min"
+    ]
+   ]
+  },
+  "diet": {
+   "label": "Dietitians",
+   "one": "Dietitian",
+   "plural": "dietitians",
+   "brand": "Diet",
+   "unit": "consult",
+   "plan": false,
+   "allowPlan": true,
+   "mode": "session",
+   "reg": "IDA Member No.",
+   "svcs": [
+    [
+     "Diabetic diet plan",
+     1,
+     "45 min"
+    ],
+    [
+     "Kidney diet plan",
+     1.2,
+     "45 min"
+    ],
+    [
+     "Weight management",
+     1,
+     "45 min"
+    ],
+    [
+     "Child nutrition",
+     0.9,
+     "40 min"
+    ]
+   ]
+  },
+  "lab": {
+   "label": "Lab Technicians",
+   "one": "Lab Technician",
+   "plural": "lab technicians",
+   "brand": "Lab",
+   "unit": "collection",
+   "plan": false,
+   "allowPlan": false,
+   "mode": "session",
+   "reg": "KSAHPC Reg. No.",
+   "svcs": [
+    [
+     "Blood test (CBC)",
+     1.5,
+     "15 min"
+    ],
+    [
+     "Full body health package",
+     7.5,
+     "20 min"
+    ],
+    [
+     "Urine routine",
+     1,
+     "10 min"
+    ],
+    [
+     "Thyroid profile",
+     2.25,
+     "15 min"
+    ],
+    [
+     "ECG at home",
+     2.5,
+     "20 min"
+    ]
+   ]
+  },
+  "pharma": {
+   "label": "Pharmacists",
+   "one": "Pharmacist",
+   "plural": "pharmacists",
+   "brand": "Pharmacy",
+   "unit": "review",
+   "plan": false,
+   "allowPlan": false,
+   "mode": "session",
+   "reg": "KSPC Reg. No.",
+   "svcs": [
+    [
+     "Medicine review at home",
+     1,
+     "30 min"
+    ],
+    [
+     "Medicine delivery",
+     0.5,
+     "Same day"
+    ],
+    [
+     "Diabetes medicine counselling",
+     1.2,
+     "30 min"
+    ]
+   ]
+  },
+  "caregiver": {
+   "label": "Caregivers",
+   "one": "Caregiver",
+   "plural": "caregivers",
+   "brand": "Care",
+   "unit": "12 hrs",
+   "plan": true,
+   "allowPlan": true,
+   "mode": "care",
+   "reg": "Police verified · ID",
+   "svcs": [
+    [
+     "Elderly caregiver",
+     1,
+     "Per shift"
+    ],
+    [
+     "Patient attendant",
+     0.95,
+     "Per shift"
+    ],
+    [
+     "Dementia care",
+     1.1,
+     "Per shift"
+    ]
+   ]
+  },
+  "aide": {
+   "label": "Home Health Aides",
+   "one": "Home Health Aide",
+   "plural": "home health aides",
+   "brand": "Care",
+   "unit": "12 hrs",
+   "plan": true,
+   "allowPlan": true,
+   "mode": "care",
+   "reg": "Police verified · ID",
+   "svcs": [
+    [
+     "Home health aide",
+     1,
+     "Per shift"
+    ],
+    [
+     "Bathing & hygiene support",
+     1,
+     "Per shift"
+    ],
+    [
+     "Bedridden patient care",
+     1.15,
+     "Per shift"
+    ]
+   ]
+  },
+  "baby": {
+   "label": "Baby Care Attendants",
+   "one": "Baby Care Attendant",
+   "plural": "baby care attendants",
+   "brand": "Care",
+   "unit": "12 hrs",
+   "plan": true,
+   "allowPlan": true,
+   "mode": "care",
+   "reg": "Police verified · ID",
+   "svcs": [
+    [
+     "Newborn baby care",
+     1,
+     "Per shift"
+    ],
+    [
+     "Postnatal mother & baby care",
+     1.15,
+     "Per shift"
+    ]
+   ]
+  },
+  "ambulance": {
+   "label": "Ambulance Drivers",
+   "one": "Ambulance Driver",
+   "plural": "ambulance drivers",
+   "brand": "Ambulance",
+   "unit": "trip",
+   "plan": false,
+   "allowPlan": false,
+   "mode": "session",
+   "reg": "Badge No.",
+   "svcs": [
+    [
+     "Emergency ambulance (BLS)",
+     1,
+     "Within city"
+    ],
+    [
+     "Patient transfer",
+     0.8,
+     "Scheduled"
+    ],
+    [
+     "Hospital discharge drop",
+     0.7,
+     "Scheduled"
+    ]
+   ]
+  },
+  "paramedic": {
+   "label": "Paramedics",
+   "one": "Paramedic",
+   "plural": "paramedics",
+   "brand": "Ambulance",
+   "unit": "trip",
+   "plan": false,
+   "allowPlan": false,
+   "mode": "session",
+   "reg": "EMT Cert. No.",
+   "svcs": [
+    [
+     "Paramedic support",
+     1,
+     "Per trip"
+    ],
+    [
+     "Patient transfer escort",
+     0.9,
+     "Per trip"
+    ],
+    [
+     "Event medical standby",
+     2,
+     "4 hrs"
+    ]
+   ]
+  }
+ },
+ "ORDER": [
+  "doctor",
+  "nurse",
+  "physio",
+  "ot",
+  "speech",
+  "psych",
+  "diet",
+  "lab",
+  "pharma",
+  "caregiver",
+  "aide",
+  "baby",
+  "ambulance",
+  "paramedic"
+ ],
+ "LOCS": {
+  "Nadakkavu": [
+   11.272,
+   75.78,
+   "Kozhikode",
+   "673011"
+  ],
+  "Eranhipalam": [
+   11.278,
+   75.789,
+   "Kozhikode",
+   "673006"
+  ],
+  "Mavoor Road": [
+   11.258,
+   75.792,
+   "Kozhikode",
+   "673004"
+  ],
+  "West Hill": [
+   11.29,
+   75.768,
+   "Kozhikode",
+   "673005"
+  ],
+  "Chevayur": [
+   11.285,
+   75.815,
+   "Kozhikode",
+   "673017"
+  ],
+  "Feroke": [
+   11.18,
+   75.84,
+   "Kozhikode",
+   "673631"
+  ],
+  "Ramanattukara": [
+   11.178,
+   75.866,
+   "Kozhikode",
+   "673633"
+  ],
+  "Kunnamangalam": [
+   11.305,
+   75.875,
+   "Kozhikode",
+   "673571"
+  ],
+  "Beypore": [
+   11.172,
+   75.805,
+   "Kozhikode",
+   "673015"
+  ],
+  "Thondayad": [
+   11.27,
+   75.818,
+   "Kozhikode",
+   "673016"
+  ],
+  "Palazhi": [
+   11.248,
+   75.838,
+   "Kozhikode",
+   "673014"
+  ],
+  "Medical College": [
+   11.268,
+   75.836,
+   "Kozhikode",
+   "673008"
+  ],
+  "Malappuram Town": [
+   11.051,
+   76.071,
+   "Malappuram",
+   "676505"
+  ],
+  "Manjeri": [
+   11.12,
+   76.12,
+   "Malappuram",
+   "676121"
+  ],
+  "Perinthalmanna": [
+   10.976,
+   76.226,
+   "Malappuram",
+   "679322"
+  ],
+  "Tirur": [
+   10.914,
+   75.921,
+   "Malappuram",
+   "676101"
+  ],
+  "Kottakkal": [
+   10.999,
+   75.996,
+   "Malappuram",
+   "676503"
+  ],
+  "Kondotty": [
+   11.147,
+   75.962,
+   "Malappuram",
+   "673638"
+  ],
+  "Valanchery": [
+   10.89,
+   76.07,
+   "Malappuram",
+   "676552"
+  ],
+  "Nilambur": [
+   11.276,
+   76.225,
+   "Malappuram",
+   "679329"
+  ],
+  "Ponnani": [
+   10.767,
+   75.926,
+   "Malappuram",
+   "679577"
+  ],
+  "Areekode": [
+   11.234,
+   76.051,
+   "Malappuram",
+   "673639"
+  ],
+  "Tanur": [
+   10.973,
+   75.869,
+   "Malappuram",
+   "676302"
+  ]
+ },
+ "THER": [
+  {
+   "id": "knee",
+   "label": "Knee Physiotherapy",
+   "cat": "physio",
+   "brand": "Physio",
+   "helps": "Knee pain from osteoarthritis, ligament injuries, and stiffness after knee replacement. Builds strength so walking and stairs feel easier.",
+   "steps": [
+    "Assessment of pain, swelling and range of movement",
+    "Heat or ice therapy and gentle joint mobilisation",
+    "Quadriceps and hamstring strengthening",
+    "A simple home exercise plan for off days"
+   ],
+   "plan": "10–15 sessions · 45 min each"
+  },
+  {
+   "id": "back",
+   "label": "Back & Spine Care",
+   "cat": "physio",
+   "brand": "Physio",
+   "helps": "Lower back pain, disc problems, sciatica and posture-related neck pain — common for desk workers and long-distance drivers.",
+   "steps": [
+    "Posture and spine movement assessment",
+    "Pain relief with TENS or manual therapy",
+    "Core and back-muscle strengthening",
+    "Ergonomic advice for work and sleep"
+   ],
+   "plan": "8–12 sessions · 45 min each"
+  },
+  {
+   "id": "stroke",
+   "label": "Stroke Rehabilitation",
+   "cat": "physio",
+   "brand": "Physio",
+   "helps": "Regaining movement, balance and independence after a stroke — ideally starting within weeks of discharge.",
+   "steps": [
+    "Neuro assessment of strength, tone and balance",
+    "Assisted movement of the weaker arm and leg",
+    "Sitting, standing and walking practice",
+    "Family training for safe transfers at home"
+   ],
+   "plan": "20–30 sessions · 60 min each"
+  },
+  {
+   "id": "shoulder",
+   "label": "Shoulder Mobility",
+   "cat": "physio",
+   "brand": "Physio",
+   "helps": "Frozen shoulder, rotator cuff strain and stiffness after fractures. Restores reach for everyday tasks like combing hair.",
+   "steps": [
+    "Range-of-movement measurement",
+    "Joint mobilisation and gentle stretching",
+    "Rotator cuff and shoulder-blade exercises",
+    "Progress check and home routine update"
+   ],
+   "plan": "10–12 sessions · 45 min each"
+  },
+  {
+   "id": "speech",
+   "label": "Speech & Swallow Therapy",
+   "cat": "speech",
+   "brand": "Therapy",
+   "helps": "Speech delay in children, unclear speech after stroke, and swallowing difficulty (dysphagia) that makes eating unsafe.",
+   "steps": [
+    "Speech, language and swallow screening",
+    "Oral-motor exercises for lips, tongue and jaw",
+    "Safe swallowing techniques and food textures",
+    "Practice activities for the family"
+   ],
+   "plan": "12–20 sessions · 45 min each"
+  },
+  {
+   "id": "ot",
+   "label": "Occupational Therapy",
+   "cat": "ot",
+   "brand": "Therapy",
+   "helps": "Hand weakness, fine-motor delays in children, and relearning daily-living skills like dressing, eating and writing.",
+   "steps": [
+    "Daily-activity and hand-function assessment",
+    "Grip, pinch and coordination exercises",
+    "Practising real tasks with home objects",
+    "Small home changes for safety and independence"
+   ],
+   "plan": "10–15 sessions · 45 min each"
+  }
+ ],
+ "pros": [
+  {
+   "id": "p01",
+   "img": "/img/d0.jpg",
+   "name": "Dr. Lakshmi Varier",
+   "g": "F",
+   "cat": "doctor",
+   "qual": "MBBS, MD (General Medicine)",
+   "exp": 14,
+   "rating": 4.9,
+   "reviews": 212,
+   "locality": "Nadakkavu",
+   "langs": [
+    "Malayalam",
+    "English",
+    "Hindi"
+   ],
+   "price": 800,
+   "today": "4:30 PM",
+   "initials": "LV",
+   "svcs": [
+    {
+     "n": "General check-up",
+     "p": 800,
+     "d": "30 min"
+    },
+    {
+     "n": "Fever & infection",
+     "p": 800,
+     "d": "30 min"
+    },
+    {
+     "n": "BP & diabetes review",
+     "p": 800,
+     "d": "30 min"
+    },
+    {
+     "n": "Elderly check-up",
+     "p": 960,
+     "d": "45 min"
+    },
+    {
+     "n": "Prescription renewal",
+     "p": 480,
+     "d": "20 min"
+    },
+    {
+     "n": "Palliative care visit",
+     "p": 1200,
+     "d": "60 min"
+    }
+   ],
+   "revs": [
+    {
+     "name": "Sreeja Mohan",
+     "place": "Nadakkavu",
+     "stars": 5,
+     "text": "Took time to listen. Felt like a family doctor from the old days.",
+     "when": "3 days ago"
+    },
+    {
+     "name": "Anitha Suresh",
+     "place": "West Hill",
+     "stars": 4,
+     "text": "Professional, gentle and clean. Booking and payment were simple — the price was exactly as shown.",
+     "when": "1 week ago"
+    },
+    {
+     "name": "Prakash Nair",
+     "place": "Thondayad",
+     "stars": 5,
+     "text": "Explained what to do on off days so we could continue at home. Highly recommend.",
+     "when": "2 weeks ago"
+    },
+    {
+     "name": "Sreeja Mohan",
+     "place": "Nadakkavu",
+     "stars": 5,
+     "text": "Took time to listen. Felt like a family doctor from the old days.",
+     "when": "1 month ago"
+    }
+   ],
+   "next": "Tomorrow, 9:00 AM",
+   "reg": "TCMC Reg. No. 29170",
+   "bio": "Dr. Lakshmi has spent over a decade treating families across Malabar and now focuses on unhurried home consultations — especially for elderly patients who find clinic visits tiring.",
+   "radius": 8
+  },
+  {
+   "id": "p02",
+   "img": "/img/d1.jpg",
+   "name": "Dr. Akhil Raveendran",
+   "g": "M",
+   "cat": "doctor",
+   "qual": "MBBS",
+   "exp": 6,
+   "rating": 4.6,
+   "reviews": 88,
+   "locality": "Chevayur",
+   "langs": [
+    "Malayalam",
+    "English",
+    "Tamil"
+   ],
+   "price": 600,
+   "today": "6:00 PM",
+   "initials": "AR",
+   "svcs": [
+    {
+     "n": "General check-up",
+     "p": 600,
+     "d": "30 min"
+    },
+    {
+     "n": "Fever & infection",
+     "p": 600,
+     "d": "30 min"
+    },
+    {
+     "n": "BP & diabetes review",
+     "p": 600,
+     "d": "30 min"
+    },
+    {
+     "n": "Elderly check-up",
+     "p": 720,
+     "d": "45 min"
+    },
+    {
+     "n": "Prescription renewal",
+     "p": 360,
+     "d": "20 min"
+    },
+    {
+     "n": "Palliative care visit",
+     "p": 900,
+     "d": "60 min"
+    }
+   ],
+   "revs": [
+    {
+     "name": "Rajeevan K.",
+     "place": "Chevayur",
+     "stars": 5,
+     "text": "Came exactly on time and explained everything to my father in Malayalam. Very patient and kind.",
+     "when": "3 days ago"
+    },
+    {
+     "name": "Joseph Mathew",
+     "place": "Eranhipalam",
+     "stars": 5,
+     "text": "Very kind with my mother. Will definitely book again for the next course.",
+     "when": "1 week ago"
+    },
+    {
+     "name": "Haris Muhammed",
+     "place": "Medical College",
+     "stars": 4,
+     "text": "Reached within 15 minutes on a rainy evening. Thank you for the care.",
+     "when": "2 weeks ago"
+    },
+    {
+     "name": "Rajeevan K.",
+     "place": "Chevayur",
+     "stars": 5,
+     "text": "Came exactly on time and explained everything to my father in Malayalam. Very patient and kind.",
+     "when": "1 month ago"
+    }
+   ],
+   "next": "Sun, 11:00 AM",
+   "reg": "TCMC Reg. No. 29171",
+   "bio": "Dr. Akhil has spent over a decade treating families across Malabar and now focuses on unhurried home consultations — especially for elderly patients who find clinic visits tiring.",
+   "radius": 10
+  },
+  {
+   "id": "p03",
+   "img": "/img/d2.jpg",
+   "name": "Dr. Reshma Unnikrishnan",
+   "g": "F",
+   "cat": "doctor",
+   "qual": "MBBS, MD (Geriatrics)",
+   "exp": 11,
+   "rating": 4.8,
+   "reviews": 164,
+   "locality": "West Hill",
+   "langs": [
+    "Malayalam",
+    "English"
+   ],
+   "price": 900,
+   "today": "",
+   "initials": "RU",
+   "svcs": [
+    {
+     "n": "General check-up",
+     "p": 900,
+     "d": "30 min"
+    },
+    {
+     "n": "Fever & infection",
+     "p": 900,
+     "d": "30 min"
+    },
+    {
+     "n": "BP & diabetes review",
+     "p": 900,
+     "d": "30 min"
+    },
+    {
+     "n": "Elderly check-up",
+     "p": 1080,
+     "d": "45 min"
+    },
+    {
+     "n": "Prescription renewal",
+     "p": 540,
+     "d": "20 min"
+    },
+    {
+     "n": "Palliative care visit",
+     "p": 1350,
+     "d": "60 min"
+    }
+   ],
+   "revs": [
+    {
+     "name": "Shamsudheen P.",
+     "place": "Kondotty",
+     "stars": 5,
+     "text": "We were worried about taking Umma to the hospital every day. The home sessions made a real difference in three weeks.",
+     "when": "3 days ago"
+    },
+    {
+     "name": "Fathima Zuhra",
+     "place": "Malappuram",
+     "stars": 5,
+     "text": "No surprises on price. The visit OTP and live tracking made us feel safe.",
+     "when": "1 week ago"
+    },
+    {
+     "name": "Divya Ramesh",
+     "place": "Kottakkal",
+     "stars": 5,
+     "text": "My son actually looks forward to the sessions now. Such warmth.",
+     "when": "2 weeks ago"
+    },
+    {
+     "name": "Shamsudheen P.",
+     "place": "Kondotty",
+     "stars": 5,
+     "text": "We were worried about taking Umma to the hospital every day. The home sessions made a real difference in three weeks.",
+     "when": "1 month ago"
+    }
+   ],
+   "next": "Tomorrow, 2:00 PM",
+   "reg": "TCMC Reg. No. 29172",
+   "bio": "Dr. Reshma has spent over a decade treating families across Malabar and now focuses on unhurried home consultations — especially for elderly patients who find clinic visits tiring.",
+   "radius": 12
+  },
+  {
+   "id": "p04",
+   "img": "/img/d3.jpg",
+   "name": "Dr. Nikhil Thampi",
+   "g": "M",
+   "cat": "doctor",
+   "qual": "MBBS, MD (Internal Medicine)",
+   "exp": 9,
+   "rating": 4.7,
+   "reviews": 131,
+   "locality": "Mavoor Road",
+   "langs": [
+    "Malayalam",
+    "English",
+    "Hindi"
+   ],
+   "price": 750,
+   "today": "5:00 PM",
+   "initials": "NT",
+   "svcs": [
+    {
+     "n": "General check-up",
+     "p": 750,
+     "d": "30 min"
+    },
+    {
+     "n": "Fever & infection",
+     "p": 750,
+     "d": "30 min"
+    },
+    {
+     "n": "BP & diabetes review",
+     "p": 750,
+     "d": "30 min"
+    },
+    {
+     "n": "Elderly check-up",
+     "p": 900,
+     "d": "45 min"
+    },
+    {
+     "n": "Prescription renewal",
+     "p": 450,
+     "d": "20 min"
+    },
+    {
+     "n": "Palliative care visit",
+     "p": 1130,
+     "d": "60 min"
+    }
+   ],
+   "revs": [
+    {
+     "name": "Anitha Suresh",
+     "place": "West Hill",
+     "stars": 4,
+     "text": "Professional, gentle and clean. Booking and payment were simple — the price was exactly as shown.",
+     "when": "3 days ago"
+    },
+    {
+     "name": "Prakash Nair",
+     "place": "Thondayad",
+     "stars": 5,
+     "text": "Explained what to do on off days so we could continue at home. Highly recommend.",
+     "when": "1 week ago"
+    },
+    {
+     "name": "Sreeja Mohan",
+     "place": "Nadakkavu",
+     "stars": 5,
+     "text": "Took time to listen. Felt like a family doctor from the old days.",
+     "when": "2 weeks ago"
+    },
+    {
+     "name": "Anitha Suresh",
+     "place": "West Hill",
+     "stars": 4,
+     "text": "Professional, gentle and clean. Booking and payment were simple — the price was exactly as shown.",
+     "when": "1 month ago"
+    }
+   ],
+   "next": "Tomorrow, 10:00 AM",
+   "reg": "TCMC Reg. No. 29173",
+   "bio": "Dr. Nikhil has spent over a decade treating families across Malabar and now focuses on unhurried home consultations — especially for elderly patients who find clinic visits tiring.",
+   "radius": 6
+  },
+  {
+   "id": "p05",
+   "img": "/img/d4.jpg",
+   "name": "Dr. Nafeesa Kunhimoideen",
+   "g": "F",
+   "cat": "doctor",
+   "qual": "MBBS, DNB (Family Medicine)",
+   "exp": 8,
+   "rating": 4.9,
+   "reviews": 176,
+   "locality": "Kottakkal",
+   "langs": [
+    "Malayalam",
+    "English",
+    "Arabic"
+   ],
+   "price": 700,
+   "today": "3:30 PM",
+   "initials": "NK",
+   "svcs": [
+    {
+     "n": "General check-up",
+     "p": 700,
+     "d": "30 min"
+    },
+    {
+     "n": "Fever & infection",
+     "p": 700,
+     "d": "30 min"
+    },
+    {
+     "n": "BP & diabetes review",
+     "p": 700,
+     "d": "30 min"
+    },
+    {
+     "n": "Elderly check-up",
+     "p": 840,
+     "d": "45 min"
+    },
+    {
+     "n": "Prescription renewal",
+     "p": 420,
+     "d": "20 min"
+    },
+    {
+     "n": "Palliative care visit",
+     "p": 1050,
+     "d": "60 min"
+    }
+   ],
+   "revs": [
+    {
+     "name": "Joseph Mathew",
+     "place": "Eranhipalam",
+     "stars": 5,
+     "text": "Very kind with my mother. Will definitely book again for the next course.",
+     "when": "3 days ago"
+    },
+    {
+     "name": "Haris Muhammed",
+     "place": "Medical College",
+     "stars": 4,
+     "text": "Reached within 15 minutes on a rainy evening. Thank you for the care.",
+     "when": "1 week ago"
+    },
+    {
+     "name": "Rajeevan K.",
+     "place": "Chevayur",
+     "stars": 5,
+     "text": "Came exactly on time and explained everything to my father in Malayalam. Very patient and kind.",
+     "when": "2 weeks ago"
+    },
+    {
+     "name": "Joseph Mathew",
+     "place": "Eranhipalam",
+     "stars": 5,
+     "text": "Very kind with my mother. Will definitely book again for the next course.",
+     "when": "1 month ago"
+    }
+   ],
+   "next": "Tomorrow, 9:00 AM",
+   "reg": "TCMC Reg. No. 29174",
+   "bio": "Dr. Nafeesa has spent over a decade treating families across Malabar and now focuses on unhurried home consultations — especially for elderly patients who find clinic visits tiring.",
+   "radius": 8
+  },
+  {
+   "id": "p06",
+   "img": "/img/d6.jpg",
+   "name": "Dr. Sarath Chandran",
+   "g": "M",
+   "cat": "doctor",
+   "qual": "MBBS, PG Dip. Palliative Medicine",
+   "exp": 12,
+   "rating": 4.8,
+   "reviews": 143,
+   "locality": "Medical College",
+   "langs": [
+    "Malayalam",
+    "English"
+   ],
+   "price": 850,
+   "today": "",
+   "initials": "SC",
+   "svcs": [
+    {
+     "n": "General check-up",
+     "p": 850,
+     "d": "30 min"
+    },
+    {
+     "n": "Fever & infection",
+     "p": 850,
+     "d": "30 min"
+    },
+    {
+     "n": "BP & diabetes review",
+     "p": 850,
+     "d": "30 min"
+    },
+    {
+     "n": "Elderly check-up",
+     "p": 1020,
+     "d": "45 min"
+    },
+    {
+     "n": "Prescription renewal",
+     "p": 510,
+     "d": "20 min"
+    },
+    {
+     "n": "Palliative care visit",
+     "p": 1280,
+     "d": "60 min"
+    }
+   ],
+   "revs": [
+    {
+     "name": "Fathima Zuhra",
+     "place": "Malappuram",
+     "stars": 5,
+     "text": "No surprises on price. The visit OTP and live tracking made us feel safe.",
+     "when": "3 days ago"
+    },
+    {
+     "name": "Divya Ramesh",
+     "place": "Kottakkal",
+     "stars": 5,
+     "text": "My son actually looks forward to the sessions now. Such warmth.",
+     "when": "1 week ago"
+    },
+    {
+     "name": "Shamsudheen P.",
+     "place": "Kondotty",
+     "stars": 5,
+     "text": "We were worried about taking Umma to the hospital every day. The home sessions made a real difference in three weeks.",
+     "when": "2 weeks ago"
+    },
+    {
+     "name": "Fathima Zuhra",
+     "place": "Malappuram",
+     "stars": 5,
+     "text": "No surprises on price. The visit OTP and live tracking made us feel safe.",
+     "when": "1 month ago"
+    }
+   ],
+   "next": "Sun, 11:00 AM",
+   "reg": "TCMC Reg. No. 29175",
+   "bio": "Dr. Sarath has spent over a decade treating families across Malabar and now focuses on unhurried home consultations — especially for elderly patients who find clinic visits tiring.",
+   "radius": 10
+  },
+  {
+   "id": "p07",
+   "img": "/img/d7.jpg",
+   "name": "Dr. Aleena Kuriakose",
+   "g": "F",
+   "cat": "doctor",
+   "qual": "MBBS",
+   "exp": 4,
+   "rating": 4.5,
+   "reviews": 52,
+   "locality": "Feroke",
+   "langs": [
+    "Malayalam",
+    "English",
+    "Hindi"
+   ],
+   "price": 550,
+   "today": "7:30 PM",
+   "initials": "AK",
+   "svcs": [
+    {
+     "n": "General check-up",
+     "p": 550,
+     "d": "30 min"
+    },
+    {
+     "n": "Fever & infection",
+     "p": 550,
+     "d": "30 min"
+    },
+    {
+     "n": "BP & diabetes review",
+     "p": 550,
+     "d": "30 min"
+    },
+    {
+     "n": "Elderly check-up",
+     "p": 660,
+     "d": "45 min"
+    },
+    {
+     "n": "Prescription renewal",
+     "p": 330,
+     "d": "20 min"
+    },
+    {
+     "n": "Palliative care visit",
+     "p": 830,
+     "d": "60 min"
+    }
+   ],
+   "revs": [
+    {
+     "name": "Prakash Nair",
+     "place": "Thondayad",
+     "stars": 5,
+     "text": "Explained what to do on off days so we could continue at home. Highly recommend.",
+     "when": "3 days ago"
+    },
+    {
+     "name": "Sreeja Mohan",
+     "place": "Nadakkavu",
+     "stars": 5,
+     "text": "Took time to listen. Felt like a family doctor from the old days.",
+     "when": "1 week ago"
+    },
+    {
+     "name": "Anitha Suresh",
+     "place": "West Hill",
+     "stars": 4,
+     "text": "Professional, gentle and clean. Booking and payment were simple — the price was exactly as shown.",
+     "when": "2 weeks ago"
+    },
+    {
+     "name": "Prakash Nair",
+     "place": "Thondayad",
+     "stars": 5,
+     "text": "Explained what to do on off days so we could continue at home. Highly recommend.",
+     "when": "1 month ago"
+    }
+   ],
+   "next": "Tomorrow, 2:00 PM",
+   "reg": "TCMC Reg. No. 29176",
+   "bio": "Dr. Aleena has spent over a decade treating families across Malabar and now focuses on unhurried home consultations — especially for elderly patients who find clinic visits tiring.",
+   "radius": 12
+  },
+  {
+   "id": "p08",
+   "img": "/img/d8.jpg",
+   "name": "Dr. Gayathri Pisharody",
+   "g": "F",
+   "cat": "doctor",
+   "qual": "MBBS, MD (Paediatrics)",
+   "exp": 10,
+   "rating": 4.9,
+   "reviews": 198,
+   "locality": "Manjeri",
+   "langs": [
+    "Malayalam",
+    "English",
+    "Tamil"
+   ],
+   "price": 900,
+   "today": "",
+   "initials": "GP",
+   "svcs": [
+    {
+     "n": "General check-up",
+     "p": 900,
+     "d": "30 min"
+    },
+    {
+     "n": "Fever & infection",
+     "p": 900,
+     "d": "30 min"
+    },
+    {
+     "n": "BP & diabetes review",
+     "p": 900,
+     "d": "30 min"
+    },
+    {
+     "n": "Elderly check-up",
+     "p": 1080,
+     "d": "45 min"
+    },
+    {
+     "n": "Prescription renewal",
+     "p": 540,
+     "d": "20 min"
+    },
+    {
+     "n": "Palliative care visit",
+     "p": 1350,
+     "d": "60 min"
+    }
+   ],
+   "revs": [
+    {
+     "name": "Haris Muhammed",
+     "place": "Medical College",
+     "stars": 4,
+     "text": "Reached within 15 minutes on a rainy evening. Thank you for the care.",
+     "when": "3 days ago"
+    },
+    {
+     "name": "Rajeevan K.",
+     "place": "Chevayur",
+     "stars": 5,
+     "text": "Came exactly on time and explained everything to my father in Malayalam. Very patient and kind.",
+     "when": "1 week ago"
+    },
+    {
+     "name": "Joseph Mathew",
+     "place": "Eranhipalam",
+     "stars": 5,
+     "text": "Very kind with my mother. Will definitely book again for the next course.",
+     "when": "2 weeks ago"
+    },
+    {
+     "name": "Haris Muhammed",
+     "place": "Medical College",
+     "stars": 4,
+     "text": "Reached within 15 minutes on a rainy evening. Thank you for the care.",
+     "when": "1 month ago"
+    }
+   ],
+   "next": "Tomorrow, 10:00 AM",
+   "reg": "TCMC Reg. No. 29177",
+   "bio": "Dr. Gayathri has spent over a decade treating families across Malabar and now focuses on unhurried home consultations — especially for elderly patients who find clinic visits tiring.",
+   "radius": 6
+  },
+  {
+   "id": "p09",
+   "img": "/img/d5.jpg",
+   "name": "Dr. Abdul Gafoor Thangal",
+   "g": "M",
+   "cat": "psych",
+   "qual": "PhD, M.Phil Clinical Psychology",
+   "exp": 18,
+   "rating": 5,
+   "reviews": 96,
+   "locality": "Eranhipalam",
+   "langs": [
+    "Malayalam",
+    "English",
+    "Arabic"
+   ],
+   "price": 1500,
+   "today": "",
+   "initials": "AG",
+   "svcs": [
+    {
+     "n": "Counselling session",
+     "p": 1200,
+     "d": "50 min"
+    },
+    {
+     "n": "Clinical psychology session",
+     "p": 1500,
+     "d": "60 min"
+    },
+    {
+     "n": "Elderly & caregiver support",
+     "p": 1200,
+     "d": "50 min"
+    },
+    {
+     "n": "Child behaviour session",
+     "p": 1500,
+     "d": "50 min"
+    }
+   ],
+   "revs": [
+    {
+     "name": "Divya Ramesh",
+     "place": "Kottakkal",
+     "stars": 5,
+     "text": "My son actually looks forward to the sessions now. Such warmth.",
+     "when": "3 days ago"
+    },
+    {
+     "name": "Shamsudheen P.",
+     "place": "Kondotty",
+     "stars": 5,
+     "text": "We were worried about taking Umma to the hospital every day. The home sessions made a real difference in three weeks.",
+     "when": "1 week ago"
+    },
+    {
+     "name": "Fathima Zuhra",
+     "place": "Malappuram",
+     "stars": 5,
+     "text": "No surprises on price. The visit OTP and live tracking made us feel safe.",
+     "when": "2 weeks ago"
+    },
+    {
+     "name": "Divya Ramesh",
+     "place": "Kottakkal",
+     "stars": 5,
+     "text": "My son actually looks forward to the sessions now. Such warmth.",
+     "when": "1 month ago"
+    }
+   ],
+   "next": "Tomorrow, 9:00 AM",
+   "reg": "RCI CRR No. 29178",
+   "bio": "Dr. Abdul offers confidential sessions at home for anxiety, low mood, family stress and caregiver burnout. A gentle, practical approach.",
+   "radius": 8
+  },
+  {
+   "id": "p10",
+   "img": "/img/d10.jpg",
+   "name": "Jobin Mathew",
+   "g": "M",
+   "cat": "psych",
+   "qual": "M.Sc, M.Phil Clinical Psychology",
+   "exp": 7,
+   "rating": 4.7,
+   "reviews": 61,
+   "locality": "Thondayad",
+   "langs": [
+    "Malayalam",
+    "English"
+   ],
+   "price": 1000,
+   "today": "5:00 PM",
+   "initials": "JM",
+   "svcs": [
+    {
+     "n": "Counselling session",
+     "p": 800,
+     "d": "50 min"
+    },
+    {
+     "n": "Clinical psychology session",
+     "p": 1000,
+     "d": "60 min"
+    },
+    {
+     "n": "Elderly & caregiver support",
+     "p": 800,
+     "d": "50 min"
+    },
+    {
+     "n": "Child behaviour session",
+     "p": 1000,
+     "d": "50 min"
+    }
+   ],
+   "revs": [
+    {
+     "name": "Anitha Suresh",
+     "place": "West Hill",
+     "stars": 4,
+     "text": "Professional, gentle and clean. Booking and payment were simple — the price was exactly as shown.",
+     "when": "3 days ago"
+    },
+    {
+     "name": "Prakash Nair",
+     "place": "Thondayad",
+     "stars": 5,
+     "text": "Explained what to do on off days so we could continue at home. Highly recommend.",
+     "when": "1 week ago"
+    },
+    {
+     "name": "Sreeja Mohan",
+     "place": "Nadakkavu",
+     "stars": 5,
+     "text": "Took time to listen. Felt like a family doctor from the old days.",
+     "when": "2 weeks ago"
+    },
+    {
+     "name": "Anitha Suresh",
+     "place": "West Hill",
+     "stars": 4,
+     "text": "Professional, gentle and clean. Booking and payment were simple — the price was exactly as shown.",
+     "when": "1 month ago"
+    }
+   ],
+   "next": "Tomorrow, 2:00 PM",
+   "reg": "RCI CRR No. 29200",
+   "bio": "Jobin offers confidential sessions at home for anxiety, low mood, family stress and caregiver burnout. A gentle, practical approach.",
+   "radius": 12
+  },
+  {
+   "id": "p11",
+   "img": "/img/d9.jpg",
+   "name": "Hareesh Nambiar",
+   "g": "M",
+   "cat": "pharma",
+   "qual": "B.Pharm",
+   "exp": 9,
+   "rating": 4.6,
+   "reviews": 74,
+   "locality": "Nadakkavu",
+   "langs": [
+    "Malayalam",
+    "English",
+    "Hindi"
+   ],
+   "price": 199,
+   "today": "2:00 PM",
+   "initials": "HN",
+   "svcs": [
+    {
+     "n": "Medicine review at home",
+     "p": 200,
+     "d": "30 min"
+    },
+    {
+     "n": "Medicine delivery",
+     "p": 100,
+     "d": "Same day"
+    },
+    {
+     "n": "Diabetes medicine counselling",
+     "p": 240,
+     "d": "30 min"
+    }
+   ],
+   "revs": [
+    {
+     "name": "Joseph Mathew",
+     "place": "Eranhipalam",
+     "stars": 5,
+     "text": "Very kind with my mother. Will definitely book again for the next course.",
+     "when": "3 days ago"
+    },
+    {
+     "name": "Haris Muhammed",
+     "place": "Medical College",
+     "stars": 4,
+     "text": "Reached within 15 minutes on a rainy evening. Thank you for the care.",
+     "when": "1 week ago"
+    },
+    {
+     "name": "Rajeevan K.",
+     "place": "Chevayur",
+     "stars": 5,
+     "text": "Came exactly on time and explained everything to my father in Malayalam. Very patient and kind.",
+     "when": "2 weeks ago"
+    },
+    {
+     "name": "Joseph Mathew",
+     "place": "Eranhipalam",
+     "stars": 5,
+     "text": "Very kind with my mother. Will definitely book again for the next course.",
+     "when": "1 month ago"
+    }
+   ],
+   "next": "Tomorrow, 10:00 AM",
+   "reg": "KSPC Reg. No. 29201",
+   "bio": "Hareesh reviews all your medicines in one sitting, flags interactions and sets up a simple daily schedule for elderly patients.",
+   "radius": 6
+  },
+  {
+   "id": "p12",
+   "img": "/img/t4.jpg",
+   "name": "Shahid Ponnath",
+   "g": "M",
+   "cat": "physio",
+   "qual": "BPT, MPT (Orthopaedics)",
+   "exp": 8,
+   "rating": 4.9,
+   "reviews": 126,
+   "locality": "Eranhipalam",
+   "langs": [
+    "Malayalam",
+    "English",
+    "Hindi"
+   ],
+   "price": 600,
+   "today": "4:30 PM",
+   "initials": "SP",
+   "svcs": [
+    {
+     "n": "Back & neck pain",
+     "p": 600,
+     "d": "45 min"
+    },
+    {
+     "n": "Knee & joint pain",
+     "p": 600,
+     "d": "45 min"
+    },
+    {
+     "n": "Stroke rehabilitation",
+     "p": 720,
+     "d": "60 min"
+    },
+    {
+     "n": "Post-surgery rehab",
+     "p": 660,
+     "d": "45 min"
+    },
+    {
+     "n": "Sports injury",
+     "p": 660,
+     "d": "45 min"
+    },
+    {
+     "n": "Elderly mobility",
+     "p": 600,
+     "d": "45 min"
+    }
+   ],
+   "revs": [
+    {
+     "name": "Fathima Zuhra",
+     "place": "Malappuram",
+     "stars": 5,
+     "text": "No surprises on price. The visit OTP and live tracking made us feel safe.",
+     "when": "3 days ago"
+    },
+    {
+     "name": "Divya Ramesh",
+     "place": "Kottakkal",
+     "stars": 5,
+     "text": "My son actually looks forward to the sessions now. Such warmth.",
+     "when": "1 week ago"
+    },
+    {
+     "name": "Shamsudheen P.",
+     "place": "Kondotty",
+     "stars": 5,
+     "text": "We were worried about taking Umma to the hospital every day. The home sessions made a real difference in three weeks.",
+     "when": "2 weeks ago"
+    },
+    {
+     "name": "Fathima Zuhra",
+     "place": "Malappuram",
+     "stars": 5,
+     "text": "No surprises on price. The visit OTP and live tracking made us feel safe.",
+     "when": "1 month ago"
+    }
+   ],
+   "next": "Tomorrow, 9:00 AM",
+   "reg": "KSAHPC Reg. No. 29202",
+   "bio": "Shahid designs simple, progressive home programmes so patients keep improving between sessions. Works closely with orthopaedic and neuro teams at local hospitals.",
+   "radius": 8
+  },
+  {
+   "id": "p13",
+   "img": "/img/t5.jpg",
+   "name": "Anoop Chacko",
+   "g": "M",
+   "cat": "physio",
+   "qual": "BPT, MPT (Neuro)",
+   "exp": 11,
+   "rating": 4.8,
+   "reviews": 154,
+   "locality": "Palazhi",
+   "langs": [
+    "Malayalam",
+    "English"
+   ],
+   "price": 700,
+   "today": "",
+   "initials": "AC",
+   "svcs": [
+    {
+     "n": "Back & neck pain",
+     "p": 700,
+     "d": "45 min"
+    },
+    {
+     "n": "Knee & joint pain",
+     "p": 700,
+     "d": "45 min"
+    },
+    {
+     "n": "Stroke rehabilitation",
+     "p": 840,
+     "d": "60 min"
+    },
+    {
+     "n": "Post-surgery rehab",
+     "p": 770,
+     "d": "45 min"
+    },
+    {
+     "n": "Sports injury",
+     "p": 770,
+     "d": "45 min"
+    },
+    {
+     "n": "Elderly mobility",
+     "p": 700,
+     "d": "45 min"
+    }
+   ],
+   "revs": [
+    {
+     "name": "Prakash Nair",
+     "place": "Thondayad",
+     "stars": 5,
+     "text": "Explained what to do on off days so we could continue at home. Highly recommend.",
+     "when": "3 days ago"
+    },
+    {
+     "name": "Sreeja Mohan",
+     "place": "Nadakkavu",
+     "stars": 5,
+     "text": "Took time to listen. Felt like a family doctor from the old days.",
+     "when": "1 week ago"
+    },
+    {
+     "name": "Anitha Suresh",
+     "place": "West Hill",
+     "stars": 4,
+     "text": "Professional, gentle and clean. Booking and payment were simple — the price was exactly as shown.",
+     "when": "2 weeks ago"
+    },
+    {
+     "name": "Prakash Nair",
+     "place": "Thondayad",
+     "stars": 5,
+     "text": "Explained what to do on off days so we could continue at home. Highly recommend.",
+     "when": "1 month ago"
+    }
+   ],
+   "next": "Sun, 11:00 AM",
+   "reg": "KSAHPC Reg. No. 29203",
+   "bio": "Anoop designs simple, progressive home programmes so patients keep improving between sessions. Works closely with orthopaedic and neuro teams at local hospitals.",
+   "radius": 10
+  },
+  {
+   "id": "p14",
+   "img": "/img/t15.jpg",
+   "name": "Keerthana Menon",
+   "g": "F",
+   "cat": "physio",
+   "qual": "BPT, MPT (Sports)",
+   "exp": 6,
+   "rating": 4.8,
+   "reviews": 92,
+   "locality": "West Hill",
+   "langs": [
+    "Malayalam",
+    "English",
+    "Tamil"
+   ],
+   "price": 650,
+   "today": "6:00 PM",
+   "initials": "KM",
+   "svcs": [
+    {
+     "n": "Back & neck pain",
+     "p": 650,
+     "d": "45 min"
+    },
+    {
+     "n": "Knee & joint pain",
+     "p": 650,
+     "d": "45 min"
+    },
+    {
+     "n": "Stroke rehabilitation",
+     "p": 780,
+     "d": "60 min"
+    },
+    {
+     "n": "Post-surgery rehab",
+     "p": 720,
+     "d": "45 min"
+    },
+    {
+     "n": "Sports injury",
+     "p": 720,
+     "d": "45 min"
+    },
+    {
+     "n": "Elderly mobility",
+     "p": 650,
+     "d": "45 min"
+    }
+   ],
+   "revs": [
+    {
+     "name": "Haris Muhammed",
+     "place": "Medical College",
+     "stars": 4,
+     "text": "Reached within 15 minutes on a rainy evening. Thank you for the care.",
+     "when": "3 days ago"
+    },
+    {
+     "name": "Rajeevan K.",
+     "place": "Chevayur",
+     "stars": 5,
+     "text": "Came exactly on time and explained everything to my father in Malayalam. Very patient and kind.",
+     "when": "1 week ago"
+    },
+    {
+     "name": "Joseph Mathew",
+     "place": "Eranhipalam",
+     "stars": 5,
+     "text": "Very kind with my mother. Will definitely book again for the next course.",
+     "when": "2 weeks ago"
+    },
+    {
+     "name": "Haris Muhammed",
+     "place": "Medical College",
+     "stars": 4,
+     "text": "Reached within 15 minutes on a rainy evening. Thank you for the care.",
+     "when": "1 month ago"
+    }
+   ],
+   "next": "Tomorrow, 2:00 PM",
+   "reg": "KSAHPC Reg. No. 29204",
+   "bio": "Keerthana designs simple, progressive home programmes so patients keep improving between sessions. Works closely with orthopaedic and neuro teams at local hospitals.",
+   "radius": 12
+  },
+  {
+   "id": "p15",
+   "img": "/img/t16.jpg",
+   "name": "Vivek Balakrishnan",
+   "g": "M",
+   "cat": "physio",
+   "qual": "BPT",
+   "exp": 4,
+   "rating": 4.5,
+   "reviews": 47,
+   "locality": "Ramanattukara",
+   "langs": [
+    "Malayalam",
+    "English"
+   ],
+   "price": 550,
+   "today": "11:00 AM",
+   "initials": "VB",
+   "svcs": [
+    {
+     "n": "Back & neck pain",
+     "p": 550,
+     "d": "45 min"
+    },
+    {
+     "n": "Knee & joint pain",
+     "p": 550,
+     "d": "45 min"
+    },
+    {
+     "n": "Stroke rehabilitation",
+     "p": 660,
+     "d": "60 min"
+    },
+    {
+     "n": "Post-surgery rehab",
+     "p": 610,
+     "d": "45 min"
+    },
+    {
+     "n": "Sports injury",
+     "p": 610,
+     "d": "45 min"
+    },
+    {
+     "n": "Elderly mobility",
+     "p": 550,
+     "d": "45 min"
+    }
+   ],
+   "revs": [
+    {
+     "name": "Divya Ramesh",
+     "place": "Kottakkal",
+     "stars": 5,
+     "text": "My son actually looks forward to the sessions now. Such warmth.",
+     "when": "3 days ago"
+    },
+    {
+     "name": "Shamsudheen P.",
+     "place": "Kondotty",
+     "stars": 5,
+     "text": "We were worried about taking Umma to the hospital every day. The home sessions made a real difference in three weeks.",
+     "when": "1 week ago"
+    },
+    {
+     "name": "Fathima Zuhra",
+     "place": "Malappuram",
+     "stars": 5,
+     "text": "No surprises on price. The visit OTP and live tracking made us feel safe.",
+     "when": "2 weeks ago"
+    },
+    {
+     "name": "Divya Ramesh",
+     "place": "Kottakkal",
+     "stars": 5,
+     "text": "My son actually looks forward to the sessions now. Such warmth.",
+     "when": "1 month ago"
+    }
+   ],
+   "next": "Tomorrow, 10:00 AM",
+   "reg": "KSAHPC Reg. No. 29205",
+   "bio": "Vivek designs simple, progressive home programmes so patients keep improving between sessions. Works closely with orthopaedic and neuro teams at local hospitals.",
+   "radius": 6
+  },
+  {
+   "id": "p16",
+   "img": "/img/t19.jpg",
+   "name": "Rinshida Kolakkadan",
+   "g": "F",
+   "cat": "physio",
+   "qual": "BPT, MPT (Geriatrics)",
+   "exp": 7,
+   "rating": 4.9,
+   "reviews": 108,
+   "locality": "Malappuram Town",
+   "langs": [
+    "Malayalam",
+    "English",
+    "Arabic"
+   ],
+   "price": 600,
+   "today": "",
+   "initials": "RK",
+   "svcs": [
+    {
+     "n": "Back & neck pain",
+     "p": 600,
+     "d": "45 min"
+    },
+    {
+     "n": "Knee & joint pain",
+     "p": 600,
+     "d": "45 min"
+    },
+    {
+     "n": "Stroke rehabilitation",
+     "p": 720,
+     "d": "60 min"
+    },
+    {
+     "n": "Post-surgery rehab",
+     "p": 660,
+     "d": "45 min"
+    },
+    {
+     "n": "Sports injury",
+     "p": 660,
+     "d": "45 min"
+    },
+    {
+     "n": "Elderly mobility",
+     "p": 600,
+     "d": "45 min"
+    }
+   ],
+   "revs": [
+    {
+     "name": "Sreeja Mohan",
+     "place": "Nadakkavu",
+     "stars": 5,
+     "text": "Took time to listen. Felt like a family doctor from the old days.",
+     "when": "3 days ago"
+    },
+    {
+     "name": "Anitha Suresh",
+     "place": "West Hill",
+     "stars": 4,
+     "text": "Professional, gentle and clean. Booking and payment were simple — the price was exactly as shown.",
+     "when": "1 week ago"
+    },
+    {
+     "name": "Prakash Nair",
+     "place": "Thondayad",
+     "stars": 5,
+     "text": "Explained what to do on off days so we could continue at home. Highly recommend.",
+     "when": "2 weeks ago"
+    },
+    {
+     "name": "Sreeja Mohan",
+     "place": "Nadakkavu",
+     "stars": 5,
+     "text": "Took time to listen. Felt like a family doctor from the old days.",
+     "when": "1 month ago"
+    }
+   ],
+   "next": "Tomorrow, 9:00 AM",
+   "reg": "KSAHPC Reg. No. 29206",
+   "bio": "Rinshida designs simple, progressive home programmes so patients keep improving between sessions. Works closely with orthopaedic and neuro teams at local hospitals.",
+   "radius": 8
+  },
+  {
+   "id": "p17",
+   "img": "/img/t3.jpg",
+   "name": "Midhun Sasi",
+   "g": "M",
+   "cat": "physio",
+   "qual": "BPT, Cert. Manual Therapy",
+   "exp": 5,
+   "rating": 4.6,
+   "reviews": 63,
+   "locality": "Kunnamangalam",
+   "langs": [
+    "Malayalam",
+    "English"
+   ],
+   "price": 550,
+   "today": "5:00 PM",
+   "initials": "MS",
+   "svcs": [
+    {
+     "n": "Back & neck pain",
+     "p": 550,
+     "d": "45 min"
+    },
+    {
+     "n": "Knee & joint pain",
+     "p": 550,
+     "d": "45 min"
+    },
+    {
+     "n": "Stroke rehabilitation",
+     "p": 660,
+     "d": "60 min"
+    },
+    {
+     "n": "Post-surgery rehab",
+     "p": 610,
+     "d": "45 min"
+    },
+    {
+     "n": "Sports injury",
+     "p": 610,
+     "d": "45 min"
+    },
+    {
+     "n": "Elderly mobility",
+     "p": 550,
+     "d": "45 min"
+    }
+   ],
+   "revs": [
+    {
+     "name": "Rajeevan K.",
+     "place": "Chevayur",
+     "stars": 5,
+     "text": "Came exactly on time and explained everything to my father in Malayalam. Very patient and kind.",
+     "when": "3 days ago"
+    },
+    {
+     "name": "Joseph Mathew",
+     "place": "Eranhipalam",
+     "stars": 5,
+     "text": "Very kind with my mother. Will definitely book again for the next course.",
+     "when": "1 week ago"
+    },
+    {
+     "name": "Haris Muhammed",
+     "place": "Medical College",
+     "stars": 4,
+     "text": "Reached within 15 minutes on a rainy evening. Thank you for the care.",
+     "when": "2 weeks ago"
+    },
+    {
+     "name": "Rajeevan K.",
+     "place": "Chevayur",
+     "stars": 5,
+     "text": "Came exactly on time and explained everything to my father in Malayalam. Very patient and kind.",
+     "when": "1 month ago"
+    }
+   ],
+   "next": "Sun, 11:00 AM",
+   "reg": "KSAHPC Reg. No. 29207",
+   "bio": "Midhun designs simple, progressive home programmes so patients keep improving between sessions. Works closely with orthopaedic and neuro teams at local hospitals.",
+   "radius": 10
+  },
+  {
+   "id": "p18",
+   "img": "/img/t9.jpg",
+   "name": "Soumya Joseph",
+   "g": "F",
+   "cat": "nurse",
+   "qual": "B.Sc Nursing",
+   "exp": 9,
+   "rating": 4.8,
+   "reviews": 141,
+   "locality": "Mavoor Road",
+   "langs": [
+    "Malayalam",
+    "English",
+    "Hindi"
+   ],
+   "price": 500,
+   "today": "3:30 PM",
+   "initials": "SJ",
+   "svcs": [
+    {
+     "n": "Injection",
+     "p": 250,
+     "d": "15 min"
+    },
+    {
+     "n": "IV drip",
+     "p": 700,
+     "d": "60–90 min"
+    },
+    {
+     "n": "Wound dressing",
+     "p": 500,
+     "d": "30 min"
+    },
+    {
+     "n": "Catheter care",
+     "p": 600,
+     "d": "30 min"
+    },
+    {
+     "n": "Ryles tube care",
+     "p": 600,
+     "d": "30 min"
+    },
+    {
+     "n": "Post-surgery care",
+     "p": 750,
+     "d": "60 min"
+    }
+   ],
+   "revs": [
+    {
+     "name": "Shamsudheen P.",
+     "place": "Kondotty",
+     "stars": 5,
+     "text": "We were worried about taking Umma to the hospital every day. The home sessions made a real difference in three weeks.",
+     "when": "3 days ago"
+    },
+    {
+     "name": "Fathima Zuhra",
+     "place": "Malappuram",
+     "stars": 5,
+     "text": "No surprises on price. The visit OTP and live tracking made us feel safe.",
+     "when": "1 week ago"
+    },
+    {
+     "name": "Divya Ramesh",
+     "place": "Kottakkal",
+     "stars": 5,
+     "text": "My son actually looks forward to the sessions now. Such warmth.",
+     "when": "2 weeks ago"
+    },
+    {
+     "name": "Shamsudheen P.",
+     "place": "Kondotty",
+     "stars": 5,
+     "text": "We were worried about taking Umma to the hospital every day. The home sessions made a real difference in three weeks.",
+     "when": "1 month ago"
+    }
+   ],
+   "next": "Tomorrow, 2:00 PM",
+   "reg": "KNMC Reg. No. 29208",
+   "bio": "Soumya handles everything from IV drips to post-surgery dressings with calm, careful hands. Trained in hospital wards in Kozhikode, now caring for patients at home.",
+   "radius": 12
+  },
+  {
+   "id": "p19",
+   "img": "/img/t10.jpg",
+   "name": "Bincy Varghese",
+   "g": "F",
+   "cat": "nurse",
+   "qual": "GNM",
+   "exp": 12,
+   "rating": 4.7,
+   "reviews": 119,
+   "locality": "Chevayur",
+   "langs": [
+    "Malayalam",
+    "English"
+   ],
+   "price": 450,
+   "today": "",
+   "initials": "BV",
+   "svcs": [
+    {
+     "n": "Injection",
+     "p": 230,
+     "d": "15 min"
+    },
+    {
+     "n": "IV drip",
+     "p": 630,
+     "d": "60–90 min"
+    },
+    {
+     "n": "Wound dressing",
+     "p": 450,
+     "d": "30 min"
+    },
+    {
+     "n": "Catheter care",
+     "p": 540,
+     "d": "30 min"
+    },
+    {
+     "n": "Ryles tube care",
+     "p": 540,
+     "d": "30 min"
+    },
+    {
+     "n": "Post-surgery care",
+     "p": 680,
+     "d": "60 min"
+    }
+   ],
+   "revs": [
+    {
+     "name": "Anitha Suresh",
+     "place": "West Hill",
+     "stars": 4,
+     "text": "Professional, gentle and clean. Booking and payment were simple — the price was exactly as shown.",
+     "when": "3 days ago"
+    },
+    {
+     "name": "Prakash Nair",
+     "place": "Thondayad",
+     "stars": 5,
+     "text": "Explained what to do on off days so we could continue at home. Highly recommend.",
+     "when": "1 week ago"
+    },
+    {
+     "name": "Sreeja Mohan",
+     "place": "Nadakkavu",
+     "stars": 5,
+     "text": "Took time to listen. Felt like a family doctor from the old days.",
+     "when": "2 weeks ago"
+    },
+    {
+     "name": "Anitha Suresh",
+     "place": "West Hill",
+     "stars": 4,
+     "text": "Professional, gentle and clean. Booking and payment were simple — the price was exactly as shown.",
+     "when": "1 month ago"
+    }
+   ],
+   "next": "Tomorrow, 10:00 AM",
+   "reg": "KNMC Reg. No. 29209",
+   "bio": "Bincy handles everything from IV drips to post-surgery dressings with calm, careful hands. Trained in hospital wards in Kozhikode, now caring for patients at home.",
+   "radius": 6
+  },
+  {
+   "id": "p20",
+   "img": "/img/t11.jpg",
+   "name": "Remya Gopinath",
+   "g": "F",
+   "cat": "nurse",
+   "qual": "B.Sc Nursing, Critical Care",
+   "exp": 8,
+   "rating": 4.9,
+   "reviews": 133,
+   "locality": "Medical College",
+   "langs": [
+    "Malayalam",
+    "English",
+    "Tamil"
+   ],
+   "price": 600,
+   "today": "4:30 PM",
+   "initials": "RG",
+   "svcs": [
+    {
+     "n": "Injection",
+     "p": 300,
+     "d": "15 min"
+    },
+    {
+     "n": "IV drip",
+     "p": 840,
+     "d": "60–90 min"
+    },
+    {
+     "n": "Wound dressing",
+     "p": 600,
+     "d": "30 min"
+    },
+    {
+     "n": "Catheter care",
+     "p": 720,
+     "d": "30 min"
+    },
+    {
+     "n": "Ryles tube care",
+     "p": 720,
+     "d": "30 min"
+    },
+    {
+     "n": "Post-surgery care",
+     "p": 900,
+     "d": "60 min"
+    }
+   ],
+   "revs": [
+    {
+     "name": "Haris Muhammed",
+     "place": "Medical College",
+     "stars": 4,
+     "text": "Reached within 15 minutes on a rainy evening. Thank you for the care.",
+     "when": "3 days ago"
+    },
+    {
+     "name": "Rajeevan K.",
+     "place": "Chevayur",
+     "stars": 5,
+     "text": "Came exactly on time and explained everything to my father in Malayalam. Very patient and kind.",
+     "when": "1 week ago"
+    },
+    {
+     "name": "Joseph Mathew",
+     "place": "Eranhipalam",
+     "stars": 5,
+     "text": "Very kind with my mother. Will definitely book again for the next course.",
+     "when": "2 weeks ago"
+    },
+    {
+     "name": "Haris Muhammed",
+     "place": "Medical College",
+     "stars": 4,
+     "text": "Reached within 15 minutes on a rainy evening. Thank you for the care.",
+     "when": "1 month ago"
+    }
+   ],
+   "next": "Sun, 11:00 AM",
+   "reg": "KNMC Reg. No. 29231",
+   "bio": "Remya handles everything from IV drips to post-surgery dressings with calm, careful hands. Trained in hospital wards in Kozhikode, now caring for patients at home.",
+   "radius": 10
+  },
+  {
+   "id": "p21",
+   "img": "/img/t12.jpg",
+   "name": "Thahira Beevi",
+   "g": "F",
+   "cat": "nurse",
+   "qual": "GNM",
+   "exp": 6,
+   "rating": 4.6,
+   "reviews": 58,
+   "locality": "Tirur",
+   "langs": [
+    "Malayalam",
+    "English",
+    "Arabic"
+   ],
+   "price": 450,
+   "today": "12:30 PM",
+   "initials": "TB",
+   "svcs": [
+    {
+     "n": "Injection",
+     "p": 230,
+     "d": "15 min"
+    },
+    {
+     "n": "IV drip",
+     "p": 630,
+     "d": "60–90 min"
+    },
+    {
+     "n": "Wound dressing",
+     "p": 450,
+     "d": "30 min"
+    },
+    {
+     "n": "Catheter care",
+     "p": 540,
+     "d": "30 min"
+    },
+    {
+     "n": "Ryles tube care",
+     "p": 540,
+     "d": "30 min"
+    },
+    {
+     "n": "Post-surgery care",
+     "p": 680,
+     "d": "60 min"
+    }
+   ],
+   "revs": [
+    {
+     "name": "Divya Ramesh",
+     "place": "Kottakkal",
+     "stars": 5,
+     "text": "My son actually looks forward to the sessions now. Such warmth.",
+     "when": "3 days ago"
+    },
+    {
+     "name": "Shamsudheen P.",
+     "place": "Kondotty",
+     "stars": 5,
+     "text": "We were worried about taking Umma to the hospital every day. The home sessions made a real difference in three weeks.",
+     "when": "1 week ago"
+    },
+    {
+     "name": "Fathima Zuhra",
+     "place": "Malappuram",
+     "stars": 5,
+     "text": "No surprises on price. The visit OTP and live tracking made us feel safe.",
+     "when": "2 weeks ago"
+    },
+    {
+     "name": "Divya Ramesh",
+     "place": "Kottakkal",
+     "stars": 5,
+     "text": "My son actually looks forward to the sessions now. Such warmth.",
+     "when": "1 month ago"
+    }
+   ],
+   "next": "Tomorrow, 2:00 PM",
+   "reg": "KNMC Reg. No. 29232",
+   "bio": "Thahira handles everything from IV drips to post-surgery dressings with calm, careful hands. Trained in hospital wards in Kozhikode, now caring for patients at home.",
+   "radius": 12
+  },
+  {
+   "id": "p22",
+   "img": "/img/t13.jpg",
+   "name": "Libin Thomas",
+   "g": "M",
+   "cat": "nurse",
+   "qual": "B.Sc Nursing",
+   "exp": 5,
+   "rating": 4.7,
+   "reviews": 72,
+   "locality": "Feroke",
+   "langs": [
+    "Malayalam",
+    "English",
+    "Hindi"
+   ],
+   "price": 500,
+   "today": "",
+   "initials": "LT",
+   "svcs": [
+    {
+     "n": "Injection",
+     "p": 250,
+     "d": "15 min"
+    },
+    {
+     "n": "IV drip",
+     "p": 700,
+     "d": "60–90 min"
+    },
+    {
+     "n": "Wound dressing",
+     "p": 500,
+     "d": "30 min"
+    },
+    {
+     "n": "Catheter care",
+     "p": 600,
+     "d": "30 min"
+    },
+    {
+     "n": "Ryles tube care",
+     "p": 600,
+     "d": "30 min"
+    },
+    {
+     "n": "Post-surgery care",
+     "p": 750,
+     "d": "60 min"
+    }
+   ],
+   "revs": [
+    {
+     "name": "Sreeja Mohan",
+     "place": "Nadakkavu",
+     "stars": 5,
+     "text": "Took time to listen. Felt like a family doctor from the old days.",
+     "when": "3 days ago"
+    },
+    {
+     "name": "Anitha Suresh",
+     "place": "West Hill",
+     "stars": 4,
+     "text": "Professional, gentle and clean. Booking and payment were simple — the price was exactly as shown.",
+     "when": "1 week ago"
+    },
+    {
+     "name": "Prakash Nair",
+     "place": "Thondayad",
+     "stars": 5,
+     "text": "Explained what to do on off days so we could continue at home. Highly recommend.",
+     "when": "2 weeks ago"
+    },
+    {
+     "name": "Sreeja Mohan",
+     "place": "Nadakkavu",
+     "stars": 5,
+     "text": "Took time to listen. Felt like a family doctor from the old days.",
+     "when": "1 month ago"
+    }
+   ],
+   "next": "Tomorrow, 10:00 AM",
+   "reg": "KNMC Reg. No. 29233",
+   "bio": "Libin handles everything from IV drips to post-surgery dressings with calm, careful hands. Trained in hospital wards in Kozhikode, now caring for patients at home.",
+   "radius": 6
+  },
+  {
+   "id": "p23",
+   "img": "/img/t14.jpg",
+   "name": "Jumaila Parambil",
+   "g": "F",
+   "cat": "nurse",
+   "qual": "B.Sc Nursing, Wound Care",
+   "exp": 7,
+   "rating": 4.8,
+   "reviews": 97,
+   "locality": "Kondotty",
+   "langs": [
+    "Malayalam",
+    "English",
+    "Arabic"
+   ],
+   "price": 550,
+   "today": "6:00 PM",
+   "initials": "JP",
+   "svcs": [
+    {
+     "n": "Injection",
+     "p": 280,
+     "d": "15 min"
+    },
+    {
+     "n": "IV drip",
+     "p": 770,
+     "d": "60–90 min"
+    },
+    {
+     "n": "Wound dressing",
+     "p": 550,
+     "d": "30 min"
+    },
+    {
+     "n": "Catheter care",
+     "p": 660,
+     "d": "30 min"
+    },
+    {
+     "n": "Ryles tube care",
+     "p": 660,
+     "d": "30 min"
+    },
+    {
+     "n": "Post-surgery care",
+     "p": 830,
+     "d": "60 min"
+    }
+   ],
+   "revs": [
+    {
+     "name": "Rajeevan K.",
+     "place": "Chevayur",
+     "stars": 5,
+     "text": "Came exactly on time and explained everything to my father in Malayalam. Very patient and kind.",
+     "when": "3 days ago"
+    },
+    {
+     "name": "Joseph Mathew",
+     "place": "Eranhipalam",
+     "stars": 5,
+     "text": "Very kind with my mother. Will definitely book again for the next course.",
+     "when": "1 week ago"
+    },
+    {
+     "name": "Haris Muhammed",
+     "place": "Medical College",
+     "stars": 4,
+     "text": "Reached within 15 minutes on a rainy evening. Thank you for the care.",
+     "when": "2 weeks ago"
+    },
+    {
+     "name": "Rajeevan K.",
+     "place": "Chevayur",
+     "stars": 5,
+     "text": "Came exactly on time and explained everything to my father in Malayalam. Very patient and kind.",
+     "when": "1 month ago"
+    }
+   ],
+   "next": "Tomorrow, 9:00 AM",
+   "reg": "KNMC Reg. No. 29234",
+   "bio": "Jumaila handles everything from IV drips to post-surgery dressings with calm, careful hands. Trained in hospital wards in Kozhikode, now caring for patients at home.",
+   "radius": 8
+  },
+  {
+   "id": "p24",
+   "img": "/img/t7.jpg",
+   "name": "Shabna Kareem",
+   "g": "F",
+   "cat": "nurse",
+   "qual": "GNM, ICU Care",
+   "exp": 10,
+   "rating": 4.8,
+   "reviews": 122,
+   "locality": "Beypore",
+   "langs": [
+    "Malayalam",
+    "English"
+   ],
+   "price": 500,
+   "today": "",
+   "initials": "SK",
+   "svcs": [
+    {
+     "n": "Injection",
+     "p": 250,
+     "d": "15 min"
+    },
+    {
+     "n": "IV drip",
+     "p": 700,
+     "d": "60–90 min"
+    },
+    {
+     "n": "Wound dressing",
+     "p": 500,
+     "d": "30 min"
+    },
+    {
+     "n": "Catheter care",
+     "p": 600,
+     "d": "30 min"
+    },
+    {
+     "n": "Ryles tube care",
+     "p": 600,
+     "d": "30 min"
+    },
+    {
+     "n": "Post-surgery care",
+     "p": 750,
+     "d": "60 min"
+    }
+   ],
+   "revs": [
+    {
+     "name": "Shamsudheen P.",
+     "place": "Kondotty",
+     "stars": 5,
+     "text": "We were worried about taking Umma to the hospital every day. The home sessions made a real difference in three weeks.",
+     "when": "3 days ago"
+    },
+    {
+     "name": "Fathima Zuhra",
+     "place": "Malappuram",
+     "stars": 5,
+     "text": "No surprises on price. The visit OTP and live tracking made us feel safe.",
+     "when": "1 week ago"
+    },
+    {
+     "name": "Divya Ramesh",
+     "place": "Kottakkal",
+     "stars": 5,
+     "text": "My son actually looks forward to the sessions now. Such warmth.",
+     "when": "2 weeks ago"
+    },
+    {
+     "name": "Shamsudheen P.",
+     "place": "Kondotty",
+     "stars": 5,
+     "text": "We were worried about taking Umma to the hospital every day. The home sessions made a real difference in three weeks.",
+     "when": "1 month ago"
+    }
+   ],
+   "next": "Sun, 11:00 AM",
+   "reg": "KNMC Reg. No. 29235",
+   "bio": "Shabna handles everything from IV drips to post-surgery dressings with calm, careful hands. Trained in hospital wards in Kozhikode, now caring for patients at home.",
+   "radius": 10
+  },
+  {
+   "id": "p25",
+   "img": "/img/t17.jpg",
+   "name": "Parvathy Warrier",
+   "g": "F",
+   "cat": "ot",
+   "qual": "BOT, MOT (Paediatrics)",
+   "exp": 8,
+   "rating": 4.9,
+   "reviews": 84,
+   "locality": "Eranhipalam",
+   "langs": [
+    "Malayalam",
+    "English",
+    "Hindi"
+   ],
+   "price": 700,
+   "today": "5:00 PM",
+   "initials": "PW",
+   "svcs": [
+    {
+     "n": "Occupational therapy",
+     "p": 700,
+     "d": "45 min"
+    },
+    {
+     "n": "Hand therapy",
+     "p": 700,
+     "d": "45 min"
+    },
+    {
+     "n": "Daily-living skills training",
+     "p": 700,
+     "d": "60 min"
+    },
+    {
+     "n": "Child development therapy",
+     "p": 770,
+     "d": "45 min"
+    }
+   ],
+   "revs": [
+    {
+     "name": "Anitha Suresh",
+     "place": "West Hill",
+     "stars": 4,
+     "text": "Professional, gentle and clean. Booking and payment were simple — the price was exactly as shown.",
+     "when": "3 days ago"
+    },
+    {
+     "name": "Prakash Nair",
+     "place": "Thondayad",
+     "stars": 5,
+     "text": "Explained what to do on off days so we could continue at home. Highly recommend.",
+     "when": "1 week ago"
+    },
+    {
+     "name": "Sreeja Mohan",
+     "place": "Nadakkavu",
+     "stars": 5,
+     "text": "Took time to listen. Felt like a family doctor from the old days.",
+     "when": "2 weeks ago"
+    },
+    {
+     "name": "Anitha Suresh",
+     "place": "West Hill",
+     "stars": 4,
+     "text": "Professional, gentle and clean. Booking and payment were simple — the price was exactly as shown.",
+     "when": "1 month ago"
+    }
+   ],
+   "next": "Tomorrow, 2:00 PM",
+   "reg": "AIOTA Reg. No. 29236",
+   "bio": "Parvathy helps children and adults build independence in everyday tasks — eating, writing, dressing — using objects already in your home.",
+   "radius": 12
+  },
+  {
+   "id": "p26",
+   "img": "/img/t6.jpg",
+   "name": "Najma Thayyil",
+   "g": "F",
+   "cat": "ot",
+   "qual": "BOT",
+   "exp": 4,
+   "rating": 4.6,
+   "reviews": 39,
+   "locality": "Perinthalmanna",
+   "langs": [
+    "Malayalam",
+    "English",
+    "Arabic"
+   ],
+   "price": 650,
+   "today": "",
+   "initials": "NT",
+   "svcs": [
+    {
+     "n": "Occupational therapy",
+     "p": 650,
+     "d": "45 min"
+    },
+    {
+     "n": "Hand therapy",
+     "p": 650,
+     "d": "45 min"
+    },
+    {
+     "n": "Daily-living skills training",
+     "p": 650,
+     "d": "60 min"
+    },
+    {
+     "n": "Child development therapy",
+     "p": 720,
+     "d": "45 min"
+    }
+   ],
+   "revs": [
+    {
+     "name": "Joseph Mathew",
+     "place": "Eranhipalam",
+     "stars": 5,
+     "text": "Very kind with my mother. Will definitely book again for the next course.",
+     "when": "3 days ago"
+    },
+    {
+     "name": "Haris Muhammed",
+     "place": "Medical College",
+     "stars": 4,
+     "text": "Reached within 15 minutes on a rainy evening. Thank you for the care.",
+     "when": "1 week ago"
+    },
+    {
+     "name": "Rajeevan K.",
+     "place": "Chevayur",
+     "stars": 5,
+     "text": "Came exactly on time and explained everything to my father in Malayalam. Very patient and kind.",
+     "when": "2 weeks ago"
+    },
+    {
+     "name": "Joseph Mathew",
+     "place": "Eranhipalam",
+     "stars": 5,
+     "text": "Very kind with my mother. Will definitely book again for the next course.",
+     "when": "1 month ago"
+    }
+   ],
+   "next": "Tomorrow, 10:00 AM",
+   "reg": "AIOTA Reg. No. 29237",
+   "bio": "Najma helps children and adults build independence in everyday tasks — eating, writing, dressing — using objects already in your home.",
+   "radius": 6
+  },
+  {
+   "id": "p27",
+   "img": "/img/t1.jpg",
+   "name": "Aswathy Pillai",
+   "g": "F",
+   "cat": "speech",
+   "qual": "BASLP, MASLP",
+   "exp": 7,
+   "rating": 4.9,
+   "reviews": 91,
+   "locality": "Thondayad",
+   "langs": [
+    "Malayalam",
+    "English",
+    "Tamil"
+   ],
+   "price": 650,
+   "today": "4:30 PM",
+   "initials": "AP",
+   "svcs": [
+    {
+     "n": "Speech therapy",
+     "p": 650,
+     "d": "45 min"
+    },
+    {
+     "n": "Swallowing (dysphagia) therapy",
+     "p": 750,
+     "d": "45 min"
+    },
+    {
+     "n": "Child language therapy",
+     "p": 650,
+     "d": "45 min"
+    },
+    {
+     "n": "Voice & fluency therapy",
+     "p": 650,
+     "d": "45 min"
+    }
+   ],
+   "revs": [
+    {
+     "name": "Fathima Zuhra",
+     "place": "Malappuram",
+     "stars": 5,
+     "text": "No surprises on price. The visit OTP and live tracking made us feel safe.",
+     "when": "3 days ago"
+    },
+    {
+     "name": "Divya Ramesh",
+     "place": "Kottakkal",
+     "stars": 5,
+     "text": "My son actually looks forward to the sessions now. Such warmth.",
+     "when": "1 week ago"
+    },
+    {
+     "name": "Shamsudheen P.",
+     "place": "Kondotty",
+     "stars": 5,
+     "text": "We were worried about taking Umma to the hospital every day. The home sessions made a real difference in three weeks.",
+     "when": "2 weeks ago"
+    },
+    {
+     "name": "Fathima Zuhra",
+     "place": "Malappuram",
+     "stars": 5,
+     "text": "No surprises on price. The visit OTP and live tracking made us feel safe.",
+     "when": "1 month ago"
+    }
+   ],
+   "next": "Tomorrow, 9:00 AM",
+   "reg": "RCI CRR No. 29238",
+   "bio": "Aswathy works with children with speech delay and adults recovering from stroke, including swallowing therapy. Sessions in Malayalam or English.",
+   "radius": 8
+  },
+  {
+   "id": "p28",
+   "img": "/img/t8.jpg",
+   "name": "Fida Shirin",
+   "g": "F",
+   "cat": "speech",
+   "qual": "BASLP",
+   "exp": 3,
+   "rating": 4.5,
+   "reviews": 28,
+   "locality": "Kottakkal",
+   "langs": [
+    "Malayalam",
+    "English",
+    "Arabic"
+   ],
+   "price": 550,
+   "today": "",
+   "initials": "FS",
+   "svcs": [
+    {
+     "n": "Speech therapy",
+     "p": 550,
+     "d": "45 min"
+    },
+    {
+     "n": "Swallowing (dysphagia) therapy",
+     "p": 630,
+     "d": "45 min"
+    },
+    {
+     "n": "Child language therapy",
+     "p": 550,
+     "d": "45 min"
+    },
+    {
+     "n": "Voice & fluency therapy",
+     "p": 550,
+     "d": "45 min"
+    }
+   ],
+   "revs": [
+    {
+     "name": "Prakash Nair",
+     "place": "Thondayad",
+     "stars": 5,
+     "text": "Explained what to do on off days so we could continue at home. Highly recommend.",
+     "when": "3 days ago"
+    },
+    {
+     "name": "Sreeja Mohan",
+     "place": "Nadakkavu",
+     "stars": 5,
+     "text": "Took time to listen. Felt like a family doctor from the old days.",
+     "when": "1 week ago"
+    },
+    {
+     "name": "Anitha Suresh",
+     "place": "West Hill",
+     "stars": 4,
+     "text": "Professional, gentle and clean. Booking and payment were simple — the price was exactly as shown.",
+     "when": "2 weeks ago"
+    },
+    {
+     "name": "Prakash Nair",
+     "place": "Thondayad",
+     "stars": 5,
+     "text": "Explained what to do on off days so we could continue at home. Highly recommend.",
+     "when": "1 month ago"
+    }
+   ],
+   "next": "Sun, 11:00 AM",
+   "reg": "RCI CRR No. 29239",
+   "bio": "Fida works with children with speech delay and adults recovering from stroke, including swallowing therapy. Sessions in Malayalam or English.",
+   "radius": 10
+  },
+  {
+   "id": "p29",
+   "img": "/img/t2.jpg",
+   "name": "Deepthi Sunil",
+   "g": "F",
+   "cat": "diet",
+   "qual": "M.Sc Dietetics",
+   "exp": 8,
+   "rating": 4.7,
+   "reviews": 66,
+   "locality": "Nadakkavu",
+   "langs": [
+    "Malayalam",
+    "English"
+   ],
+   "price": 600,
+   "today": "2:00 PM",
+   "initials": "DS",
+   "svcs": [
+    {
+     "n": "Diabetic diet plan",
+     "p": 600,
+     "d": "45 min"
+    },
+    {
+     "n": "Kidney diet plan",
+     "p": 720,
+     "d": "45 min"
+    },
+    {
+     "n": "Weight management",
+     "p": 600,
+     "d": "45 min"
+    },
+    {
+     "n": "Child nutrition",
+     "p": 540,
+     "d": "40 min"
+    }
+   ],
+   "revs": [
+    {
+     "name": "Haris Muhammed",
+     "place": "Medical College",
+     "stars": 4,
+     "text": "Reached within 15 minutes on a rainy evening. Thank you for the care.",
+     "when": "3 days ago"
+    },
+    {
+     "name": "Rajeevan K.",
+     "place": "Chevayur",
+     "stars": 5,
+     "text": "Came exactly on time and explained everything to my father in Malayalam. Very patient and kind.",
+     "when": "1 week ago"
+    },
+    {
+     "name": "Joseph Mathew",
+     "place": "Eranhipalam",
+     "stars": 5,
+     "text": "Very kind with my mother. Will definitely book again for the next course.",
+     "when": "2 weeks ago"
+    },
+    {
+     "name": "Haris Muhammed",
+     "place": "Medical College",
+     "stars": 4,
+     "text": "Reached within 15 minutes on a rainy evening. Thank you for the care.",
+     "when": "1 month ago"
+    }
+   ],
+   "next": "Tomorrow, 2:00 PM",
+   "reg": "IDA Member No. 29240",
+   "bio": "Deepthi builds meal plans around Kerala kitchens — rice, fish and all — for diabetes, kidney care and healthy weight.",
+   "radius": 12
+  },
+  {
+   "id": "p30",
+   "img": "/img/t18.jpg",
+   "name": "Hanna Mehrin",
+   "g": "F",
+   "cat": "diet",
+   "qual": "M.Sc Clinical Nutrition",
+   "exp": 5,
+   "rating": 4.8,
+   "reviews": 49,
+   "locality": "Manjeri",
+   "langs": [
+    "Malayalam",
+    "English",
+    "Arabic"
+   ],
+   "price": 500,
+   "today": "",
+   "initials": "HM",
+   "svcs": [
+    {
+     "n": "Diabetic diet plan",
+     "p": 500,
+     "d": "45 min"
+    },
+    {
+     "n": "Kidney diet plan",
+     "p": 600,
+     "d": "45 min"
+    },
+    {
+     "n": "Weight management",
+     "p": 500,
+     "d": "45 min"
+    },
+    {
+     "n": "Child nutrition",
+     "p": 450,
+     "d": "40 min"
+    }
+   ],
+   "revs": [
+    {
+     "name": "Shamsudheen P.",
+     "place": "Kondotty",
+     "stars": 5,
+     "text": "We were worried about taking Umma to the hospital every day. The home sessions made a real difference in three weeks.",
+     "when": "3 days ago"
+    },
+    {
+     "name": "Fathima Zuhra",
+     "place": "Malappuram",
+     "stars": 5,
+     "text": "No surprises on price. The visit OTP and live tracking made us feel safe.",
+     "when": "1 week ago"
+    },
+    {
+     "name": "Divya Ramesh",
+     "place": "Kottakkal",
+     "stars": 5,
+     "text": "My son actually looks forward to the sessions now. Such warmth.",
+     "when": "2 weeks ago"
+    },
+    {
+     "name": "Shamsudheen P.",
+     "place": "Kondotty",
+     "stars": 5,
+     "text": "We were worried about taking Umma to the hospital every day. The home sessions made a real difference in three weeks.",
+     "when": "1 month ago"
+    }
+   ],
+   "next": "Tomorrow, 9:00 AM",
+   "reg": "IDA Member No. 29262",
+   "bio": "Hanna builds meal plans around Kerala kitchens — rice, fish and all — for diabetes, kidney care and healthy weight.",
+   "radius": 8
+  },
+  {
+   "id": "p31",
+   "img": "/img/t0.jpg",
+   "name": "Adarsh Vijayan",
+   "g": "M",
+   "cat": "lab",
+   "qual": "BMLT",
+   "exp": 6,
+   "rating": 4.8,
+   "reviews": 203,
+   "locality": "Mavoor Road",
+   "langs": [
+    "Malayalam",
+    "English",
+    "Hindi"
+   ],
+   "price": 199,
+   "today": "4:30 PM",
+   "initials": "AV",
+   "svcs": [
+    {
+     "n": "Blood test (CBC)",
+     "p": 300,
+     "d": "15 min"
+    },
+    {
+     "n": "Full body health package",
+     "p": 1490,
+     "d": "20 min"
+    },
+    {
+     "n": "Urine routine",
+     "p": 200,
+     "d": "10 min"
+    },
+    {
+     "n": "Thyroid profile",
+     "p": 450,
+     "d": "15 min"
+    },
+    {
+     "n": "ECG at home",
+     "p": 500,
+     "d": "20 min"
+    }
+   ],
+   "revs": [
+    {
+     "name": "Anitha Suresh",
+     "place": "West Hill",
+     "stars": 4,
+     "text": "Professional, gentle and clean. Booking and payment were simple — the price was exactly as shown.",
+     "when": "3 days ago"
+    },
+    {
+     "name": "Prakash Nair",
+     "place": "Thondayad",
+     "stars": 5,
+     "text": "Explained what to do on off days so we could continue at home. Highly recommend.",
+     "when": "1 week ago"
+    },
+    {
+     "name": "Sreeja Mohan",
+     "place": "Nadakkavu",
+     "stars": 5,
+     "text": "Took time to listen. Felt like a family doctor from the old days.",
+     "when": "2 weeks ago"
+    },
+    {
+     "name": "Anitha Suresh",
+     "place": "West Hill",
+     "stars": 4,
+     "text": "Professional, gentle and clean. Booking and payment were simple — the price was exactly as shown.",
+     "when": "1 month ago"
+    }
+   ],
+   "next": "Sun, 11:00 AM",
+   "reg": "KSAHPC Reg. No. 29263",
+   "bio": "Adarsh collects samples at home with sealed, single-use kits. Reports are shared digitally within 24 hours from a NABL-accredited partner lab.",
+   "radius": 10
+  },
+  {
+   "id": "p32",
+   "img": "",
+   "name": "Jishnu Prakash",
+   "g": "M",
+   "cat": "lab",
+   "qual": "DMLT",
+   "exp": 3,
+   "rating": 4.4,
+   "reviews": 58,
+   "locality": "Ramanattukara",
+   "langs": [
+    "Malayalam",
+    "English"
+   ],
+   "price": 149,
+   "today": "",
+   "initials": "JP",
+   "svcs": [
+    {
+     "n": "Blood test (CBC)",
+     "p": 220,
+     "d": "15 min"
+    },
+    {
+     "n": "Full body health package",
+     "p": 1120,
+     "d": "20 min"
+    },
+    {
+     "n": "Urine routine",
+     "p": 150,
+     "d": "10 min"
+    },
+    {
+     "n": "Thyroid profile",
+     "p": 340,
+     "d": "15 min"
+    },
+    {
+     "n": "ECG at home",
+     "p": 370,
+     "d": "20 min"
+    }
+   ],
+   "revs": [
+    {
+     "name": "Joseph Mathew",
+     "place": "Eranhipalam",
+     "stars": 5,
+     "text": "Very kind with my mother. Will definitely book again for the next course.",
+     "when": "3 days ago"
+    },
+    {
+     "name": "Haris Muhammed",
+     "place": "Medical College",
+     "stars": 4,
+     "text": "Reached within 15 minutes on a rainy evening. Thank you for the care.",
+     "when": "1 week ago"
+    },
+    {
+     "name": "Rajeevan K.",
+     "place": "Chevayur",
+     "stars": 5,
+     "text": "Came exactly on time and explained everything to my father in Malayalam. Very patient and kind.",
+     "when": "2 weeks ago"
+    },
+    {
+     "name": "Joseph Mathew",
+     "place": "Eranhipalam",
+     "stars": 5,
+     "text": "Very kind with my mother. Will definitely book again for the next course.",
+     "when": "1 month ago"
+    }
+   ],
+   "next": "Tomorrow, 2:00 PM",
+   "reg": "KSAHPC Reg. No. 29264",
+   "bio": "Jishnu collects samples at home with sealed, single-use kits. Reports are shared digitally within 24 hours from a NABL-accredited partner lab.",
+   "radius": 12
+  },
+  {
+   "id": "p33",
+   "img": "",
+   "name": "Anju Mohan",
+   "g": "F",
+   "cat": "pharma",
+   "qual": "D.Pharm",
+   "exp": 4,
+   "rating": 4.5,
+   "reviews": 31,
+   "locality": "Tirur",
+   "langs": [
+    "Malayalam",
+    "English"
+   ],
+   "price": 149,
+   "today": "5:00 PM",
+   "initials": "AM",
+   "svcs": [
+    {
+     "n": "Medicine review at home",
+     "p": 150,
+     "d": "30 min"
+    },
+    {
+     "n": "Medicine delivery",
+     "p": 70,
+     "d": "Same day"
+    },
+    {
+     "n": "Diabetes medicine counselling",
+     "p": 180,
+     "d": "30 min"
+    }
+   ],
+   "revs": [
+    {
+     "name": "Fathima Zuhra",
+     "place": "Malappuram",
+     "stars": 5,
+     "text": "No surprises on price. The visit OTP and live tracking made us feel safe.",
+     "when": "3 days ago"
+    },
+    {
+     "name": "Divya Ramesh",
+     "place": "Kottakkal",
+     "stars": 5,
+     "text": "My son actually looks forward to the sessions now. Such warmth.",
+     "when": "1 week ago"
+    },
+    {
+     "name": "Shamsudheen P.",
+     "place": "Kondotty",
+     "stars": 5,
+     "text": "We were worried about taking Umma to the hospital every day. The home sessions made a real difference in three weeks.",
+     "when": "2 weeks ago"
+    },
+    {
+     "name": "Fathima Zuhra",
+     "place": "Malappuram",
+     "stars": 5,
+     "text": "No surprises on price. The visit OTP and live tracking made us feel safe.",
+     "when": "1 month ago"
+    }
+   ],
+   "next": "Tomorrow, 10:00 AM",
+   "reg": "KSPC Reg. No. 29265",
+   "bio": "Anju reviews all your medicines in one sitting, flags interactions and sets up a simple daily schedule for elderly patients.",
+   "radius": 6
+  },
+  {
+   "id": "p34",
+   "img": "/img/c1.jpg",
+   "name": "Sindhu Rajan",
+   "g": "F",
+   "cat": "caregiver",
+   "qual": "GDA, Elderly Care Cert.",
+   "exp": 9,
+   "rating": 4.8,
+   "reviews": 87,
+   "locality": "Chevayur",
+   "langs": [
+    "Malayalam",
+    "Tamil"
+   ],
+   "price": 1200,
+   "today": "6:00 PM",
+   "initials": "SR",
+   "svcs": [
+    {
+     "n": "Elderly caregiver",
+     "p": 1200,
+     "d": "Per shift"
+    },
+    {
+     "n": "Patient attendant",
+     "p": 1140,
+     "d": "Per shift"
+    },
+    {
+     "n": "Dementia care",
+     "p": 1320,
+     "d": "Per shift"
+    }
+   ],
+   "revs": [
+    {
+     "name": "Prakash Nair",
+     "place": "Thondayad",
+     "stars": 5,
+     "text": "Explained what to do on off days so we could continue at home. Highly recommend.",
+     "when": "3 days ago"
+    },
+    {
+     "name": "Sreeja Mohan",
+     "place": "Nadakkavu",
+     "stars": 5,
+     "text": "Took time to listen. Felt like a family doctor from the old days.",
+     "when": "1 week ago"
+    },
+    {
+     "name": "Anitha Suresh",
+     "place": "West Hill",
+     "stars": 4,
+     "text": "Professional, gentle and clean. Booking and payment were simple — the price was exactly as shown.",
+     "when": "2 weeks ago"
+    },
+    {
+     "name": "Prakash Nair",
+     "place": "Thondayad",
+     "stars": 5,
+     "text": "Explained what to do on off days so we could continue at home. Highly recommend.",
+     "when": "1 month ago"
+    }
+   ],
+   "next": "Tomorrow, 9:00 AM",
+   "reg": "Police verified · ID 29266",
+   "bio": "Sindhu is a patient, experienced caregiver for elderly and bedridden patients — feeding, hygiene, mobility and companionship.",
+   "radius": 8
+  },
+  {
+   "id": "p35",
+   "img": "/img/c2.jpg",
+   "name": "Valsala Kumari",
+   "g": "F",
+   "cat": "caregiver",
+   "qual": "Certified Patient Attendant",
+   "exp": 14,
+   "rating": 4.9,
+   "reviews": 112,
+   "locality": "Palazhi",
+   "langs": [
+    "Malayalam"
+   ],
+   "price": 1300,
+   "today": "",
+   "initials": "VK",
+   "svcs": [
+    {
+     "n": "Elderly caregiver",
+     "p": 1300,
+     "d": "Per shift"
+    },
+    {
+     "n": "Patient attendant",
+     "p": 1240,
+     "d": "Per shift"
+    },
+    {
+     "n": "Dementia care",
+     "p": 1430,
+     "d": "Per shift"
+    }
+   ],
+   "revs": [
+    {
+     "name": "Haris Muhammed",
+     "place": "Medical College",
+     "stars": 4,
+     "text": "Reached within 15 minutes on a rainy evening. Thank you for the care.",
+     "when": "3 days ago"
+    },
+    {
+     "name": "Rajeevan K.",
+     "place": "Chevayur",
+     "stars": 5,
+     "text": "Came exactly on time and explained everything to my father in Malayalam. Very patient and kind.",
+     "when": "1 week ago"
+    },
+    {
+     "name": "Joseph Mathew",
+     "place": "Eranhipalam",
+     "stars": 5,
+     "text": "Very kind with my mother. Will definitely book again for the next course.",
+     "when": "2 weeks ago"
+    },
+    {
+     "name": "Haris Muhammed",
+     "place": "Medical College",
+     "stars": 4,
+     "text": "Reached within 15 minutes on a rainy evening. Thank you for the care.",
+     "when": "1 month ago"
+    }
+   ],
+   "next": "Sun, 11:00 AM",
+   "reg": "Police verified · ID 29267",
+   "bio": "Valsala is a patient, experienced caregiver for elderly and bedridden patients — feeding, hygiene, mobility and companionship.",
+   "radius": 10
+  },
+  {
+   "id": "p36",
+   "img": "/img/c7.jpg",
+   "name": "Mercy Antony",
+   "g": "F",
+   "cat": "caregiver",
+   "qual": "GDA, Dementia Care Cert.",
+   "exp": 16,
+   "rating": 4.9,
+   "reviews": 134,
+   "locality": "West Hill",
+   "langs": [
+    "Malayalam",
+    "English"
+   ],
+   "price": 1400,
+   "today": "7:30 PM",
+   "initials": "MA",
+   "svcs": [
+    {
+     "n": "Elderly caregiver",
+     "p": 1400,
+     "d": "Per shift"
+    },
+    {
+     "n": "Patient attendant",
+     "p": 1330,
+     "d": "Per shift"
+    },
+    {
+     "n": "Dementia care",
+     "p": 1540,
+     "d": "Per shift"
+    }
+   ],
+   "revs": [
+    {
+     "name": "Divya Ramesh",
+     "place": "Kottakkal",
+     "stars": 5,
+     "text": "My son actually looks forward to the sessions now. Such warmth.",
+     "when": "3 days ago"
+    },
+    {
+     "name": "Shamsudheen P.",
+     "place": "Kondotty",
+     "stars": 5,
+     "text": "We were worried about taking Umma to the hospital every day. The home sessions made a real difference in three weeks.",
+     "when": "1 week ago"
+    },
+    {
+     "name": "Fathima Zuhra",
+     "place": "Malappuram",
+     "stars": 5,
+     "text": "No surprises on price. The visit OTP and live tracking made us feel safe.",
+     "when": "2 weeks ago"
+    },
+    {
+     "name": "Divya Ramesh",
+     "place": "Kottakkal",
+     "stars": 5,
+     "text": "My son actually looks forward to the sessions now. Such warmth.",
+     "when": "1 month ago"
+    }
+   ],
+   "next": "Tomorrow, 2:00 PM",
+   "reg": "Police verified · ID 29268",
+   "bio": "Mercy is a patient, experienced caregiver for elderly and bedridden patients — feeding, hygiene, mobility and companionship.",
+   "radius": 12
+  },
+  {
+   "id": "p37",
+   "img": "/img/c3.jpg",
+   "name": "Sabira Hameed",
+   "g": "F",
+   "cat": "aide",
+   "qual": "Home Health Aide (NSDC)",
+   "exp": 6,
+   "rating": 4.7,
+   "reviews": 54,
+   "locality": "Malappuram Town",
+   "langs": [
+    "Malayalam",
+    "Arabic"
+   ],
+   "price": 900,
+   "today": "",
+   "initials": "SH",
+   "svcs": [
+    {
+     "n": "Home health aide",
+     "p": 900,
+     "d": "Per shift"
+    },
+    {
+     "n": "Bathing & hygiene support",
+     "p": 900,
+     "d": "Per shift"
+    },
+    {
+     "n": "Bedridden patient care",
+     "p": 1040,
+     "d": "Per shift"
+    }
+   ],
+   "revs": [
+    {
+     "name": "Sreeja Mohan",
+     "place": "Nadakkavu",
+     "stars": 5,
+     "text": "Took time to listen. Felt like a family doctor from the old days.",
+     "when": "3 days ago"
+    },
+    {
+     "name": "Anitha Suresh",
+     "place": "West Hill",
+     "stars": 4,
+     "text": "Professional, gentle and clean. Booking and payment were simple — the price was exactly as shown.",
+     "when": "1 week ago"
+    },
+    {
+     "name": "Prakash Nair",
+     "place": "Thondayad",
+     "stars": 5,
+     "text": "Explained what to do on off days so we could continue at home. Highly recommend.",
+     "when": "2 weeks ago"
+    },
+    {
+     "name": "Sreeja Mohan",
+     "place": "Nadakkavu",
+     "stars": 5,
+     "text": "Took time to listen. Felt like a family doctor from the old days.",
+     "when": "1 month ago"
+    }
+   ],
+   "next": "Tomorrow, 10:00 AM",
+   "reg": "Police verified · ID 29269",
+   "bio": "Sabira supports daily personal care, light mobility and vitals monitoring, and keeps the family updated after every shift.",
+   "radius": 6
+  },
+  {
+   "id": "p38",
+   "img": "/img/c6.jpg",
+   "name": "Rifa Thasneem",
+   "g": "F",
+   "cat": "aide",
+   "qual": "Home Health Aide (NSDC)",
+   "exp": 3,
+   "rating": 4.5,
+   "reviews": 22,
+   "locality": "Feroke",
+   "langs": [
+    "Malayalam",
+    "English"
+   ],
+   "price": 850,
+   "today": "4:30 PM",
+   "initials": "RT",
+   "svcs": [
+    {
+     "n": "Home health aide",
+     "p": 850,
+     "d": "Per shift"
+    },
+    {
+     "n": "Bathing & hygiene support",
+     "p": 850,
+     "d": "Per shift"
+    },
+    {
+     "n": "Bedridden patient care",
+     "p": 980,
+     "d": "Per shift"
+    }
+   ],
+   "revs": [
+    {
+     "name": "Rajeevan K.",
+     "place": "Chevayur",
+     "stars": 5,
+     "text": "Came exactly on time and explained everything to my father in Malayalam. Very patient and kind.",
+     "when": "3 days ago"
+    },
+    {
+     "name": "Joseph Mathew",
+     "place": "Eranhipalam",
+     "stars": 5,
+     "text": "Very kind with my mother. Will definitely book again for the next course.",
+     "when": "1 week ago"
+    },
+    {
+     "name": "Haris Muhammed",
+     "place": "Medical College",
+     "stars": 4,
+     "text": "Reached within 15 minutes on a rainy evening. Thank you for the care.",
+     "when": "2 weeks ago"
+    },
+    {
+     "name": "Rajeevan K.",
+     "place": "Chevayur",
+     "stars": 5,
+     "text": "Came exactly on time and explained everything to my father in Malayalam. Very patient and kind.",
+     "when": "1 month ago"
+    }
+   ],
+   "next": "Tomorrow, 9:00 AM",
+   "reg": "Police verified · ID 29270",
+   "bio": "Rifa supports daily personal care, light mobility and vitals monitoring, and keeps the family updated after every shift.",
+   "radius": 8
+  },
+  {
+   "id": "p39",
+   "img": "/img/c4.jpg",
+   "name": "Nasla Sherin",
+   "g": "F",
+   "cat": "baby",
+   "qual": "Postnatal & Newborn Care Cert.",
+   "exp": 5,
+   "rating": 4.8,
+   "reviews": 68,
+   "locality": "Kondotty",
+   "langs": [
+    "Malayalam",
+    "English",
+    "Arabic"
+   ],
+   "price": 1300,
+   "today": "5:00 PM",
+   "initials": "NS",
+   "svcs": [
+    {
+     "n": "Newborn baby care",
+     "p": 1300,
+     "d": "Per shift"
+    },
+    {
+     "n": "Postnatal mother & baby care",
+     "p": 1490,
+     "d": "Per shift"
+    }
+   ],
+   "revs": [
+    {
+     "name": "Shamsudheen P.",
+     "place": "Kondotty",
+     "stars": 5,
+     "text": "We were worried about taking Umma to the hospital every day. The home sessions made a real difference in three weeks.",
+     "when": "3 days ago"
+    },
+    {
+     "name": "Fathima Zuhra",
+     "place": "Malappuram",
+     "stars": 5,
+     "text": "No surprises on price. The visit OTP and live tracking made us feel safe.",
+     "when": "1 week ago"
+    },
+    {
+     "name": "Divya Ramesh",
+     "place": "Kottakkal",
+     "stars": 5,
+     "text": "My son actually looks forward to the sessions now. Such warmth.",
+     "when": "2 weeks ago"
+    },
+    {
+     "name": "Shamsudheen P.",
+     "place": "Kondotty",
+     "stars": 5,
+     "text": "We were worried about taking Umma to the hospital every day. The home sessions made a real difference in three weeks.",
+     "when": "1 month ago"
+    }
+   ],
+   "next": "Sun, 11:00 AM",
+   "reg": "Police verified · ID 29271",
+   "bio": "Nasla supports new mothers through the first weeks — newborn bathing, feeding support and traditional postnatal care.",
+   "radius": 10
+  },
+  {
+   "id": "p40",
+   "img": "/img/c0.jpg",
+   "name": "Sujith Kumar",
+   "g": "M",
+   "cat": "ambulance",
+   "qual": "BLS Ambulance, First-aid Cert.",
+   "exp": 11,
+   "rating": 4.8,
+   "reviews": 176,
+   "locality": "Medical College",
+   "langs": [
+    "Malayalam",
+    "English",
+    "Hindi"
+   ],
+   "price": 1500,
+   "today": "24×7",
+   "initials": "SK",
+   "svcs": [
+    {
+     "n": "Emergency ambulance (BLS)",
+     "p": 1500,
+     "d": "Within city"
+    },
+    {
+     "n": "Patient transfer",
+     "p": 1200,
+     "d": "Scheduled"
+    },
+    {
+     "n": "Hospital discharge drop",
+     "p": 1050,
+     "d": "Scheduled"
+    }
+   ],
+   "revs": [
+    {
+     "name": "Prakash Nair",
+     "place": "Thondayad",
+     "stars": 5,
+     "text": "Explained what to do on off days so we could continue at home. Highly recommend.",
+     "when": "3 days ago"
+    },
+    {
+     "name": "Sreeja Mohan",
+     "place": "Nadakkavu",
+     "stars": 5,
+     "text": "Took time to listen. Felt like a family doctor from the old days.",
+     "when": "1 week ago"
+    },
+    {
+     "name": "Anitha Suresh",
+     "place": "West Hill",
+     "stars": 4,
+     "text": "Professional, gentle and clean. Booking and payment were simple — the price was exactly as shown.",
+     "when": "2 weeks ago"
+    },
+    {
+     "name": "Prakash Nair",
+     "place": "Thondayad",
+     "stars": 5,
+     "text": "Explained what to do on off days so we could continue at home. Highly recommend.",
+     "when": "1 month ago"
+    }
+   ],
+   "next": "Tomorrow, 10:00 AM",
+   "reg": "Badge No. 29293",
+   "bio": "Sujith drives a fully-equipped BLS ambulance and knows every lane between the city and Medical College. Available round the clock.",
+   "radius": 6
+  },
+  {
+   "id": "p41",
+   "img": "/img/c5.jpg",
+   "name": "Faisal Kottayil",
+   "g": "M",
+   "cat": "paramedic",
+   "qual": "EMT-Basic Certification",
+   "exp": 8,
+   "rating": 4.7,
+   "reviews": 93,
+   "locality": "Kondotty",
+   "langs": [
+    "Malayalam",
+    "English",
+    "Hindi"
+   ],
+   "price": 1200,
+   "today": "24×7",
+   "initials": "FK",
+   "svcs": [
+    {
+     "n": "Paramedic support",
+     "p": 1200,
+     "d": "Per trip"
+    },
+    {
+     "n": "Patient transfer escort",
+     "p": 1080,
+     "d": "Per trip"
+    },
+    {
+     "n": "Event medical standby",
+     "p": 2400,
+     "d": "4 hrs"
+    }
+   ],
+   "revs": [
+    {
+     "name": "Haris Muhammed",
+     "place": "Medical College",
+     "stars": 4,
+     "text": "Reached within 15 minutes on a rainy evening. Thank you for the care.",
+     "when": "3 days ago"
+    },
+    {
+     "name": "Rajeevan K.",
+     "place": "Chevayur",
+     "stars": 5,
+     "text": "Came exactly on time and explained everything to my father in Malayalam. Very patient and kind.",
+     "when": "1 week ago"
+    },
+    {
+     "name": "Joseph Mathew",
+     "place": "Eranhipalam",
+     "stars": 5,
+     "text": "Very kind with my mother. Will definitely book again for the next course.",
+     "when": "2 weeks ago"
+    },
+    {
+     "name": "Haris Muhammed",
+     "place": "Medical College",
+     "stars": 4,
+     "text": "Reached within 15 minutes on a rainy evening. Thank you for the care.",
+     "when": "1 month ago"
+    }
+   ],
+   "next": "Tomorrow, 9:00 AM",
+   "reg": "EMT Cert. No. 29294",
+   "bio": "Faisal is an EMT-certified paramedic for emergency response, patient transfers and on-site first aid.",
+   "radius": 8
+  }
+ ]
+}

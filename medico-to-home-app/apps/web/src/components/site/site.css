@@ -1,0 +1,50 @@
+/* Generated from the prototype. Inline styles need !important to be overridden. */
+html{scroll-behavior:smooth}
+body{margin:0;background:#fff;color:#02084D;font-family:Inter,system-ui,sans-serif;font-weight:300;-webkit-font-smoothing:antialiased}
+a{color:#02084D;text-decoration:none}
+a:hover{color:#1A2170}
+*{box-sizing:border-box}
+input,select,textarea,button{font-family:inherit}
+::-webkit-scrollbar{height:0}
+@keyframes mthSk{0%{opacity:.55}50%{opacity:1}100%{opacity:.55}}
+@keyframes mthIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@keyframes mthSpin{to{transform:rotate(360deg)}}
+.mth-hover-0:hover{color:#02084D !important}
+.mth-hover-1:hover{border-color:#02084D !important}
+.mth-hover-2:hover{background:#02084D !important;color:#fff !important}
+.mth-hover-3:hover{background:#C22F2F !important}
+.mth-active-4:active{transform:scale(.96) !important}
+.mth-hover-5:hover{color:#6B7085 !important}
+.mth-hover-6:hover{background:#F6F7FA !important}
+.mth-hover-7:hover{background:#1A2170 !important}
+.mth-active-8:active{transform:scale(.98) !important}
+.mth-hover-9:hover{transform:translateY(-3px) !important;box-shadow:0 14px 34px rgba(2,8,77,.06) !important}
+.mth-hover-10:hover{gap:10px !important}
+.mth-hover-11:hover{transform:translateY(-2px) !important}
+.mth-hover-12:hover{background:#02084D !important;color:#fff !important;border-color:#02084D !important}
+.mth-focus-13:focus{border-color:#02084D !important}
+.mth-hover-14:hover{border-color:#02084D !important;background:#F6F7FA !important}
+.mth-hover-15:hover{background:#C22F2F !important;color:#fff !important}
+.mth-hover-16:hover{transform:translateY(-4px) !important;box-shadow:0 14px 34px rgba(2,8,77,.08) !important;border-color:#D9DCE6 !important}
+.mth-hover-17:hover{background:#F1F2F7 !important}
+.mth-active-18:active{transform:scale(.97) !important}
+
+/* Phone and tablet layouts. Inline styles need !important to be overridden. */
+.mth-footer a, .mth-footer button, .mth-footer-item { min-height: 36px; display: inline-flex !important; align-items: center; }
+@media (max-width: 639px) {
+  .mth-cards { grid-template-columns: 1fr !important; gap: 12px !important; }
+  .mth-card { flex-direction: row !important; }
+  .mth-card-img { aspect-ratio: auto !important; width: 112px !important; flex: none !important; }
+  .mth-card-initials { width: 56px !important; height: 56px !important; font-size: 20px !important; }
+  .mth-card-badge { display: none !important; }
+  .mth-card-body { padding: 12px 14px !important; gap: 6px !important; min-width: 0; }
+  .mth-card-profile { display: none !important; }
+  .mth-steps button { gap: 6px !important; }
+  .mth-step-bar { min-width: 10px !important; margin: 0 6px !important; }
+  /* Service cards become a swipeable row instead of ten stacked cards */
+  .mth-swipe { grid-template-columns: none !important; grid-auto-flow: column; grid-auto-columns: 84%; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; margin: 0 calc(-1 * clamp(18px, 4vw, 48px)); padding: 0 clamp(18px, 4vw, 48px) 4px; scroll-padding: 0 clamp(18px, 4vw, 48px); }
+  .mth-swipe > * { scroll-snap-align: start; }
+}
+@media (min-width: 640px) and (max-width: 1023px) {
+  .mth-card-img { aspect-ratio: 4 / 3 !important; }
+}

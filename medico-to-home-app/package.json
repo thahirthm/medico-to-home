@@ -1,0 +1,27 @@
+{
+  "name": "medico-to-home-app",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "npm run dev --workspaces --if-present",
+    "dev:web": "npm run dev -w @medico/web",
+    "dev:api": "npm run dev -w @medico/api",
+    "build": "npm run build --workspaces --if-present",
+    "lint": "npm run lint --workspaces --if-present",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "db:seed": "tsx --env-file=.env.local supabase/seed/seed.mts",
+    "db:migrate": "sh -c 'set -a; . ./.env.local; set +a; for f in supabase/migrations/*.sql; do psql \"$DATABASE_URL\" -v ON_ERROR_STOP=1 -q -f \"$f\"; done'"
+  },
+  "devDependencies": {
+    "eslint": "^9",
+    "typescript": "^5",
+    "typescript-eslint": "^8"
+  }
+}
