@@ -40,7 +40,7 @@ export function Header() {
                 {" "}
                 {v.loggedOut && (
                   <>
-                    <button onClick={v.proLogin} style={{ background: "none", border: "none", font: "inherit", fontSize: "13px", color: "#4A4F6A", cursor: "pointer", padding: "6px 2px", transition: "color .2s", whiteSpace: "nowrap" }} className="mth-hover-0">Professional login</button>
+                    <button onClick={v.proLogin} style={{ background: "none", border: "none", font: "inherit", fontSize: "13px", color: "#4A4F6A", cursor: "pointer", padding: "6px 2px", transition: "color .2s", whiteSpace: "nowrap" }} className="mth-hover-0">Medico login</button>
                     <button onClick={v.openLogin} style={{ border: "1px solid #02084D", background: "#fff", color: "#02084D", borderRadius: "999px", padding: "8px 18px", font: "inherit", fontSize: "13px", fontWeight: "500", cursor: "pointer", transition: "background .2s, color .2s" }} className="mth-hover-2">Log in</button>
                   </>
                 )}
@@ -97,7 +97,7 @@ export function Header() {
                 <button onClick={v.pillLoc} style={{ display: "flex", alignItems: "center", gap: "6px", border: "1px solid #E6E8EF", background: "#fff", borderRadius: "999px", padding: "12px 16px", font: "inherit", fontSize: "14px", color: "#02084D" }}>{v.loc}, {v.locDistrict}</button>
                 {" "}
                 <button onClick={v.acctOrLogin} style={{ border: "1px solid #02084D", background: "#fff", color: "#02084D", borderRadius: "999px", padding: "12px 22px", font: "inherit", fontSize: "14px", fontWeight: "500" }}>{v.acctLabel}</button>
-                {v.loggedOut && <button onClick={v.proLogin} style={{ border: "1px solid #E6E8EF", background: "#fff", color: "#02084D", borderRadius: "999px", padding: "12px 22px", font: "inherit", fontSize: "14px" }}>Professional login</button>}
+                {v.loggedOut && <button onClick={v.proLogin} style={{ border: "1px solid #E6E8EF", background: "#fff", color: "#02084D", borderRadius: "999px", padding: "12px 22px", font: "inherit", fontSize: "14px" }}>Medico login</button>}
               </div>
             </div>
           </>
