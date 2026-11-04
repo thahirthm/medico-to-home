@@ -4,6 +4,7 @@
 const I={
 all:"M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z",
 doctor:"M5 3H4v5a4 4 0 0 0 8 0V3h-1M8 12v2a6 6 0 0 0 12 0v-2M20 12a2 2 0 1 1 0-4 2 2 0 0 1 0 4z",
+dentist:"M7 3c-2.2 0-4 1.8-4 4.5 0 2 .8 3.4 1.5 5 .6 1.6.8 3.5 1.2 5.5.3 1.6.9 3 2 3s1.6-1.3 2-3.2l.6-2.8c.2-.9.9-1.5 1.7-1.5s1.5.6 1.7 1.5l.6 2.8c.4 1.9.9 3.2 2 3.2s1.7-1.4 2-3c.4-2 .6-3.9 1.2-5.5.7-1.6 1.5-3 1.5-5C21 4.8 19.2 3 17 3c-1.8 0-3 1-5 1S8.8 3 7 3z",
 nurse:"M18 2l4 4M17 7l3-3M19 9 8.7 19.3a2.4 2.4 0 0 1-3.4 0l-.6-.6a2.4 2.4 0 0 1 0-3.4L15 5M9 11l4 4M5 19l-3 3M14 4l6 6",
 physio:"M13 4a1.5 1.5 0 1 0 0 .01M7 21l3-6 3 2v4M10 15l1-5 3 2 3 1M7 11l4-1",
 ot:"M18 11V6a2 2 0 0 0-4 0M14 10V4a2 2 0 0 0-4 0v2M10 10.5V6a2 2 0 0 0-4 0v8M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-6-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15",
@@ -50,6 +51,6 @@ info:"M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM12 11v5M12 8h.01",
 plus:"M12 5v14M5 12h14",
 };
 
-const SUG=[['Knee physiotherapy','physio'],['Back pain physiotherapy','physio'],['Stroke rehabilitation','physio'],['Wound dressing','nurse'],['IV drip at home','nurse'],['Injection at home','nurse'],['Blood test at home','lab'],['ECG at home','lab'],['Speech therapy for child','speech'],['Swallowing therapy','speech'],['Elderly caregiver','caregiver'],['Doctor home visit','doctor'],['BP & diabetes review','doctor'],['Counselling','psych'],['Diabetic diet plan','diet'],['Postnatal baby care','baby'],['Medicine delivery','pharma'],['Ambulance','ambulance'],['Hand therapy','ot']];
+const SUG=[['Knee physiotherapy','physio'],['Back pain physiotherapy','physio'],['Stroke rehabilitation','physio'],['Wound dressing','nurse'],['IV drip at home','nurse'],['Injection at home','nurse'],['Blood test at home','lab'],['ECG at home','lab'],['Speech therapy for child','speech'],['Swallowing therapy','speech'],['Elderly caregiver','caregiver'],['Doctor home visit','doctor'],['Dental check-up at home','dentist'],['Denture repair','dentist'],['BP & diabetes review','doctor'],['Counselling','psych'],['Diabetic diet plan','diet'],['Postnatal baby care','baby'],['Medicine delivery','pharma'],['Ambulance','ambulance'],['Hand therapy','ot']];
 export const MTH={I,SUG,CATS:{},ORDER:[],LOCS:{},pros:[],THER:[],faqs:[]};
 export function setCatalogue(data){Object.assign(MTH,data)}

@@ -43,6 +43,49 @@
     ]
    ]
   },
+  "dentist": {
+   "label": "Dentists",
+   "one": "Dentist",
+   "plural": "dentists",
+   "brand": "Dental",
+   "unit": "visit",
+   "plan": false,
+   "allowPlan": true,
+   "mode": "session",
+   "reg": "Dental Council Reg. No.",
+   "svcs": [
+    [
+     "Dental check-up",
+     1,
+     "30 min"
+    ],
+    [
+     "Toothache relief",
+     1.2,
+     "45 min"
+    ],
+    [
+     "Scaling & cleaning",
+     1.5,
+     "45 min"
+    ],
+    [
+     "Denture fitting & repair",
+     1.6,
+     "60 min"
+    ],
+    [
+     "Oral care for bedridden patients",
+     1.3,
+     "45 min"
+    ],
+    [
+     "Child dental check-up",
+     1,
+     "30 min"
+    ]
+   ]
+  },
   "nurse": {
    "label": "Nurses",
    "one": "Nurse",
@@ -465,6 +508,7 @@
  },
  "ORDER": [
   "doctor",
+  "dentist",
   "nurse",
   "physio",
   "ot",

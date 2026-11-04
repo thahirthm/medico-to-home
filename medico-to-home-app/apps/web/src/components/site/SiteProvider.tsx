@@ -249,9 +249,6 @@ class SiteStore extends Component {
     const whenOpts = ['Today', 'Tomorrow'].map((w, i) => ({ label: w, bg: s.when === w ? '#02084D' : '#fff', fg: s.when === w ? '#fff' : '#02084D', bd: s.when === w ? '#02084D' : '#E6E8EF', pick: () => this.setState({ when: w, whenDate: L.K(L.add(L.T0, i)), whenOpen: false }) }));
     const tabs = ['all', ...M.ORDER].map(k => { const on = s.cat === k; return { label: k === 'all' ? 'All' : M.CATS[k].label, icon: this.icon(k), bg: on ? '#02084D' : '#fff', fg: on ? '#fff' : '#02084D', bd: on ? '#02084D' : '#E6E8EF', stroke: on ? '#fff' : '#02084D', pick: () => this.setCat(k) }; });
     const all = this.filtered();
-    const pool = M.pros.filter(p => s.cat === 'all' || p.cat === s.cat);
-    const top = pool.slice().sort((a, b) => L.km(a, this.at()) - L.km(b, this.at())).slice(0, 14).sort((a, b) => b.rating - a.rating || b.reviews - a.reviews).slice(0, 4).map(p => this.card(p));
-    const avail = pool.filter(p => L.availableNow(p)).sort((a, b) => L.km(a, this.at()) - L.km(b, this.at())).slice(0, 4).map(p => this.card(p));
     const plural = s.cat === 'all' ? 'professionals' : M.CATS[s.cat].plural;
     const chip = (on) => ({ bg: on ? '#02084D' : '#fff', fg: on ? '#fff' : '#02084D', bd: on ? '#02084D' : '#E6E8EF' });
     const fc = this.filterCount(); const f = s.f;
@@ -269,9 +266,9 @@ class SiteStore extends Component {
       kozLocs: locGroup('Kozhikode'), mlpLocs: locGroup('Malappuram'),
       when: s.when, whenOpen: s.whenOpen, toggleWhen: () => this.setState(x => ({ whenOpen: !x.whenOpen, qOpen: false, locOpen: false })), whenOpts, days,
       doSearch: () => this.doSearch(),
-      tabs, top, avail, grid: all.slice(0, s.gridLimit).map(p => this.card(p)), gridHasMore: !s.gridLoading && all.length > s.gridLimit, moreLabel: 'Show more (' + (all.length - s.gridLimit) + ' more)', showMore: () => this.setState(x => ({ gridLimit: x.gridLimit + GRID_PAGE })), gridEmpty: !s.gridLoading && all.length === 0, gridHas: !s.gridLoading && all.length > 0,
+      tabs, grid: all.slice(0, s.gridLimit).map(p => this.card(p)), gridHasMore: !s.gridLoading && all.length > s.gridLimit, moreLabel: 'Show more (' + (all.length - s.gridLimit) + ' more)', showMore: () => this.setState(x => ({ gridLimit: x.gridLimit + GRID_PAGE })), gridEmpty: !s.gridLoading && all.length === 0, gridHas: !s.gridLoading && all.length > 0,
       loading: s.gridLoading, notLoading: !s.gridLoading, skel: [1, 2, 3, 4, 5, 6, 7, 8], skel4: [1, 2, 3, 4],
-      hasAvail: avail.length > 0, catTitle: s.cat === 'all' ? 'professionals' : M.CATS[s.cat].plural,
+      catTitle: s.cat === 'all' ? 'professionals' : M.CATS[s.cat].plural,
       countText: all.length + ' ' + (all.length === 1 && s.cat !== 'all' ? M.CATS[s.cat].one.toLowerCase() : plural) + ' near ' + (s.here ? s.here.label : s.loc),
       find: s.find, hasFind: !!s.find, onFind: (e) => this.setState({ find: e.target.value }), clearFind: () => this.setState({ find: '' }),
       qAppliedText: s.qApplied ? 'Results for “' + s.qApplied + '”' : '', hasQApplied: !!s.qApplied,
@@ -295,6 +292,7 @@ class SiteStore extends Component {
   services() {
     const L = MTHL; const go = (k) => () => this.setCat(k, true);
     const G = [['Doctor', 'doctor', [['General check-up', 550], ['Fever & infection', 550], ['BP & diabetes review', 550], ['Elderly check-up', 650], ['Palliative care visit', 820]]],
+      ['Dental', 'dentist', [['Dental check-up', 550], ['Toothache relief', 660], ['Scaling & cleaning', 830], ['Denture fitting & repair', 880], ['Oral care for bedridden patients', 720]]],
       ['Nurse', 'nurse', [['Injection', 230], ['IV drip', 630], ['Wound dressing', 450], ['Catheter & Ryles tube care', 540], ['12/24-hr nursing', 1800]]],
       ['Physio', 'physio', [['Back & neck pain', 550], ['Knee & joint pain', 550], ['Stroke rehab', 660], ['Post-surgery rehab', 600], ['Sports injury', 600]]],
       ['Therapy', 'speech', [['Occupational therapy', 650], ['Speech therapy', 550], ['Swallowing (dysphagia)', 630], ['Child development', 720]]],

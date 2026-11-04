@@ -65,6 +65,17 @@ export const PROFESSIONS: Profession[] = [
     documents: clinical,
   },
   {
+    label: "Dentist", category: "dentist", group: "Doctors & specialists", blurb: "BDS and MDS dentists for check-ups, dentures and oral care at home.",
+    fields: [
+      qualification(["BDS", "MDS"]),
+      { key: "specialisation", label: "Specialisation", type: "select", required: true, options: ["General dentistry", "Prosthodontics", "Periodontology", "Conservative dentistry & endodontics", "Orthodontics", "Oral & maxillofacial surgery", "Paediatric dentistry", "Oral medicine & radiology", "Other"] },
+      institution, passingYear,
+      ...reg("Dental council registration number", ["Kerala State Dental Council", "Dental Council of India (DCI)", "Another state dental council"]),
+      { key: "visit_types", label: "Visits you can do", type: "multi", required: true, options: ["Dental check-up", "Toothache relief", "Scaling & cleaning", "Denture fitting & repair", "Oral care for bedridden patients"] },
+    ],
+    documents: clinical,
+  },
+  {
     label: "Nurse", category: "nurse", group: "Nursing", blurb: "GNM, BSc and ANM nurses for care, injections and procedures.",
     fields: [
       qualification(["GNM", "BSc Nursing", "Post Basic BSc Nursing", "MSc Nursing", "ANM"]),

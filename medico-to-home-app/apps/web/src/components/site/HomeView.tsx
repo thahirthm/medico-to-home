@@ -5,7 +5,6 @@
 import { Fragment } from "react";
 import { useSite } from "./SiteProvider";
 import { ProCard } from "./ProCard";
-import { BodyViewer } from "./BodyViewer";
 
 export function HomeView() {
   const v = useSite();
@@ -231,103 +230,8 @@ export function HomeView() {
             </div>
           </div>
           <div style={{ maxWidth: "1320px", margin: "0 auto", padding: "0 clamp(18px,4vw,48px)", display: "flex", flexDirection: "column", gap: "clamp(56px,6vw,80px)", marginTop: "clamp(36px,4vw,56px)" }}>
-            <div data-reveal="1" style={{ display: "flex", flexDirection: "column", gap: "22px" }}>
-              <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: "16px", flexWrap: "wrap" }}>
-                <h2 style={{ margin: "0", fontSize: "clamp(26px,3vw,38px)", fontWeight: "300", letterSpacing: "-.03em", lineHeight: "1.1" }}>
-                  <span style={{ fontWeight: "600" }}>Top rated</span>
-                  {" "}{v.catTitle} near you
-                </h2>
-                <button onClick={v.setTop} style={{ background: "none", border: "none", font: "inherit", fontSize: "14px", color: "#02084D", cursor: "pointer", display: "flex", alignItems: "center", gap: "6px", padding: "6px 0" }}>
-                  See all{" "}
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#02084D" strokeWidth="1.5">
-                    <path d="M5 12h14M13 6l6 6-6 6" />
-                  </svg>
-                </button>
-              </div>
-              <div className="mth-cards" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(250px,1fr))", gap: "20px" }}>
-                {v.loading && (
-                  <>
-                    {v.skel4.map((k: any, i0: number) => (
-                      <Fragment key={i0}>
-                        <div style={{ border: "1px solid #EEF0F5", borderRadius: "16px", overflow: "hidden" }}>
-                          <div style={{ aspectRatio: "4/5", background: "#F1F2F6", animation: "mthSk 1.4s ease infinite" }}></div>
-                          <div style={{ padding: "16px", display: "flex", flexDirection: "column", gap: "10px" }}>
-                            <div style={{ height: "14px", width: "60%", background: "#F1F2F6", borderRadius: "6px", animation: "mthSk 1.4s ease infinite" }}></div>
-                            <div style={{ height: "12px", width: "85%", background: "#F1F2F6", borderRadius: "6px", animation: "mthSk 1.4s ease infinite" }}></div>
-                            <div style={{ height: "22px", width: "50%", background: "#F1F2F6", borderRadius: "999px", animation: "mthSk 1.4s ease infinite" }}></div>
-                          </div>
-                        </div>
-                      </Fragment>
-                    ))}
-                  </>
-                )}
-                {v.notLoading && (
-                  <>
-                    {v.top.map((p: any, i0: number) => (
-                      <Fragment key={i0}>
-                        <ProCard pro={p} />
-                      </Fragment>
-                    ))}
-                  </>
-                )}
-              </div>
-            </div>
-            {v.hasAvail && (
-              <>
-                <div data-reveal="1" style={{ display: "flex", flexDirection: "column", gap: "22px" }}>
-                  <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: "16px", flexWrap: "wrap" }}>
-                    <h2 style={{ margin: "0", fontSize: "clamp(26px,3vw,38px)", fontWeight: "300", letterSpacing: "-.03em", lineHeight: "1.1" }}>
-                      <span style={{ fontWeight: "600" }}>Available now</span>
-                      {" "}near you
-                    </h2>
-                    <span style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "13px", color: "#1F9D6B", fontWeight: "400" }}>
-                      <span style={{ width: "8px", height: "8px", borderRadius: "50%", background: "#1F9D6B", boxShadow: "0 0 0 4px #E8F5EF" }}></span>
-                      Can visit you today
-                    </span>
-                  </div>
-                  <div className="mth-cards" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(250px,1fr))", gap: "20px" }}>
-                    {v.loading && (
-                      <>
-                        {v.skel4.map((k: any, i0: number) => (
-                          <Fragment key={i0}>
-                            <div style={{ border: "1px solid #EEF0F5", borderRadius: "16px", overflow: "hidden" }}>
-                              <div style={{ aspectRatio: "4/5", background: "#F1F2F6", animation: "mthSk 1.4s ease infinite" }}></div>
-                              <div style={{ padding: "16px", display: "flex", flexDirection: "column", gap: "10px" }}>
-                                <div style={{ height: "14px", width: "60%", background: "#F1F2F6", borderRadius: "6px" }}></div>
-                                <div style={{ height: "12px", width: "85%", background: "#F1F2F6", borderRadius: "6px" }}></div>
-                              </div>
-                            </div>
-                          </Fragment>
-                        ))}
-                      </>
-                    )}
-                    {v.notLoading && (
-                      <>
-                        {v.avail.map((p: any, i0: number) => (
-                          <Fragment key={i0}>
-                            <ProCard pro={p} />
-                          </Fragment>
-                        ))}
-                      </>
-                    )}
-                  </div>
-                </div>
-              </>
-            )}
             <div id="mth-grid" style={{ display: "flex", flexDirection: "column", gap: "22px" }}>
-              <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: "16px", flexWrap: "wrap" }}>
-                <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-                  <h2 style={{ margin: "0", fontSize: "clamp(26px,3vw,38px)", fontWeight: "300", letterSpacing: "-.03em", lineHeight: "1.1" }}>
-                    Browse{" "}
-                    <span style={{ fontWeight: "600" }}>all</span>
-                    {" "}{v.catTitle}
-                  </h2>
-                  {v.hasQApplied && (
-                    <>
-                      <div style={{ fontSize: "14px", color: "#6B7085" }}>{v.qAppliedText}</div>
-                    </>
-                  )}
-                </div>
+              <div style={{ display: "flex", alignItems: "center", gap: "8px 16px", flexWrap: "wrap" }}>
                 <label className="mth-find" style={{ flex: "1 1 260px", maxWidth: "360px", display: "flex", alignItems: "center", gap: "10px", border: "1px solid #E6E8EF", borderRadius: "999px", padding: "0 6px 0 16px", background: "#fff", transition: "border-color .2s" }}>
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6B7085" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true" style={{ flex: "none" }}>
                     <circle cx="11" cy="11" r="7" />
@@ -343,6 +247,11 @@ export function HomeView() {
                     </button>
                   )}
                 </label>
+                {v.hasQApplied && (
+                  <>
+                    <div style={{ fontSize: "14px", color: "#6B7085" }}>{v.qAppliedText}</div>
+                  </>
+                )}
               </div>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px", flexWrap: "wrap", padding: "12px 0", borderTop: "1px solid #EEF0F5", borderBottom: "1px solid #EEF0F5" }}>
                 <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", alignItems: "center" }}>
@@ -460,68 +369,6 @@ export function HomeView() {
                   </div>
                 </Fragment>
               ))}
-            </div>
-          </div>
-        </section>
-        <section id="mth-explain" style={{ padding: "clamp(64px,8vw,120px) clamp(18px,4vw,48px)" }}>
-          <div style={{ maxWidth: "1320px", margin: "0 auto", display: "flex", flexDirection: "column", gap: "clamp(28px,3vw,44px)" }}>
-            <div data-reveal="1" style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", gap: "24px", flexWrap: "wrap" }}>
-              <h2 style={{ margin: "0", fontSize: "clamp(36px,5.2vw,68px)", fontWeight: "300", letterSpacing: "-.04em", lineHeight: "1" }}>
-                See how your{" "}
-                <span style={{ fontWeight: "600" }}>therapy</span>
-                {" "}works.
-              </h2>
-              <p style={{ margin: "0", maxWidth: "360px", fontSize: "16px", lineHeight: "1.55", color: "#6B7085" }}>Pick a therapy. Drag to rotate, scroll to zoom.</p>
-            </div>
-            <div style={{ display: "flex", gap: "8px", overflowX: "auto", scrollbarWidth: "none", paddingBottom: "2px" }}>
-              {v.therapies.map((t: any, i0: number) => (
-                <Fragment key={i0}>
-                  <button onClick={t.pick} style={{ flex: "none", border: `1px solid ${t.bd}`, background: t.bg, color: t.fg, borderRadius: "999px", padding: "10px 18px", font: "inherit", fontSize: "14px", cursor: "pointer", whiteSpace: "nowrap", transition: "all .25s" }} className="mth-hover-1">{t.label}</button>
-                </Fragment>
-              ))}
-            </div>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: "clamp(20px,3vw,40px)", alignItems: "stretch" }}>
-              <div style={{ flex: "1.35 1 420px", minHeight: "clamp(380px,46vw,600px)", background: "#F6F7FA", borderRadius: "24px", position: "relative", overflow: "hidden" }}>
-                <BodyViewer focus={v.thFocus} />
-                <div style={{ position: "absolute", left: "20px", bottom: "18px", fontSize: "12px", color: "#6B7085", display: "flex", alignItems: "center", gap: "6px", pointerEvents: "none" }}>
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6B7085" strokeWidth="1.5">
-                    <path d="M12 3a9 9 0 1 0 9 9M21 3v6h-6" />
-                  </svg>
-                  Drag to rotate · Scroll to zoom{" "}
-                </div>
-              </div>
-              <div style={{ flex: "1 1 340px", display: "flex", flexDirection: "column", gap: "26px", padding: "clamp(4px,1vw,16px) 0" }}>
-                <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-                  <div style={{ fontSize: "12px", letterSpacing: ".08em", textTransform: "uppercase", color: "#6B7085", fontWeight: "500" }}>What it helps with</div>
-                  <div style={{ fontSize: "clamp(26px,2.6vw,34px)", fontWeight: "300", letterSpacing: "-.03em", lineHeight: "1.1" }}>{v.th.label}</div>
-                  <p style={{ margin: "0", fontSize: "16px", lineHeight: "1.55", color: "#4A4F6A", textWrap: "pretty" }}>{v.th.helps}</p>
-                </div>
-                <div style={{ display: "flex", flexDirection: "column" }}>
-                  <div style={{ fontSize: "12px", letterSpacing: ".08em", textTransform: "uppercase", color: "#6B7085", fontWeight: "500", marginBottom: "6px" }}>A typical session</div>
-                  {v.thSteps.map((st: any, i0: number) => (
-                    <Fragment key={i0}>
-                      <div style={{ display: "flex", gap: "18px", padding: "14px 0", borderTop: "1px solid #EEF0F5", animation: "mthIn .4s ease both" }}>
-                        <span style={{ fontSize: "13px", fontWeight: "500", color: "#6B7085", width: "22px", flex: "none", paddingTop: "2px" }}>{st.n}</span>
-                        {" "}
-                        <span style={{ fontSize: "15px", lineHeight: "1.5", color: "#02084D" }}>{st.t}</span>
-                      </div>
-                    </Fragment>
-                  ))}
-                </div>
-                <div style={{ display: "flex", alignItems: "center", gap: "10px", fontSize: "15px", padding: "14px 16px", background: "#F6F7FA", borderRadius: "12px" }}>
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#02084D" strokeWidth="1.5">
-                    <path d="M4 6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zM4 10h16M8 2v4M16 2v4" />
-                  </svg>
-                  {" "}
-                  <span style={{ color: "#6B7085" }}>Typical plan</span>
-                  <span style={{ fontWeight: "500" }}>{v.th.plan}</span>
-                </div>
-                <div style={{ display: "flex", gap: "12px", flexWrap: "wrap", alignItems: "center" }}>
-                  <button onClick={v.thBook} style={{ background: "#02084D", color: "#fff", border: "none", borderRadius: "999px", padding: "15px 26px", font: "inherit", fontSize: "15px", fontWeight: "600", cursor: "pointer", transition: "background .2s, transform .15s" }} className="mth-hover-7 mth-active-8">{v.thCta}</button>
-                  {" "}
-                  <button onClick={v.thMore} style={{ background: "none", border: "none", font: "inherit", fontSize: "14px", color: "#02084D", cursor: "pointer", padding: "10px 4px" }}>Compare therapists</button>
-                </div>
-              </div>
             </div>
           </div>
         </section>

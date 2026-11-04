@@ -14,8 +14,7 @@ const LEGACY_ROLES: Record<string, string> = { Caretaker: "Caregiver", "Lab tech
 
 /** The catalogue category each role is listed under once approved. */
 export const MEDICO_CATEGORY: Record<string, string> = {
-  // There is no dental category in the catalogue yet, so approved dentists are listed with the doctors.
-  Doctor: "doctor", Dentist: "doctor", Nurse: "nurse", Pharmacist: "pharma", Physiotherapist: "physio", "Occupational Therapist": "ot",
+  Doctor: "doctor", Dentist: "dentist", Nurse: "nurse", Pharmacist: "pharma", Physiotherapist: "physio", "Occupational Therapist": "ot",
   "Speech & Language Therapist": "speech", "Clinical Psychologist": "psych", Psychologist: "psych", Dietitian: "diet",
   "Lab Technician": "lab", Caregiver: "caregiver", "Home Health Aide": "aide", "Baby Care Attendant": "baby",
   "Ambulance Driver": "ambulance", Paramedic: "paramedic",
