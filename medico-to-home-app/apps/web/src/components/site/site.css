@@ -9,25 +9,30 @@ input,select,textarea,button{font-family:inherit}
 @keyframes mthSk{0%{opacity:.55}50%{opacity:1}100%{opacity:.55}}
 @keyframes mthIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 @keyframes mthSpin{to{transform:rotate(360deg)}}
-.mth-hover-0:hover{color:#02084D !important}
-.mth-hover-1:hover{border-color:#02084D !important}
-.mth-hover-2:hover{background:#02084D !important;color:#fff !important}
-.mth-hover-3:hover{background:#C22F2F !important}
 .mth-active-4:active{transform:scale(.96) !important}
-.mth-hover-5:hover{color:#6B7085 !important}
-.mth-hover-6:hover{background:#F6F7FA !important}
-.mth-hover-7:hover{background:#1A2170 !important}
 .mth-active-8:active{transform:scale(.98) !important}
-.mth-hover-9:hover{transform:translateY(-3px) !important;box-shadow:0 14px 34px rgba(2,8,77,.06) !important}
-.mth-hover-10:hover{gap:10px !important}
-.mth-hover-11:hover{transform:translateY(-2px) !important}
-.mth-hover-12:hover{background:#02084D !important;color:#fff !important;border-color:#02084D !important}
 .mth-focus-13:focus{border-color:#02084D !important}
-.mth-hover-14:hover{border-color:#02084D !important;background:#F6F7FA !important}
-.mth-hover-15:hover{background:#C22F2F !important;color:#fff !important}
-.mth-hover-16:hover{transform:translateY(-4px) !important;box-shadow:0 14px 34px rgba(2,8,77,.08) !important;border-color:#D9DCE6 !important}
-.mth-hover-17:hover{background:#F1F2F7 !important}
 .mth-active-18:active{transform:scale(.97) !important}
+.mth-find:focus-within{border-color:#02084D !important}
+.mth-find input::-webkit-search-cancel-button{display:none}
+/* Hover effects only where there is a real pointer, so a tap does not leave cards lifted */
+@media (hover: hover) {
+  .mth-hover-0:hover{color:#02084D !important}
+  .mth-hover-1:hover{border-color:#02084D !important}
+  .mth-hover-2:hover{background:#02084D !important;color:#fff !important}
+  .mth-hover-3:hover{background:#C22F2F !important}
+  .mth-hover-5:hover{color:#6B7085 !important}
+  .mth-hover-6:hover{background:#F6F7FA !important}
+  .mth-hover-7:hover{background:#1A2170 !important}
+  .mth-hover-9:hover{transform:translateY(-3px) !important;box-shadow:0 14px 34px rgba(2,8,77,.06) !important}
+  .mth-hover-10:hover{gap:10px !important}
+  .mth-hover-11:hover{transform:translateY(-2px) !important}
+  .mth-hover-12:hover{background:#02084D !important;color:#fff !important;border-color:#02084D !important}
+  .mth-hover-14:hover{border-color:#02084D !important;background:#F6F7FA !important}
+  .mth-hover-15:hover{background:#C22F2F !important;color:#fff !important}
+  .mth-hover-16:hover{transform:translateY(-4px) !important;box-shadow:0 14px 34px rgba(2,8,77,.08) !important;border-color:#D9DCE6 !important}
+  .mth-hover-17:hover{background:#F1F2F7 !important}
+}
 
 /* Phone and tablet layouts. Inline styles need !important to be overridden. */
 .mth-footer a, .mth-footer button, .mth-footer-item { min-height: 36px; display: inline-flex !important; align-items: center; }
@@ -47,4 +52,14 @@ input,select,textarea,button{font-family:inherit}
 }
 @media (min-width: 640px) and (max-width: 1023px) {
   .mth-card-img { aspect-ratio: 4 / 3 !important; }
+}
+/* Same breakpoint as the site's phone layout (SiteProvider: w < 860) */
+@media (max-width: 859px) {
+  /* Dialogs scroll inside themselves when the keyboard is open, and the page behind stays put */
+  .mth-modal { align-items: flex-start !important; overflow-y: auto; overscroll-behavior: contain; }
+  .mth-modal > * { margin: auto 0; }
+  body:has(.mth-modal), body:has(.mth-menu) { overflow: hidden; }
+  .mth-menu { overscroll-behavior: contain; }
+  /* Long messages wrap instead of running off the screen */
+  .mth-toast { white-space: normal !important; width: max-content; max-width: calc(100vw - 32px); bottom: calc(20px + env(safe-area-inset-bottom)) !important; }
 }

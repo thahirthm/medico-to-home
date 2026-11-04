@@ -53,7 +53,7 @@ export function AuthGate({ area, children }: { area: Area; children: ReactNode }
   const leave = () => supabase.auth.signOut({ scope: "local" }).then(() => setState("login"));
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-wash p-4">
+    <div className="flex min-h-dvh items-center justify-center bg-wash p-4">
       <div className="w-full max-w-sm rounded-2xl border border-line bg-white p-6">
         <Image src="/brand/logo.svg" alt="Medico To Home" width={132} height={32} className="mb-5 h-7 w-auto" unoptimized />
         {state === "login" && area === "admin" && <StaffLogin onDone={check} />}

@@ -55,7 +55,7 @@ function AdminFrame({ children }: { children: ReactNode }) {
   const isActive = (href: string) => current?.href === href;
 
   return (
-    <div className="min-h-screen bg-wash lg:flex">
+    <div className="min-h-dvh bg-wash lg:flex">
       <aside className="border-b border-line bg-white lg:sticky lg:top-0 lg:flex lg:h-screen lg:w-60 lg:flex-none lg:flex-col lg:border-b-0 lg:border-r">
         <div className="flex items-center justify-between px-5 py-4 lg:py-6">
           <Link href="/admin" className="flex min-h-10 items-center">

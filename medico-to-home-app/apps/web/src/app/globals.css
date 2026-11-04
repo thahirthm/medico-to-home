@@ -79,3 +79,23 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .badge-swing, .dot-pulse { animation: none; }
 }
+
+/* Touch devices. Keeps the page at its scale while people tap and type; pinch-to-zoom still works. */
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+a, button, input, select, textarea, label, summary, [role="button"] {
+  touch-action: manipulation; /* no double-tap zoom on controls */
+  -webkit-tap-highlight-color: transparent; /* no grey flash on tap */
+}
+@media (pointer: coarse) {
+  /* iOS Safari zooms into any field under 16px on focus, so fields are 16px on touch screens */
+  input:where(:not([type="checkbox"], [type="radio"], [type="range"], [type="file"], [type="color"])),
+  select,
+  textarea { font-size: 16px !important; }
+  /* Fields that are already larger keep their size */
+  input.text-xl { font-size: var(--text-xl) !important; }
+}
+
+/* On phones the keyboard pushes bottom-fixed bars up over the form, so they step aside while a field is in use */
+@media (pointer: coarse) and (max-width: 1023px) {
+  body:has(input:focus, textarea:focus, select:focus) .keyboard-hide { display: none !important; }
+}

@@ -80,7 +80,7 @@ export function Header() {
         </div>
         {v.menu && (
           <>
-            <div style={{ position: "fixed", left: "0", right: "0", top: "72px", bottom: "0", background: "#fff", zIndex: "59", padding: "24px 24px 40px", display: "flex", flexDirection: "column", gap: "4px", animation: "mthIn .25s ease", overflow: "auto" }}>
+            <div className="mth-menu" style={{ position: "fixed", left: "0", right: "0", top: "72px", bottom: "0", background: "#fff", zIndex: "59", padding: "24px 24px 40px", display: "flex", flexDirection: "column", gap: "4px", animation: "mthIn .25s ease", overflow: "auto" }}>
               <button onClick={v.goServices} style={{ textAlign: "left", background: "none", border: "none", borderBottom: "1px solid #EEF0F5", padding: "18px 0", font: "inherit", fontSize: "26px", fontWeight: "300", letterSpacing: "-.02em", color: "#02084D", cursor: "pointer" }}>Services</button>
               {" "}
               <button onClick={v.goHow} style={{ textAlign: "left", background: "none", border: "none", borderBottom: "1px solid #EEF0F5", padding: "18px 0", font: "inherit", fontSize: "26px", fontWeight: "300", letterSpacing: "-.02em", color: "#02084D", cursor: "pointer" }}>How it works</button>

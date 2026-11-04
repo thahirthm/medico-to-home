@@ -1,5 +1,5 @@
 import Anthropic from "@anthropic-ai/sdk";
-import { bioFacts, COUNCILS, displayName, KERALA_DISTRICTS, MEDICO_GENDERS, MEDICO_LANGUAGES, MEDICO_ROLES, MEDICO_SLOTS, RADIUS_KM, templateBio, totalYears, YEARS_MAX, type MedicoProfile } from "@medico/shared";
+import { bioFacts, COUNCILS, displayName, KERALA_DISTRICTS, MEDICO_CATEGORY, MEDICO_GENDERS, MEDICO_LANGUAGES, MEDICO_SLOTS, normaliseMedico, RADIUS_KM, templateBio, totalYears, YEARS_MAX, type MedicoProfile } from "@medico/shared";
 import type { FastifyInstance } from "fastify";
 import { randomUUID } from "node:crypto";
 import { z } from "zod";
@@ -25,7 +25,7 @@ const year = z.string().trim().regex(/^(\d{4})?$/, "Years have 4 digits.").defau
 // Every field is optional: a Medico can skip any step and finish later.
 const profileBody = z.object({
   name: text(120),
-  role: oneOf(MEDICO_ROLES),
+  role: oneOf(Object.keys(MEDICO_CATEGORY)), // includes old role names, which normaliseMedico renames
   specialisation: text(120),
   qualification: text(160),
   gender: oneOf(MEDICO_GENDERS),
@@ -43,7 +43,7 @@ const profileBody = z.object({
   languages: z.array(z.enum(MEDICO_LANGUAGES)).max(MEDICO_LANGUAGES.length).default([]),
   radiusKm: z.coerce.number().int().min(RADIUS_KM.min).max(RADIUS_KM.max).default(RADIUS_KM.default),
   bio: text(1200),
-});
+}).transform(normaliseMedico);
 
 const anthropic = env.ANTHROPIC_API_KEY ? new Anthropic({ apiKey: env.ANTHROPIC_API_KEY }) : null;
 

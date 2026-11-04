@@ -231,7 +231,7 @@ export function ProfessionalView() {
         )}
         {v.mob && (
           <>
-            <div style={{ position: "fixed", left: "0", right: "0", bottom: "0", zIndex: "40", background: "#fff", borderTop: "1px solid #E6E8EF", padding: "12px 18px calc(12px + env(safe-area-inset-bottom))", display: "flex", alignItems: "center", gap: "12px" }}>
+            <div className="keyboard-hide" style={{ position: "fixed", left: "0", right: "0", bottom: "0", zIndex: "40", background: "#fff", borderTop: "1px solid #E6E8EF", padding: "12px 18px calc(12px + env(safe-area-inset-bottom))", display: "flex", alignItems: "center", gap: "12px" }}>
               <div style={{ flex: "1", display: "flex", flexDirection: "column" }}>
                 <span style={{ fontSize: "16px", fontWeight: "600" }}>
                   {v.pp.priceText}{" "}

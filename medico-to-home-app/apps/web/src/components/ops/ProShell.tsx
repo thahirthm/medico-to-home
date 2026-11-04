@@ -35,7 +35,7 @@ function ProFrame({ children }: { children: ReactNode }) {
   const nav = useMe().professional ? ALL : PENDING;
   const active = (href: string) => (href === "/pro" ? pathname === href : pathname.startsWith(href));
   return (
-    <div className="flex min-h-screen flex-col bg-wash">
+    <div className="flex min-h-dvh flex-col bg-wash">
       <header className="sticky top-0 z-10 border-b border-line bg-white">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
           <div className="flex items-center gap-8">
@@ -59,7 +59,7 @@ function ProFrame({ children }: { children: ReactNode }) {
         </div>
       </header>
       <main className="mx-auto w-full max-w-6xl flex-1 space-y-4 p-4 pb-24 sm:p-6 md:pb-10">{children}</main>
-      <nav className="fixed inset-x-0 bottom-0 z-10 flex border-t border-line bg-white md:hidden" aria-label="Professional mode">
+      <nav className="keyboard-hide fixed inset-x-0 bottom-0 z-10 flex border-t border-line bg-white md:hidden" aria-label="Professional mode">
         {nav.map((item) => (
           <Link key={item.href} href={item.href} aria-current={active(item.href) ? "page" : undefined}
             className={`flex-1 py-3.5 text-center text-[12px] ${active(item.href) ? "font-medium text-navy" : "text-muted"}`}>

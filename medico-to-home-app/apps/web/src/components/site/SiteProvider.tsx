@@ -36,7 +36,7 @@ function fromPath(path) {
 class SiteStore extends Component {
   state = { gridLimit: GRID_PAGE, proId: 'p12', ...fromPath(this.props.pathname), ready: true, w: 1280, authReady: false, patients: [], addresses: [], bookings: [], me: null, live: null, booking: false, scrolled: false, menu: false,
     loc: 'Nadakkavu', locLoading: true, locOpen: false, q: '', qApplied: '', qOpen: false, when: 'Today', whenDate: null, whenOpen: false,
-    cat: 'all', sort: 'top', availNow: false, filtersOpen: false, f: { price: 1600, gender: 'Any', langs: [], exp: 0, rating: 0, dist: 0 },
+    cat: 'all', sort: 'near', availNow: false, find: '', filtersOpen: false, f: { price: 1600, gender: 'Any', langs: [], exp: 0, rating: 0, dist: 0 },
     gridLoading: true, sos: false, login: false, user: null, therapy: 'knee', toast: '',
     b: null, track: 0, eta: 12, earnS: 20, earnP: 650, faq: -1, proTab: 'about' };
 
@@ -207,10 +207,11 @@ class SiteStore extends Component {
   icon(k) { return MTH.I[k] || ''; }
   card(p) {
     const M = MTH, L = MTHL, c = M.CATS[p.cat], km = L.km(p, this.at());
-    const today = !!p.today;
+    // Today's availability is worked out against the clock, so a slot that has passed no longer counts.
+    const next = L.nextToday(p), now = L.availableNow(p), today = now || !!next;
     return { id: p.id, img: p.img, hasImg: !!p.img, noImg: !p.img, initials: p.initials, name: p.name, rating: p.rating.toFixed(1), reviews: p.reviews,
       roleLine: c.one + ' · ' + p.qual, exp: p.exp, langs: p.langs.join(', '), distLine: km.toFixed(1) + ' km away · ' + p.locality,
-      availText: p.today === '24×7' ? 'Available now · 24×7' : today ? 'Available today · ' + p.today : (() => { const fo = L.firstOpen(p); return 'Next: ' + L.fdl(fo.d) + ', ' + fo.t; })(),
+      availText: p.today === '24×7' ? 'Available now · 24×7' : now ? 'Available now · ' + next : next ? 'Available today · ' + next : (() => { const fo = L.firstOpen(p); return 'Next: ' + L.fdl(fo.d) + ', ' + fo.t; })(),
       availBg: today ? '#E8F5EF' : '#F1F2F6', availFg: today ? '#1F9D6B' : '#6B7085',
       priceText: L.inr(p.price), unitText: '/ ' + c.unit,
       open: () => this.openPro(p.id), book: (e) => { if (e && e.stopPropagation) e.stopPropagation(); this.startBook(p.id); } };
@@ -218,11 +219,16 @@ class SiteStore extends Component {
   filtered() {
     const s = this.state, M = MTH, L = MTHL; const f = s.f;
     let list = M.pros.filter(p => s.cat === 'all' || p.cat === s.cat);
+    // The search box above the list: a name, category, qualification or service.
+    const words = s.find.trim().toLowerCase().split(/\s+/).filter(Boolean);
+    if (words.length) list = list.filter(p => { const c = M.CATS[p.cat]; const text = [p.name, p.qual, c.label, c.one, c.plural, c.brand, ...p.svcs.map(x => x.n)].join(' ').toLowerCase(); return words.every(w => text.includes(w)); });
     if (s.qApplied) { const q = s.qApplied.toLowerCase(); list = list.filter(p => (p.name + ' ' + p.qual + ' ' + M.CATS[p.cat].label + ' ' + p.svcs.map(x => x.n).join(' ')).toLowerCase().includes(q) || q.split(' ').some(w => w.length > 3 && M.CATS[p.cat].label.toLowerCase().includes(w.slice(0, 5)))); }
     list = list.filter(p => p.price <= f.price || f.price >= 1600).filter(p => f.gender === 'Any' || (f.gender === 'Female' ? p.g === 'F' : p.g === 'M'))
       .filter(p => f.langs.every(l => p.langs.includes(l))).filter(p => p.exp >= f.exp).filter(p => p.rating >= f.rating)
-      .filter(p => !f.dist || L.km(p, this.at()) <= f.dist).filter(p => !s.availNow || p.today);
-    const byR = (a, b) => b.rating - a.rating || b.reviews - a.reviews; const byK = (a, b) => L.km(a, this.at()) - L.km(b, this.at());
+      .filter(p => !f.dist || L.km(p, this.at()) <= f.dist).filter(p => !s.availNow || L.availableNow(p));
+    // Nearest first by default; ratings break ties, and distance breaks ties between equal ratings.
+    const at = this.at(), k = new Map(list.map(p => [p.id, L.km(p, at)]));
+    const byR = (a, b) => b.rating - a.rating || b.reviews - a.reviews || k.get(a.id) - k.get(b.id); const byK = (a, b) => k.get(a.id) - k.get(b.id) || b.rating - a.rating;
     return list.sort(s.sort === 'near' ? byK : byR);
   }
   filterCount() { const f = this.state.f; return (f.price < 1600) + (f.gender !== 'Any') + (f.langs.length > 0) + (f.exp > 0) + (f.rating > 0) + (f.dist > 0); }
@@ -245,7 +251,7 @@ class SiteStore extends Component {
     const all = this.filtered();
     const pool = M.pros.filter(p => s.cat === 'all' || p.cat === s.cat);
     const top = pool.slice().sort((a, b) => L.km(a, this.at()) - L.km(b, this.at())).slice(0, 14).sort((a, b) => b.rating - a.rating || b.reviews - a.reviews).slice(0, 4).map(p => this.card(p));
-    const avail = pool.filter(p => p.today).sort((a, b) => L.km(a, this.at()) - L.km(b, this.at())).slice(0, 4).map(p => this.card(p));
+    const avail = pool.filter(p => L.availableNow(p)).sort((a, b) => L.km(a, this.at()) - L.km(b, this.at())).slice(0, 4).map(p => this.card(p));
     const plural = s.cat === 'all' ? 'professionals' : M.CATS[s.cat].plural;
     const chip = (on) => ({ bg: on ? '#02084D' : '#fff', fg: on ? '#fff' : '#02084D', bd: on ? '#02084D' : '#E6E8EF' });
     const fc = this.filterCount(); const f = s.f;
@@ -267,10 +273,11 @@ class SiteStore extends Component {
       loading: s.gridLoading, notLoading: !s.gridLoading, skel: [1, 2, 3, 4, 5, 6, 7, 8], skel4: [1, 2, 3, 4],
       hasAvail: avail.length > 0, catTitle: s.cat === 'all' ? 'professionals' : M.CATS[s.cat].plural,
       countText: all.length + ' ' + (all.length === 1 && s.cat !== 'all' ? M.CATS[s.cat].one.toLowerCase() : plural) + ' near ' + (s.here ? s.here.label : s.loc),
+      find: s.find, hasFind: !!s.find, onFind: (e) => this.setState({ find: e.target.value }), clearFind: () => this.setState({ find: '' }),
       qAppliedText: s.qApplied ? 'Results for “' + s.qApplied + '”' : '', hasQApplied: !!s.qApplied,
-      emptyText: 'No ' + plural + ' available at this time — try another date or nearby area.',
+      emptyText: s.find.trim() ? 'No ' + plural + ' match “' + s.find.trim() + '”. Check the spelling, or try a category or service.' : 'No ' + plural + ' available at this time — try another date or nearby area.',
       resetFilters: () => { this.setState({ f: { price: 1600, gender: 'Any', langs: [], exp: 0, rating: 0, dist: 0 }, availNow: false }); this.flash(); },
-      resetAll: () => { this.setState({ f: { price: 1600, gender: 'Any', langs: [], exp: 0, rating: 0, dist: 0 }, availNow: false, qApplied: '', cat: 'all' }); this.flash(); },
+      resetAll: () => { this.setState({ f: { price: 1600, gender: 'Any', langs: [], exp: 0, rating: 0, dist: 0 }, availNow: false, qApplied: '', cat: 'all', find: '' }); this.flash(); },
       sortTop: chip(s.sort === 'top'), sortNear: chip(s.sort === 'near'), availChip: chip(s.availNow),
       setTop: () => { this.setState({ sort: 'top' }); this.flash(); }, setNear: () => { this.setState({ sort: 'near' }); this.flash(); }, togAvail: () => { this.setState(x => ({ availNow: !x.availNow })); this.flash(); },
       filtersOpen: s.filtersOpen, openFilters: () => this.setState({ filtersOpen: true }), closeFilters: () => this.setState({ filtersOpen: false }),

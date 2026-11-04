@@ -1,13 +1,13 @@
 "use client";
 
 import {
-  COUNCILS, displayName, emptyMedicoProfile, KERALA_DISTRICTS, MEDICO_GENDERS, MEDICO_LANGUAGES, MEDICO_ROLES, MEDICO_SLOTS,
-  RADIUS_KM, templateBio, totalYears, YEARS_MAX, type MedicoProfile,
+  councilsFor, displayName, emptyMedicoProfile, KERALA_DISTRICTS, MEDICO_GENDERS, MEDICO_LANGUAGES, MEDICO_ROLES, MEDICO_SLOTS,
+  MEDICO_SUGGESTIONS, normaliseMedico, RADIUS_KM, registrationFor, templateBio, totalYears, YEARS_MAX, type MedicoProfile, type MedicoRole,
 } from "@medico/shared";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { api, supabase } from "@/lib/api";
 
 const input = "w-full rounded-[14px] border border-line bg-white px-4 py-3 text-[15px] font-light text-navy outline-none focus:border-navy";
@@ -72,14 +72,15 @@ export function Registration() {
       } catch {}
       const app = saved.application && saved.application.stage !== "rejected" ? saved.application : null;
       setReview(saved.application);
-      setP({
+      const loaded: MedicoProfile = {
         ...emptyMedicoProfile(),
         name: saved.account.full_name || meta.full_name || meta.name || "",
         email: saved.account.email,
         phone: saved.account.phone ?? "",
         ...(app?.profile ?? {}),
         ...(draft ?? {}),
-      });
+      };
+      setP(normaliseMedico(loaded));
       // A sent registration lives on the Medico dashboard, unless they came back to edit it.
       const editing = new URLSearchParams(window.location.search).has("edit");
       if (app?.submittedAt && app.stage !== "info_needed" && !editing && !draft) return router.replace("/pro");
@@ -131,7 +132,7 @@ export function Registration() {
   const note = review && ["info_needed", "rejected"].includes(review.stage) && review.decisionNote;
 
   return (
-    <div className="min-h-screen bg-[#F5F6FA]">
+    <div className="min-h-dvh bg-[#F5F6FA]">
       <header className="sticky top-0 z-10 border-b border-line bg-white">
         <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-5 py-3">
           <Link href="/" aria-label="Medico To Home home"><Image src="/brand/logo.svg" alt="Medico To Home" width={130} height={30} className="h-7 w-auto" unoptimized /></Link>
@@ -189,7 +190,7 @@ export function Registration() {
         </section>
       </div>
 
-      <footer className="fixed inset-x-0 bottom-0 z-10 border-t border-line bg-white">
+      <footer className="keyboard-hide fixed inset-x-0 bottom-0 z-10 border-t border-line bg-white">
         <div className="mx-auto flex max-w-5xl items-center justify-between gap-3 px-5 py-3">
           {step > 0 ? <button onClick={() => goTo(step - 1)} className={secondary}>Back</button> : <span />}
           <div className="flex items-center gap-3">
@@ -208,17 +209,104 @@ export function Registration() {
 
 type StepProps = { p: MedicoProfile; set: (patch: Partial<MedicoProfile>) => void };
 
+/**
+ * A text field with suggestions that narrow as you type. Anything not on the list can be added as it is typed.
+ * Follows the ARIA combobox pattern: arrow keys move through the list, Enter picks, Escape closes.
+ */
+function Suggest({ label: text, value, options, onChange, placeholder }: { label: string; value: string; options: string[]; onChange: (v: string) => void; placeholder: string }) {
+  const id = useId();
+  const box = useRef<HTMLDivElement>(null);
+  const [open, setOpen] = useState(false);
+  const [active, setActive] = useState(-1);
+
+  const q = value.trim().toLowerCase();
+  // Names that start with what was typed come first, then those that contain it anywhere.
+  const matches = q ? [...options.filter((o) => o.toLowerCase().startsWith(q)), ...options.filter((o) => !o.toLowerCase().startsWith(q) && o.toLowerCase().includes(q))] : options;
+  const custom = q && !options.some((o) => o.toLowerCase() === q) ? value.trim() : "";
+  const items = custom ? [...matches, custom] : matches;
+  const shown = open && items.length > 0;
+
+  // Close when a tap or click lands outside the field and its list.
+  useEffect(() => {
+    if (!open) return;
+    const away = (e: PointerEvent) => !box.current?.contains(e.target as Node) && setOpen(false);
+    document.addEventListener("pointerdown", away);
+    return () => document.removeEventListener("pointerdown", away);
+  }, [open]);
+
+  const pick = (v: string) => {
+    onChange(v);
+    setOpen(false);
+    setActive(-1);
+  };
+  const onKey = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+      e.preventDefault();
+      if (!open) return setOpen(true);
+      const step = e.key === "ArrowDown" ? 1 : -1;
+      setActive((i) => (i + step + items.length) % items.length);
+    } else if (e.key === "Enter" && shown && active >= 0) {
+      e.preventDefault();
+      pick(items[active]!);
+    } else if (e.key === "Escape" && open) {
+      e.preventDefault();
+      setOpen(false);
+    }
+  };
+  // Bold the part of a suggestion that matches what was typed.
+  const mark = (o: string) => {
+    const at = q ? o.toLowerCase().indexOf(q) : -1;
+    return at < 0 ? o : <>{o.slice(0, at)}<b className="font-medium">{o.slice(at, at + q.length)}</b>{o.slice(at + q.length)}</>;
+  };
+
+  return (
+    <div ref={box} className={`${label} relative`}>
+      <label htmlFor={`${id}-input`}>{text}</label>
+      <input id={`${id}-input`} className={input} value={value} placeholder={placeholder} autoComplete="off" role="combobox"
+        aria-expanded={shown} aria-controls={`${id}-list`} aria-autocomplete="list" aria-activedescendant={shown && active >= 0 ? `${id}-${active}` : undefined}
+        onChange={(e) => { onChange(e.target.value); setOpen(true); setActive(-1); }}
+        onFocus={() => setOpen(true)} onClick={() => setOpen(true)} onKeyDown={onKey}
+        onBlur={(e) => e.relatedTarget && !box.current?.contains(e.relatedTarget) && setOpen(false)} />
+      {shown && (
+        <ul id={`${id}-list`} role="listbox" aria-label={text}
+          className="absolute inset-x-0 top-full z-20 mt-1.5 max-h-64 overflow-y-auto overscroll-contain rounded-[14px] border border-line bg-white py-1.5 shadow-[0_14px_34px_rgba(2,8,77,.10)]">
+          {items.map((o, i) => (
+            <li key={`${o}-${i}`} id={`${id}-${i}`} role="option" aria-selected={i === active}
+              onMouseDown={(e) => e.preventDefault()} onClick={() => pick(o)} onMouseMove={() => active !== i && setActive(i)}
+              className={`cursor-pointer px-4 py-2.5 text-[15px] font-light text-navy ${i === active ? "bg-wash" : ""} ${o === custom && i === items.length - 1 ? "border-t border-line-soft" : ""}`}>
+              {o === custom && i === items.length - 1 ? <span className="flex items-center gap-2"><span aria-hidden className="text-muted">+</span>Add “{custom}”</span> : mark(o)}
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
 function AboutStep({ p, set }: StepProps) {
+  const suggestions = MEDICO_SUGGESTIONS[p.role as MedicoRole];
+  const example = (list: string[] | undefined, fallback: string) => (list ? `E.g. ${list.slice(0, 2).join(", ")}` : fallback);
+  // Changing role clears a specialisation or qualification picked from the old role's list; anything typed in stays.
+  const pickRole = (r: MedicoRole) => {
+    const role = p.role === r ? "" : r;
+    const next = MEDICO_SUGGESTIONS[role as MedicoRole];
+    const keep = (v: string, key: "specialisations" | "qualifications") => (suggestions?.[key].includes(v) && !next?.[key].includes(v) ? "" : v);
+    // A council that does not belong to the new role is cleared too, as the API would drop it.
+    const council = councilsFor(role).includes(p.council) ? p.council : "";
+    set({ role, council, specialisation: keep(p.specialisation, "specialisations"), qualification: keep(p.qualification, "qualifications") });
+  };
   return (
     <div className="grid gap-5">
       <label className={label}>Full name<input className={input} value={p.name} onChange={(e) => set({ name: e.target.value })} autoComplete="name" placeholder="As on your registration certificate" /></label>
       <fieldset className="grid gap-2">
         <legend className="mb-1.5 text-[13px] text-body">What do you do?</legend>
-        <div className="flex flex-wrap gap-2">{MEDICO_ROLES.map((r) => <Chip key={r} on={p.role === r} onClick={() => set({ role: p.role === r ? "" : r })}>{r}</Chip>)}</div>
+        <div className="flex flex-wrap gap-2">{MEDICO_ROLES.map((r) => <Chip key={r} on={p.role === r} onClick={() => pickRole(r)}>{r}</Chip>)}</div>
       </fieldset>
       <div className="grid gap-5 sm:grid-cols-2">
-        <label className={label}>Specialisation<input className={input} value={p.specialisation} onChange={(e) => set({ specialisation: e.target.value })} placeholder="E.g. Geriatrics, ICU care, Orthopaedics" /></label>
-        <label className={label}>Highest qualification<input className={input} value={p.qualification} onChange={(e) => set({ qualification: e.target.value })} placeholder="E.g. MBBS, MD · BSc Nursing · BPT" /></label>
+        <Suggest label="Specialisation" value={p.specialisation} options={suggestions?.specialisations ?? []} onChange={(v) => set({ specialisation: v })}
+          placeholder={example(suggestions?.specialisations, "Choose what you do to see suggestions")} />
+        <Suggest label="Highest qualification" value={p.qualification} options={suggestions?.qualifications ?? []} onChange={(v) => set({ qualification: v })}
+          placeholder={example(suggestions?.qualifications, "Choose what you do to see suggestions")} />
       </div>
       <fieldset className="grid gap-2">
         <legend className="mb-1.5 text-[13px] text-body">Gender</legend>
@@ -274,16 +362,18 @@ function PhotoStep({ p, set }: StepProps) {
 }
 
 function RegistrationStep({ p, set }: StepProps) {
+  // Only the councils or certifying bodies that fit the role chosen in step 1.
+  const spec = registrationFor(p.role);
   return (
     <div className="grid gap-5">
-      <label className={label}>Council
+      <label className={label}>{spec.bodyLabel}
         <select className={input} value={p.council} onChange={(e) => set({ council: e.target.value })}>
-          <option value="">Choose your council</option>
-          {COUNCILS.map((c) => <option key={c}>{c}</option>)}
+          <option value="">Choose one</option>
+          {spec.groups.map((g) => <optgroup key={g.label} label={g.label}>{g.options.map((c) => <option key={c}>{c}</option>)}</optgroup>)}
         </select>
       </label>
-      <label className={label}>Registration number<input className={`${input} uppercase`} value={p.registrationNo} onChange={(e) => set({ registrationNo: e.target.value.toUpperCase() })} placeholder="E.g. TCMC 54321" autoCapitalize="characters" /></label>
-      <p className="rounded-[14px] bg-[#E8F5EF] px-4 py-3 text-[14px] leading-relaxed text-[#2E7D5B]">Our team checks it with the council within 24–48 hours. Once verified, your profile shows the <strong className="font-semibold">Verified Medico</strong> badge.</p>
+      <label className={label}>{spec.numberLabel}<input className={`${input} uppercase`} value={p.registrationNo} onChange={(e) => set({ registrationNo: e.target.value.toUpperCase() })} placeholder={spec.placeholder} autoCapitalize="characters" /></label>
+      <p className="rounded-[14px] bg-[#E8F5EF] px-4 py-3 text-[14px] leading-relaxed text-[#2E7D5B]">Our team checks it with {spec.checkedWith} within 24–48 hours. Once verified, your profile shows the <strong className="font-semibold">Verified Medico</strong> badge.</p>
     </div>
   );
 }

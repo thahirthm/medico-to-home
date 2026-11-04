@@ -13,7 +13,7 @@ export function Overlays() {
       {v.filtersOpen && (
         <>
           <div onClick={v.closeFilters} style={{ position: "fixed", inset: "0", background: "rgba(2,8,77,.18)", zIndex: "80", animation: "mthIn .2s ease" }}></div>
-          <aside style={{ position: "fixed", top: "0", right: "0", bottom: "0", width: "min(420px,100vw)", background: "#fff", zIndex: "81", display: "flex", flexDirection: "column", boxShadow: "-20px 0 60px -30px rgba(2,8,77,.3)" }}>
+          <aside className="mth-menu" style={{ position: "fixed", top: "0", right: "0", bottom: "0", width: "min(420px,100vw)", background: "#fff", zIndex: "81", display: "flex", flexDirection: "column", boxShadow: "-20px 0 60px -30px rgba(2,8,77,.3)" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "22px 24px", borderBottom: "1px solid #EEF0F5" }}>
               <span style={{ fontSize: "22px", fontWeight: "300", letterSpacing: "-.02em" }}>
                 <span style={{ fontWeight: "600" }}>Filters</span>
@@ -97,7 +97,7 @@ export function Overlays() {
       )}
       {v.sos && (
         <>
-          <div onClick={v.closeSos} style={{ position: "fixed", inset: "0", background: "rgba(2,8,77,.28)", zIndex: "90", display: "flex", alignItems: "center", justifyContent: "center", padding: "20px", animation: "mthIn .2s ease" }}>
+          <div onClick={v.closeSos} className="mth-modal" style={{ position: "fixed", inset: "0", background: "rgba(2,8,77,.28)", zIndex: "90", display: "flex", alignItems: "center", justifyContent: "center", padding: "20px", animation: "mthIn .2s ease" }}>
             <div onClick={v.stop} style={{ width: "min(420px,100%)", background: "#fff", borderRadius: "24px", padding: "28px", display: "flex", flexDirection: "column", gap: "18px" }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                 <span style={{ background: "#FDECEC", color: "#D93A3A", borderRadius: "999px", padding: "5px 12px", fontSize: "12px", fontWeight: "600", letterSpacing: ".06em" }}>SOS · DEMO</span>
@@ -127,7 +127,7 @@ export function Overlays() {
       )}
       {v.login && (
         <>
-          <div onClick={v.closeLogin} style={{ position: "fixed", inset: "0", background: "rgba(2,8,77,.22)", zIndex: "90", display: "flex", alignItems: "center", justifyContent: "center", padding: "20px", animation: "mthIn .2s ease" }}>
+          <div onClick={v.closeLogin} className="mth-modal" style={{ position: "fixed", inset: "0", background: "rgba(2,8,77,.22)", zIndex: "90", display: "flex", alignItems: "center", justifyContent: "center", padding: "20px", animation: "mthIn .2s ease" }}>
             <div onClick={v.stop} style={{ width: "min(420px,100%)", background: "#fff", borderRadius: "24px", padding: "28px", display: "flex", flexDirection: "column", gap: "18px" }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                 <img src="/brand/icon.svg" alt="" style={{ height: "26px" }} />
@@ -147,7 +147,7 @@ export function Overlays() {
       )}
       {v.hasToast && (
         <>
-          <div style={{ position: "fixed", left: "50%", bottom: "28px", transform: "translateX(-50%)", zIndex: "95", background: "#02084D", color: "#fff", borderRadius: "999px", padding: "12px 20px", fontSize: "14px", display: "flex", alignItems: "center", gap: "8px", animation: "mthIn .25s ease", whiteSpace: "nowrap" }}>
+          <div className="mth-toast" style={{ position: "fixed", left: "50%", bottom: "28px", transform: "translateX(-50%)", zIndex: "95", background: "#02084D", color: "#fff", borderRadius: "999px", padding: "12px 20px", fontSize: "14px", display: "flex", alignItems: "center", gap: "8px", animation: "mthIn .25s ease", whiteSpace: "nowrap" }}>
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2">
               <path d="M5 12.5l4.5 4.5L19 7.5" />
             </svg>

@@ -50,7 +50,7 @@ export function MedicoLogin() {
   };
 
   return (
-    <main className="grid min-h-screen bg-white lg:grid-cols-2">
+    <main className="grid min-h-dvh bg-white lg:grid-cols-2">
       <div className="flex flex-col justify-center px-6 py-10 sm:px-12 lg:order-2 lg:px-16">
         <div className="mx-auto flex w-full max-w-sm flex-col gap-6">
           <Link href="/" aria-label="Medico To Home home">

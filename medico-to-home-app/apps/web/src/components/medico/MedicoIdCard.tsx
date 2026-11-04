@@ -1,6 +1,6 @@
 "use client";
 
-import { displayName, totalYears, type MedicoProfile } from "@medico/shared";
+import { displayName, medicoRole, totalYears, type MedicoProfile } from "@medico/shared";
 import { useRef, useState, type KeyboardEvent, type PointerEvent, type ReactNode } from "react";
 
 // "Travancore-Cochin Medical Council (TCMC)" → "TCMC"; anything without a short form stays as it is.
@@ -8,7 +8,11 @@ const councilShort = (c: string) => c.match(/\(([^)]+)\)$/)?.[1] ?? c.replace(/^
 
 // Each role wears its own colour, like the bands on a hospital ID.
 const ROLE_COLOUR: Record<string, string> = {
-  Doctor: "#1F4FD8", Nurse: "#0E9F8E", Physiotherapist: "#1F9D6B", Caretaker: "#C77D1A", "Lab technician": "#7B4BD6", "Other therapist": "#D9467A",
+  Doctor: "#1F4FD8", Nurse: "#0E9F8E", Pharmacist: "#2A7FB8", Physiotherapist: "#1F9D6B", "Occupational Therapist": "#D9467A",
+  "Speech & Language Therapist": "#B8458F", "Clinical Psychologist": "#5A4BD6", Psychologist: "#5A4BD6", Dietitian: "#6E9A1F",
+  "Lab Technician": "#7B4BD6", Caregiver: "#C77D1A", "Home Health Aide": "#B86A12", "Baby Care Attendant": "#E0719A",
+  "Ambulance Driver": "#C22F2F", Paramedic: "#D4532A",
+  Caretaker: "#C77D1A", "Lab technician": "#7B4BD6", "Other therapist": "#D9467A",
 };
 
 const STATUS: Record<string, { label: string; bg: string; fg: string }> = {
@@ -63,7 +67,7 @@ function Line({ icon, children }: { icon: ReactNode; children: ReactNode }) {
 export function MedicoIdCard({ p, id, stage }: { p: MedicoProfile; id: string; stage: string }) {
   const name = displayName(p) || "Your name";
   const first = displayName(p).split(" ").slice(0, 2).join(" ") || "this medico";
-  const colour = ROLE_COLOUR[p.role] ?? "#02084D";
+  const colour = ROLE_COLOUR[medicoRole(p.role)] ?? "#02084D";
   const status = STATUS[stage] ?? { label: "Verification in progress", bg: "#FBF6EA", fg: "#9A6A0E" };
   const medicoId = `MTH-M ${id.replace(/-/g, "").slice(0, 8).toUpperCase().replace(/(.{4})(?=.)/, "$1 ")}`;
   const years = totalYears(p);

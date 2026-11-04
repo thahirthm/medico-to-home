@@ -316,17 +316,34 @@ export function HomeView() {
               </>
             )}
             <div id="mth-grid" style={{ display: "flex", flexDirection: "column", gap: "22px" }}>
-              <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-                <h2 style={{ margin: "0", fontSize: "clamp(26px,3vw,38px)", fontWeight: "300", letterSpacing: "-.03em", lineHeight: "1.1" }}>
-                  Browse{" "}
-                  <span style={{ fontWeight: "600" }}>all</span>
-                  {" "}{v.catTitle}
-                </h2>
-                {v.hasQApplied && (
-                  <>
-                    <div style={{ fontSize: "14px", color: "#6B7085" }}>{v.qAppliedText}</div>
-                  </>
-                )}
+              <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: "16px", flexWrap: "wrap" }}>
+                <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+                  <h2 style={{ margin: "0", fontSize: "clamp(26px,3vw,38px)", fontWeight: "300", letterSpacing: "-.03em", lineHeight: "1.1" }}>
+                    Browse{" "}
+                    <span style={{ fontWeight: "600" }}>all</span>
+                    {" "}{v.catTitle}
+                  </h2>
+                  {v.hasQApplied && (
+                    <>
+                      <div style={{ fontSize: "14px", color: "#6B7085" }}>{v.qAppliedText}</div>
+                    </>
+                  )}
+                </div>
+                <label className="mth-find" style={{ flex: "1 1 260px", maxWidth: "360px", display: "flex", alignItems: "center", gap: "10px", border: "1px solid #E6E8EF", borderRadius: "999px", padding: "0 6px 0 16px", background: "#fff", transition: "border-color .2s" }}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6B7085" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true" style={{ flex: "none" }}>
+                    <circle cx="11" cy="11" r="7" />
+                    <path d="m20 20-3.5-3.5" />
+                  </svg>
+                  <input type="search" value={v.find} onChange={v.onFind} placeholder="Search by name or category" aria-label="Search professionals by name or category" enterKeyHint="search"
+                    style={{ flex: "1", minWidth: "0", border: "none", outline: "none", background: "transparent", font: "inherit", fontSize: "14px", fontWeight: "300", color: "#02084D", padding: "11px 0" }} />
+                  {v.hasFind && (
+                    <button type="button" onClick={v.clearFind} aria-label="Clear search" style={{ flex: "none", width: "30px", height: "30px", borderRadius: "50%", border: "none", background: "#F6F7FA", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#02084D" strokeWidth="2">
+                        <path d="M6 6l12 12M18 6 6 18" />
+                      </svg>
+                    </button>
+                  )}
+                </label>
               </div>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px", flexWrap: "wrap", padding: "12px 0", borderTop: "1px solid #EEF0F5", borderBottom: "1px solid #EEF0F5" }}>
                 <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", alignItems: "center" }}>

@@ -1,4 +1,4 @@
-import { displayName, MEDICO_CATEGORY, professionByLabel, totalYears, VERIFICATION_STEPS, type MedicoProfile } from "@medico/shared";
+import { displayName, MEDICO_CATEGORY, medicoRole, professionByLabel, totalYears, VERIFICATION_STEPS, type MedicoProfile } from "@medico/shared";
 import type { FastifyInstance, FastifyRequest } from "fastify";
 import { randomBytes } from "node:crypto";
 import { z } from "zod";
@@ -57,7 +57,7 @@ const pick = (body: unknown, columns: string[]) => Object.entries(z.record(z.str
 // A Medico registration becomes a professional profile on the same account, hidden ('pending') until staff set it live.
 async function approveMedico(application: { id: number; profile_id: string | null; details: { profile: MedicoProfile } }) {
   const p = application.details.profile;
-  const category = MEDICO_CATEGORY[p.role];
+  const category = MEDICO_CATEGORY[medicoRole(p.role)];
   if (!category) throw new ApiError(400, "The applicant has not chosen a role yet. Ask them for it first.");
   const locality = (await pool.query("select id from localities where district = $1 order by id limit 1", [p.district])).rows[0];
   if (!locality) throw new ApiError(400, `Add a service area in ${p.district || "their district"} under Content first, or ask the applicant for their district.`);
