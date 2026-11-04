@@ -4,7 +4,7 @@
 import { councilsFor } from "./councils";
 
 export const MEDICO_ROLES = [
-  "Doctor", "Nurse", "Pharmacist", "Physiotherapist", "Occupational Therapist", "Speech & Language Therapist", "Clinical Psychologist",
+  "Doctor", "Dentist", "Nurse", "Pharmacist", "Physiotherapist", "Occupational Therapist", "Speech & Language Therapist", "Clinical Psychologist",
   "Psychologist", "Dietitian", "Lab Technician", "Caregiver", "Home Health Aide", "Baby Care Attendant", "Ambulance Driver", "Paramedic",
 ] as const;
 export type MedicoRole = (typeof MEDICO_ROLES)[number];
@@ -14,7 +14,8 @@ const LEGACY_ROLES: Record<string, string> = { Caretaker: "Caregiver", "Lab tech
 
 /** The catalogue category each role is listed under once approved. */
 export const MEDICO_CATEGORY: Record<string, string> = {
-  Doctor: "doctor", Nurse: "nurse", Pharmacist: "pharma", Physiotherapist: "physio", "Occupational Therapist": "ot",
+  // There is no dental category in the catalogue yet, so approved dentists are listed with the doctors.
+  Doctor: "doctor", Dentist: "doctor", Nurse: "nurse", Pharmacist: "pharma", Physiotherapist: "physio", "Occupational Therapist": "ot",
   "Speech & Language Therapist": "speech", "Clinical Psychologist": "psych", Psychologist: "psych", Dietitian: "diet",
   "Lab Technician": "lab", Caregiver: "caregiver", "Home Health Aide": "aide", "Baby Care Attendant": "baby",
   "Ambulance Driver": "ambulance", Paramedic: "paramedic",
@@ -36,15 +37,37 @@ export function normaliseMedico<T extends Pick<MedicoProfile, "role" | "council"
  */
 export const MEDICO_SUGGESTIONS: Record<MedicoRole, { specialisations: string[]; qualifications: string[] }> = {
   Doctor: {
+    // Every clinical department: general and family practice, the MD/MS/DM/MCh branches, then AYUSH.
     specialisations: [
-      "General medicine", "Family medicine", "Internal medicine", "Geriatrics", "Paediatrics", "Palliative care", "Cardiology",
-      "Pulmonology", "Neurology", "Nephrology", "Diabetes & endocrinology", "Orthopaedics", "Dermatology", "Psychiatry",
-      "Obstetrics & gynaecology", "General surgery", "ENT", "Ophthalmology", "Physical medicine & rehabilitation",
-      "Emergency medicine", "Anaesthesiology", "Ayurveda", "Homoeopathy", "Unani", "Siddha",
+      "General medicine", "Family medicine", "Internal medicine", "Geriatrics", "Palliative care", "Emergency medicine", "Critical care",
+      "Anaesthesiology", "Pain medicine", "Paediatrics", "Neonatology", "Cardiology", "Cardiothoracic & vascular surgery",
+      "Pulmonology & respiratory medicine", "Sleep medicine", "Neurology", "Neurosurgery", "Nephrology", "Urology", "Gastroenterology",
+      "Hepatology", "Surgical gastroenterology", "Diabetes & endocrinology", "Rheumatology", "Clinical haematology", "Medical oncology",
+      "Surgical oncology", "Radiation oncology", "Infectious diseases", "Orthopaedics", "Sports medicine", "Physical medicine & rehabilitation",
+      "Dermatology, venereology & leprosy", "Psychiatry", "Obstetrics & gynaecology", "Reproductive medicine & infertility", "General surgery",
+      "Laparoscopic surgery", "Plastic & reconstructive surgery", "Paediatric surgery", "ENT (otorhinolaryngology)", "Ophthalmology",
+      "Radiology", "Nuclear medicine", "Pathology", "Microbiology", "Biochemistry", "Pharmacology", "Transfusion medicine", "Community medicine",
+      "Forensic medicine", "Ayurveda", "Panchakarma", "Homoeopathy", "Unani", "Siddha", "Yoga & naturopathy",
     ],
     qualifications: [
-      "MBBS", "MBBS, MD", "MBBS, MS", "MBBS, DNB", "MBBS, MD, DM", "MBBS, MS, MCh", "MBBS, Diploma (DCH / DGO / DA / DPM)",
-      "MBBS, MRCP / MRCGP / FRCS", "BAMS (Ayurveda)", "MD (Ayurveda)", "BHMS (Homoeopathy)", "MD (Homoeopathy)", "BUMS (Unani)", "BSMS (Siddha)",
+      "MBBS", "MBBS, MD", "MBBS, MS", "MBBS, DNB", "MBBS, MD, DM", "MBBS, MS, MCh", "MBBS, Diploma (DCH / DGO / DA / DPM / DLO / DO)",
+      "MBBS, MRCP / MRCGP / FRCS", "BAMS (Ayurveda)", "MD / MS (Ayurveda)", "BHMS (Homoeopathy)", "MD (Homoeopathy)", "BUMS (Unani)",
+      "BSMS (Siddha)", "BNYS (Naturopathy & Yoga)",
+    ],
+  },
+  Dentist: {
+    // The nine MDS branches, then the kinds of dental care often given at home.
+    specialisations: [
+      "General dentistry", "Prosthodontics & crown and bridge", "Periodontology (gums)", "Conservative dentistry & endodontics (root canal)",
+      "Orthodontics & dentofacial orthopaedics", "Oral & maxillofacial surgery", "Paediatric & preventive dentistry",
+      "Oral medicine & radiology", "Oral & maxillofacial pathology", "Public health dentistry", "Implantology", "Cosmetic dentistry",
+      "Geriatric dentistry", "Special-care dentistry", "Dentures & denture repair", "Home dental care for bedridden patients",
+    ],
+    qualifications: [
+      "BDS", "BDS, MDS (Prosthodontics)", "BDS, MDS (Periodontology)", "BDS, MDS (Conservative Dentistry & Endodontics)",
+      "BDS, MDS (Orthodontics)", "BDS, MDS (Oral & Maxillofacial Surgery)", "BDS, MDS (Paediatric & Preventive Dentistry)",
+      "BDS, MDS (Oral Medicine & Radiology)", "BDS, MDS (Oral Pathology)", "BDS, MDS (Public Health Dentistry)",
+      "BDS, PG Diploma in Dentistry", "BDS, Fellowship in Implantology", "BDS, MFDS / MJDF",
     ],
   },
   Nurse: {
@@ -239,9 +262,9 @@ export function totalYears(p: Pick<MedicoProfile, "experienceMode" | "years" | "
   return Math.min(YEARS_MAX, sum);
 }
 
-/** "Dr." in front of a doctor's name, nothing for anyone else. */
+/** "Dr." in front of a doctor's or dentist's name, nothing for anyone else. */
 export const displayName = (p: Pick<MedicoProfile, "name" | "role">) =>
-  p.role === "Doctor" && p.name && !/^dr\.?\s/i.test(p.name) ? `Dr. ${p.name}` : p.name;
+  (p.role === "Doctor" || p.role === "Dentist") && p.name && !/^dr\.?\s/i.test(p.name) ? `Dr. ${p.name}` : p.name;
 
 /**
  * The facts a bio may use. Contact details (phone, email) are deliberately left out,

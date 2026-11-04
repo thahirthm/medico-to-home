@@ -8,7 +8,7 @@ const councilShort = (c: string) => c.match(/\(([^)]+)\)$/)?.[1] ?? c.replace(/^
 
 // Each role wears its own colour, like the bands on a hospital ID.
 const ROLE_COLOUR: Record<string, string> = {
-  Doctor: "#1F4FD8", Nurse: "#0E9F8E", Pharmacist: "#2A7FB8", Physiotherapist: "#1F9D6B", "Occupational Therapist": "#D9467A",
+  Doctor: "#1F4FD8", Dentist: "#0B7FA6", Nurse: "#0E9F8E", Pharmacist: "#2A7FB8", Physiotherapist: "#1F9D6B", "Occupational Therapist": "#D9467A",
   "Speech & Language Therapist": "#B8458F", "Clinical Psychologist": "#5A4BD6", Psychologist: "#5A4BD6", Dietitian: "#6E9A1F",
   "Lab Technician": "#7B4BD6", Caregiver: "#C77D1A", "Home Health Aide": "#B86A12", "Baby Care Attendant": "#E0719A",
   "Ambulance Driver": "#C22F2F", Paramedic: "#D4532A",

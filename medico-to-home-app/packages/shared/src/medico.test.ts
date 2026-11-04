@@ -7,6 +7,7 @@ describe("medico profile", () => {
   it("adds Dr. only for doctors", () => {
     expect(displayName(profile({ name: "Reshma Unnikrishnan", role: "Doctor" }))).toBe("Dr. Reshma Unnikrishnan");
     expect(displayName(profile({ name: "Dr. Reshma", role: "Doctor" }))).toBe("Dr. Reshma");
+    expect(displayName(profile({ name: "Anjali Menon", role: "Dentist" }))).toBe("Dr. Anjali Menon");
     expect(displayName(profile({ name: "Soumya Joseph", role: "Nurse" }))).toBe("Soumya Joseph");
   });
 

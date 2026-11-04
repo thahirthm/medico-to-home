@@ -38,6 +38,13 @@ const NURSING = [
   "Delhi Nursing Council", "Jammu and Kashmir Nursing Council", "Puducherry Nursing Council",
 ];
 
+// Most states name theirs "<State> State Dental Council"; these do not.
+const DENTAL_NAMES: Record<string, string> = { "Tamil Nadu": "Tamil Nadu Dental Council" };
+const DENTAL = [
+  ...STATES.map((s) => DENTAL_NAMES[s] ?? `${s} State Dental Council`),
+  "Delhi Dental Council", "Jammu and Kashmir Dental Council", "Puducherry Dental Council", "Chandigarh Dental Council",
+];
+
 // Most states name theirs "<State> State Pharmacy Council"; these do not.
 const PHARMACY_NAMES: Record<string, string> = { "Tamil Nadu": "Tamil Nadu Pharmacy Council" };
 const PHARMACY = [
@@ -53,6 +60,7 @@ const ALLIED = [
 
 const NMC = "National Medical Commission (NMC)";
 const INC = "Indian Nursing Council (INC)";
+const DCI = "Dental Council of India (DCI)";
 const PCI = "Pharmacy Council of India (PCI)";
 const RCI = "Rehabilitation Council of India (RCI)";
 const NCAHP = "National Commission for Allied and Healthcare Professions (NCAHP)";
@@ -92,6 +100,7 @@ export const REGISTRATION_BY_ROLE: Record<string, RegistrationSpec> = {
     [NMC, "National Commission for Indian System of Medicine (NCISM)", "National Commission for Homoeopathy (NCH)"],
     MEDICAL, "E.g. TCMC 54321",
   ),
+  Dentist: council([DCI], DENTAL, "E.g. KSDC A-12345"),
   Nurse: council([INC], NURSING, "E.g. KNMC 123456"),
   Pharmacist: council([PCI], PHARMACY, "E.g. KSPC 45678"),
   Physiotherapist: council([NCAHP, "Indian Association of Physiotherapists (IAP)"], ALLIED, "E.g. NCAHP or IAP number"),
@@ -109,7 +118,7 @@ export const REGISTRATION_BY_ROLE: Record<string, RegistrationSpec> = {
 };
 
 /** Before a role is chosen: just the national councils, so the field never looks empty. */
-const ANY_ROLE = council([NMC, INC, PCI, RCI, NCAHP], [], "As printed on your certificate");
+const ANY_ROLE = council([NMC, DCI, INC, PCI, RCI, NCAHP], [], "As printed on your certificate");
 
 export const registrationFor = (role: string): RegistrationSpec => REGISTRATION_BY_ROLE[role] ?? ANY_ROLE;
 
