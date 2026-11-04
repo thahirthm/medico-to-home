@@ -61,6 +61,20 @@ jobs:
           printf '%s\n' "$VPS_SSH_KEY" > ~/.ssh/id_ed25519 && chmod 600 ~/.ssh/id_ed25519
           # The server's own key, pinned so the deploy cannot be sent to an impostor.
           echo "$VPS_HOST ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOyc7bgr7gnrTUIwTkrG+Xbi/mCqCxokM0wfzj1TLcUB" > ~/.ssh/known_hosts
+          # Give up on a dead connection quickly and retry it, rather than hanging on one attempt.
+          printf 'Host *\n  ConnectTimeout 20\n  ConnectionAttempts 3\n  ServerAliveInterval 15\n  ServerAliveCountMax 4\n' > ~/.ssh/config
+      # A runner sometimes cannot reach the VPS for a minute or two; wait for SSH rather than failing the deploy.
+      - name: Wait for the server
+        env:
+          SERVER: root@${{ secrets.VPS_HOST }}
+        run: |
+          for i in 1 2 3 4 5 6; do
+            ssh -o BatchMode=yes "$SERVER" true && exit 0
+            echo "Server not reachable (attempt $i of 6), trying again in 30 s"
+            sleep 30
+          done
+          echo "Could not reach the server over SSH. Check the VPS is running and its firewall allows port 22."
+          exit 1
       - name: Deploy
         env:
           SERVER: root@${{ secrets.VPS_HOST }}
