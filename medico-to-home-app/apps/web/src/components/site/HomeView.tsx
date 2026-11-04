@@ -16,14 +16,13 @@ export function HomeView() {
           <div style={{ maxWidth: "1100px", margin: "0 auto", display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center", gap: "22px" }}>
             <div style={{ display: "flex", alignItems: "center", gap: "8px", border: "1px solid #E6E8EF", borderRadius: "999px", padding: "6px 14px 6px 8px", fontSize: "13px", fontWeight: "400", color: "#4A4F6A" }}>
               <span style={{ background: "#E8F5EF", color: "#1F9D6B", borderRadius: "999px", padding: "2px 8px", fontSize: "12px", fontWeight: "500" }}>New</span>
-              Now live in Kozhikode & Malappuram{" "}
+              Book trusted Medicos
             </div>
             <h1 style={{ margin: "0", fontSize: "clamp(46px,8.4vw,112px)", lineHeight: ".98", fontWeight: "300", letterSpacing: "-.045em", color: "#02084D", textWrap: "balance" }}>
               Care that comes{" "}
               <span style={{ fontWeight: "600" }}>home</span>
               .
             </h1>
-            <p style={{ margin: "0", maxWidth: "620px", fontSize: "clamp(16px,1.6vw,19px)", lineHeight: "1.55", fontWeight: "300", color: "#6B7085", textWrap: "pretty" }}>Book verified doctors, nurses, therapists and caregivers at your doorstep across Kozhikode and Malappuram.</p>
             <div style={{ width: "100%", maxWidth: "1040px", marginTop: "18px", background: "#fff", border: "1px solid #E6E8EF", borderRadius: v.searchR, boxShadow: "0 1px 0 rgba(2,8,77,.02), 0 20px 50px -24px rgba(2,8,77,.14)", display: "flex", flexWrap: "wrap", alignItems: "stretch", padding: "8px", textAlign: "left", position: "relative", zIndex: "20" }}>
               <div data-dd="1" style={{ flex: "1.5 1 260px", position: "relative", padding: "12px 20px", borderRadius: "999px", display: "flex", flexDirection: "column", gap: "3px", justifyContent: "center", transition: "background .2s" }} className="mth-hover-6">
                 <label style={{ fontSize: "12px", fontWeight: "500", color: "#02084D" }}>What are you looking for?</label>

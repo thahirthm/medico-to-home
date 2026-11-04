@@ -1,4 +1,4 @@
-import { displayName, MEDICO_CATEGORY, medicoRole, professionByLabel, totalYears, VERIFICATION_STEPS, type MedicoProfile } from "@medico/shared";
+import { displayName, MEDICO_CATEGORY, medicoRole, spokenLanguages, professionByLabel, totalYears, VERIFICATION_STEPS, type MedicoProfile } from "@medico/shared";
 import type { FastifyInstance, FastifyRequest } from "fastify";
 import { randomBytes } from "node:crypto";
 import { z } from "zod";
@@ -59,14 +59,15 @@ async function approveMedico(application: { id: number; profile_id: string | nul
   const p = application.details.profile;
   const category = MEDICO_CATEGORY[medicoRole(p.role)];
   if (!category) throw new ApiError(400, "The applicant has not chosen a role yet. Ask them for it first.");
-  const locality = (await pool.query("select id from localities where district = $1 order by id limit 1", [p.district])).rows[0];
+  // Their own town's service area when there is one, else the first in their district.
+  const locality = (await pool.query("select id from localities where district = $1 order by (name = $2) desc, id limit 1", [p.district, p.town ?? ""])).rows[0];
   if (!locality) throw new ApiError(400, `Add a service area in ${p.district || "their district"} under Content first, or ask the applicant for their district.`);
   await pool.query(
     `insert into professionals (name, gender, category_key, qualification, experience_years, locality_id, languages, base_price, radius_km, bio, photo_url, registration_no, status, profile_id)
      values ($1,$2,$3,$4,$5,$6,$7,500,$8,$9,$10,$11,'pending',$12)`,
     [
       displayName(p), p.gender === "Male" ? "M" : "F", category, [p.qualification, p.specialisation].filter(Boolean).join(", "), totalYears(p), locality.id,
-      p.languages, p.radiusKm, p.bio, p.photoUrl, p.registrationNo, application.profile_id,
+      spokenLanguages(p), p.radiusKm, p.bio, p.photoUrl, p.registrationNo, application.profile_id,
     ],
   );
   await pool.query("update applications set stage = 'approved', decision_note = '' where id = $1", [application.id]);

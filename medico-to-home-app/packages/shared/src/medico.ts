@@ -201,7 +201,17 @@ export const KERALA_DISTRICTS = [
 ] as const;
 
 export const MEDICO_SLOTS = ["Early mornings", "Evenings", "Days off", "Weekends"] as const;
-export const MEDICO_LANGUAGES = ["Malayalam", "English", "Hindi", "Tamil", "Arabic"] as const;
+export const MEDICO_LANGUAGES = ["Malayalam", "English", "Hindi", "Tamil", "Arabic", "Other"] as const;
+
+/** Every language a Medico speaks: the chips chosen, with "Other" swapped for what they typed. */
+export const spokenLanguages = (p: Pick<MedicoProfile, "languages"> & { otherLanguages?: string }) => [
+  ...p.languages.filter((l) => l !== "Other"),
+  ...(p.languages.includes("Other") ? (p.otherLanguages ?? "").split(",").map((l) => l.trim()).filter(Boolean) : []),
+];
+
+/** "Feroke, Kozhikode", or just the district when no town is given. */
+export const medicoPlace = (p: Pick<MedicoProfile, "district"> & { town?: string }) =>
+  [p.town && p.town !== p.district ? p.town : "", p.district].filter(Boolean).join(", ");
 export const MEDICO_GENDERS = ["Female", "Male", "Other"] as const;
 export const RADIUS_KM = { min: 2, max: 30, default: 8 } as const;
 export const YEARS_MAX = 40;
@@ -232,21 +242,25 @@ export interface MedicoProfile {
   phone: string;
   email: string;
   district: string;
+  /** A town from the district's list, or one the Medico typed in. */
+  town: string;
   experienceMode: "years" | "workplaces";
   years: number;
   workplaces: Workplace[];
   awards: Award[];
   slots: string[];
   languages: string[];
+  /** Languages not in the list, typed in after choosing "Other", comma separated. */
+  otherLanguages: string;
   radiusKm: number;
   bio: string;
 }
 
 export const emptyMedicoProfile = (): MedicoProfile => ({
   name: "", role: "", specialisation: "", qualification: "", gender: "", photoUrl: "",
-  council: "", registrationNo: "", phone: "", email: "", district: "",
+  council: "", registrationNo: "", phone: "", email: "", district: "", town: "",
   experienceMode: "years", years: 0, workplaces: [], awards: [],
-  slots: [], languages: [], radiusKm: RADIUS_KM.default, bio: "",
+  slots: [], languages: [], otherLanguages: "", radiusKm: RADIUS_KM.default, bio: "",
 });
 
 const CURRENT_YEAR = () => new Date().getFullYear();
@@ -280,8 +294,8 @@ export function bioFacts(p: MedicoProfile) {
     years: totalYears(p),
     workplaces: p.workplaces.filter((w) => w.place).map((w) => ({ place: w.place, role: w.role })),
     awards: p.awards.filter((a) => a.title).map((a) => ({ title: a.title, by: a.by, year: a.year })),
-    languages: p.languages,
-    district: p.district,
+    languages: spokenLanguages(p),
+    district: medicoPlace(p),
   };
 }
 

@@ -2,7 +2,7 @@
 
 import {
   councilsFor, displayName, emptyMedicoProfile, KERALA_DISTRICTS, MEDICO_GENDERS, MEDICO_LANGUAGES, MEDICO_ROLES, MEDICO_SLOTS,
-  MEDICO_SUGGESTIONS, normaliseMedico, RADIUS_KM, registrationFor, templateBio, totalYears, YEARS_MAX, type MedicoProfile, type MedicoRole,
+  medicoPlace, MEDICO_SUGGESTIONS, normaliseMedico, RADIUS_KM, registrationFor, spokenLanguages, templateBio, totalYears, townsIn, YEARS_MAX, type MedicoProfile, type MedicoRole,
 } from "@medico/shared";
 import Image from "next/image";
 import Link from "next/link";
@@ -388,12 +388,15 @@ function ContactStep({ p, set }: StepProps) {
         </span>
       </label>
       <label className={label}>Email<input className={input} type="email" autoComplete="email" value={p.email} onChange={(e) => set({ email: e.target.value })} /></label>
-      <label className={label}>Home district
-        <select className={input} value={p.district} onChange={(e) => set({ district: e.target.value })}>
-          <option value="">Choose your district</option>
-          {KERALA_DISTRICTS.map((d) => <option key={d}>{d}</option>)}
-        </select>
-      </label>
+      <div className="grid gap-5 sm:grid-cols-2">
+        <label className={label}>Home district
+          <select className={input} value={p.district} onChange={(e) => set({ district: e.target.value, town: "" })}>
+            <option value="">Choose your district</option>
+            {KERALA_DISTRICTS.map((d) => <option key={d}>{d}</option>)}
+          </select>
+        </label>
+        <TownField p={p} set={set} />
+      </div>
       <p className="text-[13px] text-muted">Your mobile number and email are never shown on your profile.</p>
     </div>
   );
@@ -469,6 +472,31 @@ function AwardsStep({ p, set }: StepProps) {
   );
 }
 
+const OTHER_TOWN = "__other";
+
+/** The district's towns, with "Other" for a town that is not on the list. */
+function TownField({ p, set }: StepProps) {
+  const towns = townsIn(p.district);
+  const [typing, setTyping] = useState(!!p.town && !towns.includes(p.town));
+  return (
+    <div className="grid gap-2">
+      <label className={label}>Town
+        <select className={input} disabled={!p.district} value={typing ? OTHER_TOWN : p.town}
+          onChange={(e) => {
+            const other = e.target.value === OTHER_TOWN;
+            setTyping(other);
+            set({ town: other ? "" : e.target.value });
+          }}>
+          <option value="">{p.district ? "Choose your town" : "Choose a district first"}</option>
+          {towns.map((t) => <option key={t}>{t}</option>)}
+          {p.district && <option value={OTHER_TOWN}>Other (type it in)</option>}
+        </select>
+      </label>
+      {typing && <input className={input} aria-label="Your town" value={p.town} onChange={(e) => set({ town: e.target.value })} placeholder="Your town or village" maxLength={80} autoFocus />}
+    </div>
+  );
+}
+
 function AvailabilityStep({ p, set }: StepProps) {
   return (
     <div className="grid gap-6">
@@ -479,6 +507,10 @@ function AvailabilityStep({ p, set }: StepProps) {
       <fieldset className="grid gap-2">
         <legend className="mb-1.5 text-[13px] text-body">Languages you speak</legend>
         <div className="flex flex-wrap gap-2">{MEDICO_LANGUAGES.map((l) => <Chip key={l} on={p.languages.includes(l)} onClick={() => set({ languages: toggle(p.languages, l) })}>{l}</Chip>)}</div>
+        {p.languages.includes("Other") && (
+          <input className={`${input} mt-1`} aria-label="Other languages" value={p.otherLanguages} onChange={(e) => set({ otherLanguages: e.target.value })}
+            placeholder="Please specify, e.g. Kannada, Tulu" maxLength={120} autoFocus />
+        )}
       </fieldset>
       <label className={label}>
         <span>How far will you travel? <strong className="font-semibold text-navy">{p.radiusKm} km</strong></span>
@@ -508,8 +540,8 @@ function BioStep({ p, set, onEdit }: StepProps & { onEdit: (step: number) => voi
   const rows: [string, string, number][] = [
     ["Name", displayName(p), 0], ["Role", [p.role, p.specialisation].filter(Boolean).join(" · "), 0], ["Qualification", p.qualification, 0],
     ["Photo", p.photoUrl ? "Added" : "", 1], ["Registration", [p.council, p.registrationNo].filter(Boolean).join(" · "), 2],
-    ["District", p.district, 3], ["Experience", totalYears(p) ? `${totalYears(p)} years` : "", 4], ["Awards", p.awards.filter((a) => a.title).map((a) => a.title).join(", "), 5],
-    ["Languages", p.languages.join(", "), 6], ["Travel", `Up to ${p.radiusKm} km`, 6],
+    ["Area", medicoPlace(p), 3], ["Experience", totalYears(p) ? `${totalYears(p)} years` : "", 4], ["Awards", p.awards.filter((a) => a.title).map((a) => a.title).join(", "), 5],
+    ["Languages", spokenLanguages(p).join(", "), 6], ["Travel", `Up to ${p.radiusKm} km`, 6],
   ];
   return (
     <div className="grid gap-6">

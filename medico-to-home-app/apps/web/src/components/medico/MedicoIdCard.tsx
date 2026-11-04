@@ -1,6 +1,6 @@
 "use client";
 
-import { displayName, medicoRole, totalYears, type MedicoProfile } from "@medico/shared";
+import { displayName, medicoPlace, medicoRole, spokenLanguages, totalYears, type MedicoProfile } from "@medico/shared";
 import { useRef, useState, type KeyboardEvent, type PointerEvent, type ReactNode } from "react";
 
 // "Travancore-Cochin Medical Council (TCMC)" → "TCMC"; anything without a short form stays as it is.
@@ -227,16 +227,16 @@ export function MedicoIdCard({ p, id, stage }: { p: MedicoProfile; id: string; s
                     {(awards[0].by || awards[0].year) && <span className="text-muted"> · {[awards[0].by, awards[0].year].filter(Boolean).join(", ")}</span>}
                   </Line>
                 )}
-                <Tags label="Speaks" items={p.languages} />
+                <Tags label="Speaks" items={spokenLanguages(p)} />
                 <Tags label="Available" items={p.slots} />
-                {!p.bio && !latest && !awards[0] && !p.languages.length && !p.slots.length && (
+                {!p.bio && !latest && !awards[0] && !spokenLanguages(p).length && !p.slots.length && (
                   <p className="m-auto text-center text-[13px] text-faint">Profile details will appear here as {first} fills them in.</p>
                 )}
               </div>
 
               <div className="relative mt-3 flex flex-none items-center justify-center gap-2 overflow-hidden py-2.5 text-[11px] font-semibold tracking-[.24em] text-white uppercase" style={{ background: colour }}>
                 <svg aria-hidden width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4"><path d="M3 12a9 9 0 0 1 15.5-6.2L21 8M21 3v5h-5M21 12a9 9 0 0 1-15.5 6.2L3 16M3 21v-5h5" /></svg>
-                {p.district ? `Visits homes in ${p.district}` : "Home visits"}
+                {p.district ? `Visits homes in ${medicoPlace(p)}` : "Home visits"}
               </div>
             </article>
           </div>

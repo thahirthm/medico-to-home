@@ -1,7 +1,7 @@
 "use client";
 
 import {
-  PERSONAL_FIELDS, professionByLabel, totalYears, VERIFICATION_STEPS, WORK_FIELDS,
+  medicoPlace, PERSONAL_FIELDS, professionByLabel, spokenLanguages, totalYears, VERIFICATION_STEPS, WORK_FIELDS,
   type ApplicationDocument, type Details, type Field, type MedicoProfile, type VerificationRecord, type VerificationStep,
 } from "@medico/shared";
 import { useState, type ReactNode } from "react";
@@ -166,13 +166,13 @@ function MedicoApplication({ profile: p }: { profile: MedicoProfile }) {
         <p className="text-[13px] leading-relaxed text-body">{p.bio || "No bio yet."}</p>
       </section>
       <Section title="About" rows={[["Full name", p.name], ["Role", p.role], ["Specialisation", p.specialisation], ["Qualification", p.qualification], ["Gender", p.gender]].map(([k, v]) => [k, v || "Not added"] as const)} />
-      <Section title="Registration and contact" rows={[["Council", p.council], ["Registration no.", p.registrationNo], ["Mobile", p.phone], ["Email", p.email], ["District", p.district]].map(([k, v]) => [k, v || "Not added"] as const)} />
+      <Section title="Registration and contact" rows={[["Council", p.council], ["Registration no.", p.registrationNo], ["Mobile", p.phone], ["Email", p.email], ["District", p.district], ["Town", p.town]].map(([k, v]) => [k, v || "Not added"] as const)} />
       <Section title="Experience" rows={[
         ["Total", years ? `${years} years` : "Not added"],
         ...p.workplaces.filter((w) => w.place).map((w) => [w.place, [w.role, [w.from, w.to].filter(Boolean).join("–")].filter(Boolean).join(" · ")] as const),
         ...p.awards.filter((x) => x.title).map((x) => [`Award: ${x.title}`, [x.by, x.year].filter(Boolean).join(", ")] as const),
       ]} />
-      <Section title="Availability" rows={[["Free", p.slots.join(", ") || "Not added"], ["Languages", p.languages.join(", ") || "Not added"], ["Travels up to", `${p.radiusKm} km`]]} />
+      <Section title="Availability" rows={[["Free", p.slots.join(", ") || "Not added"], ["Languages", spokenLanguages(p).join(", ") || "Not added"], ["Travels up to", `${p.radiusKm} km`]]} />
     </div>
   );
 }
@@ -242,8 +242,8 @@ function facts(a: Application) {
     const p = a.details.profile as unknown as MedicoProfile;
     return {
       name: p.name, role: p.role, specialisation: p.specialisation, qualification: p.qualification, gender: p.gender, photo: p.photoUrl, bio: p.bio,
-      council: p.council, registration: p.registrationNo, phone: p.phone, email: p.email, district: p.district,
-      years: totalYears(p), languages: p.languages, slots: p.slots, radius: `${p.radiusKm} km`,
+      council: p.council, registration: p.registrationNo, phone: p.phone, email: p.email, district: medicoPlace(p),
+      years: totalYears(p), languages: spokenLanguages(p), slots: p.slots, radius: `${p.radiusKm} km`,
       workplaces: p.workplaces.filter((w) => w.place).map((w) => [w.place, [w.role, [w.from, w.to].filter(Boolean).join("–")].filter(Boolean).join(" · ")] as const),
       awards: p.awards.filter((x) => x.title).map((x) => [x.title, [x.by, x.year].filter(Boolean).join(", ")] as const),
     };
