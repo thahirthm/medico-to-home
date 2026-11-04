@@ -59,7 +59,7 @@ function AdminFrame({ children }: { children: ReactNode }) {
       <aside className="border-b border-line bg-white lg:sticky lg:top-0 lg:flex lg:h-screen lg:w-60 lg:flex-none lg:flex-col lg:border-b-0 lg:border-r">
         <div className="flex items-center justify-between px-5 py-4 lg:py-6">
           <Link href="/admin" className="flex min-h-10 items-center">
-            <Image src="/brand/logo.svg" alt="Medico To Home" width={132} height={32} className="h-7 w-auto" unoptimized />
+            <Image src="/brand/logo.svg" alt="Medico To Home" width={132} height={32} className="h-7 w-auto lg:h-10" unoptimized />
           </Link>
           <span className="text-xs text-muted">Admin</span>
         </div>

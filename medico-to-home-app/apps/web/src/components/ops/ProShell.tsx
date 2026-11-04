@@ -40,7 +40,7 @@ function ProFrame({ children }: { children: ReactNode }) {
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
           <div className="flex items-center gap-8">
             <Link href="/pro" className="flex min-h-10 items-center gap-2">
-              <Image src="/brand/logo.svg" alt="Medico To Home" width={120} height={28} className="h-6 w-auto" unoptimized />
+              <Image src="/brand/logo.svg" alt="Medico To Home" width={120} height={28} className="h-6 w-auto md:h-10" unoptimized />
               <span className="rounded-full bg-wash px-2 py-0.5 text-[11px] text-muted">Medico</span>
             </Link>
             <nav className="hidden gap-1 md:flex" aria-label="Professional mode">

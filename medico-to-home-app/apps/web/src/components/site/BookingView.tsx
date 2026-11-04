@@ -299,6 +299,9 @@ export function BookingView() {
                       )}
                     </div>
                     <div style={{ flex: "1 1 260px", display: "flex", flexDirection: "column", gap: "16px" }}>
+                      {v.slotGroups.length === 0 && (
+                        <div style={{ padding: "18px", borderRadius: "12px", background: "#F6F7FA", fontSize: "14px", color: "#6B7085" }}>No visits on this day. Please pick another date.</div>
+                      )}
                       {v.slotGroups.map((g: any, i0: number) => (
                         <Fragment key={i0}>
                           <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>

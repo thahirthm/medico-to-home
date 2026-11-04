@@ -11,7 +11,7 @@ import { MTH, setCatalogue } from "@/prototype/catalogue";
 import { MTHL } from "@/prototype/schedule";
 
 const SiteContext = createContext(null);
-const GRID_PAGE = 12;
+const GRID_PAGE = 15;
 // What the user was doing before Google sign-in sent them away, so it can continue on return.
 const PENDING_KEY = "mth-pending-login";
 export const useSite = (): any => useContext(SiteContext);
@@ -41,7 +41,9 @@ class SiteStore extends Component {
     b: null, track: 0, eta: 12, earnS: 20, earnP: 650, faq: -1, proTab: 'about' };
 
   componentDidMount() {
-    this._rs = () => this.setState({ w: window.innerWidth }); this._rs();
+    // clientWidth, not innerWidth: on phones innerWidth grows to fit the wider desktop first render, so the
+    // site would stay in its desktop layout. clientWidth is the real screen width.
+    this._rs = () => this.setState({ w: document.documentElement.clientWidth || window.innerWidth }); this._rs();
     this._sc = () => { const s = window.scrollY > 8; if (s !== this.state.scrolled) this.setState({ scrolled: s }); };
     this._md = (e) => { if (!e.target.closest('[data-dd]')) { const s = this.state; if (s.locOpen || s.qOpen || s.whenOpen) this.setState({ locOpen: false, qOpen: false, whenOpen: false }); } };
     window.addEventListener('resize', this._rs); window.addEventListener('scroll', this._sc); document.addEventListener('mousedown', this._md);
@@ -210,8 +212,10 @@ class SiteStore extends Component {
     // Today's availability is worked out against the clock, so a slot that has passed no longer counts.
     const next = L.nextToday(p), now = L.availableNow(p), today = now || !!next;
     return { id: p.id, img: p.img, hasImg: !!p.img, noImg: !p.img, initials: p.initials, name: p.name, rating: p.rating.toFixed(1), reviews: p.reviews,
-      roleLine: c.one + ' · ' + p.qual, exp: p.exp, langs: p.langs.join(', '), distLine: km.toFixed(1) + ' km away · ' + p.locality,
+      roleLine: c.one + ' · ' + p.qual, exp: p.exp, langs: p.langs.join(', '), distLine: km.toFixed(1) + ' km away · ' + p.locality, distShort: km.toFixed(1) + ' km · ' + p.locality,
       availText: p.today === '24×7' ? 'Available now · 24×7' : now ? 'Available now · ' + next : next ? 'Available today · ' + next : (() => { const fo = L.firstOpen(p); return 'Next: ' + L.fdl(fo.d) + ', ' + fo.t; })(),
+      // Short form for the chip on the card photo.
+      availShort: p.today === '24×7' ? 'Open 24×7' : now ? 'Available now' : next ? 'Today ' + next : (() => { const fo = L.firstOpen(p); return L.DOW[fo.d.getDay()] + ' ' + fo.t; })(),
       availBg: today ? '#E8F5EF' : '#F1F2F6', availFg: today ? '#1F9D6B' : '#6B7085',
       priceText: L.inr(p.price), unitText: '/ ' + c.unit,
       open: () => this.openPro(p.id), book: (e) => { if (e && e.stopPropagation) e.stopPropagation(); this.startBook(p.id); } };
@@ -324,7 +328,7 @@ class SiteStore extends Component {
     const week = days.map((d, i) => { const off = L.offDay(p, d); const on = i === di; const free = off ? 0 : L.ALL.filter(t => !L.booked(p, d, t)).length;
       return { dow: i === 0 ? 'Today' : i === 1 ? 'Tmrw' : L.DOW[d.getDay()], n: d.getDate(), sub: off ? 'Off' : free + ' slots', bg: on ? '#02084D' : '#fff', fg: on ? '#fff' : off ? '#B5B8C6' : '#02084D', bd: on ? '#02084D' : '#E6E8EF', pick: () => this.setState({ proDay: i }) }; });
     const offSel = L.offDay(p, dsel);
-    const pslots = offSel ? [] : L.ALL.map(t => { const bk = L.booked(p, dsel, t); return { t, label: bk ? 'Booked' : t, bg: bk ? '#F6F7FA' : '#fff', fg: bk ? '#B5B8C6' : '#02084D', bd: bk ? '#F0F1F5' : '#E6E8EF', cur: bk ? 'default' : 'pointer', pick: () => { if (!bk) this.startBook(p.id, { date: L.K(dsel), slot: t, plan: false }); } }; });
+    const pslots = offSel ? [] : L.shownTimes(p, dsel).map(t => { const bk = L.booked(p, dsel, t); return { t, label: bk ? 'Booked' : t, bg: bk ? '#F6F7FA' : '#fff', fg: bk ? '#B5B8C6' : '#02084D', bd: bk ? '#F0F1F5' : '#E6E8EF', cur: bk ? 'default' : 'pointer', pick: () => { if (!bk) this.startBook(p.id, { date: L.K(dsel), slot: t, plan: false }); } }; });
     const km = L.km(p, this.at());
     const similar = M.pros.filter(x => x.cat === p.cat && x.id !== p.id).sort((a, b) => L.km(a, this.at()) - L.km(b, this.at())).slice(0, 4).map(x => this.card(x));
     return {
@@ -358,7 +362,9 @@ class SiteStore extends Component {
     });
     const canPrev = b.calOff > 0 || mb > new Date(L.T0.getFullYear(), L.T0.getMonth(), 1);
     const slotRef = b.plan ? L.P(b.start) : L.P(b.date);
-    const slotGroups = L.SL.map(([g, ts]) => ({ g, slots: ts.map(t => { const bk = !b.plan && L.booked(p, slotRef, t); const on = b.slot === t; return { t: bk ? 'Booked' : t, bg: on ? N : bk ? '#F6F7FA' : '#fff', fg: on ? '#fff' : bk ? '#B5B8C6' : N, bd: on ? N : bk ? '#F0F1F5' : '#E6E8EF', cur: bk ? 'not-allowed' : 'pointer', pick: () => { if (!bk) this.setB({ slot: t }); } }; }) }));
+    // A single visit lists only the hours this professional works that day; a plan's dates vary, so it lists every hour.
+    const shown = b.plan ? L.ALL : L.shownTimes(p, slotRef);
+    const slotGroups = L.SL.map(([g, ts]) => ({ g, slots: ts.filter(t => shown.includes(t)).map(t => { const bk = !b.plan && L.booked(p, slotRef, t); const on = b.slot === t; return { t: bk ? 'Booked' : t, bg: on ? N : bk ? '#F6F7FA' : '#fff', fg: on ? '#fff' : bk ? '#B5B8C6' : N, bd: on ? N : bk ? '#F0F1F5' : '#E6E8EF', cur: bk ? 'not-allowed' : 'pointer', pick: () => { if (!bk) this.setB({ slot: t }); } }; }) })).filter(g => g.slots.length);
     const startDays = Array.from({ length: 14 }, (_, i) => { const d = L.add(L.T0, i); const on = L.K(d) === b.start; return { dow: i === 0 ? 'Today' : L.DOW[d.getDay()], n: d.getDate(), mon: L.MON[d.getMonth()], ...chip(on), pick: () => this.setB({ start: L.K(d), skip: [], calOff: 0 }) }; });
     const sessOpts = [5, 10, 15, 20, 'custom'].map(n => ({ label: n === 'custom' ? 'Custom' : String(n), ...chip(b.sessions === n), pick: () => this.setB({ sessions: n, skip: [] }) }));
     const freqOpts = Object.keys(L.FREQ).map(k => ({ label: L.FREQ[k], ...chip(b.freq === k), pick: () => this.setB({ freq: k, skip: [] }) }));

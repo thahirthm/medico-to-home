@@ -4,7 +4,7 @@ import {
   councilsFor, DAY_PARTS, displayName, hasTimetable, inDayOrder, MAX_SERVICES, shortTime, SLOT_TIMES, timetableSummary, WEEKDAYS, weeklySlotCount,
   type MedicoService, type Weekday,
    emptyMedicoProfile, KERALA_DISTRICTS, MEDICO_GENDERS, MEDICO_LANGUAGES, MEDICO_ROLES,
-  medicoPlace, MEDICO_SUGGESTIONS, normaliseMedico, RADIUS_KM, registrationFor, spokenLanguages, templateBio, totalYears, townsIn, YEARS_MAX, type MedicoProfile, type MedicoRole,
+  medicoPlace, MEDICO_SUGGESTIONS, normaliseMedico, registrationFor, spokenLanguages, templateBio, totalYears, townsIn, YEARS_MAX, type MedicoProfile, type MedicoRole,
 } from "@medico/shared";
 import Image from "next/image";
 import Link from "next/link";
@@ -34,7 +34,7 @@ const STEPS: { title: string; intro: string; done: (p: MedicoProfile) => boolean
   { title: "Contact", intro: "We only use these to reach you. Patients never see them.", done: (p) => !!(p.phone || p.email || p.district) },
   { title: "Experience", intro: "Every year you have given to patients counts. Let's add them up.", done: (p) => totalYears(p) > 0 },
   { title: "Awards", intro: "You earned these. Let families see them.", done: (p) => p.awards.some((a) => a.title) },
-  { title: "Availability", intro: "Work when it suits you. Set your week, where you go and the languages you speak.", done: (p) => hasTimetable(p) || p.serviceTowns.length > 0 },
+  { title: "Availability", intro: "Work when it suits you. Set your week and the languages you speak.", done: (p) => hasTimetable(p) },
   { title: "Services & charges", intro: "What you offer and what you charge. We have filled in a starting list for you.", done: (p) => p.services.some((x) => x.name && x.price > 0) },
   { title: "Your bio", intro: "Last step. Let's tell families who you are.", done: (p) => !!p.bio.trim() },
 ];
@@ -154,7 +154,7 @@ export function Registration() {
     <div className="min-h-dvh bg-[#F5F6FA]">
       <header className="sticky top-0 z-10 border-b border-line bg-white">
         <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-5 py-3">
-          <Link href="/" aria-label="Medico To Home home"><Image src="/brand/logo.svg" alt="Medico To Home" width={130} height={30} className="h-7 w-auto" unoptimized /></Link>
+          <Link href="/" aria-label="Medico To Home home"><Image src="/brand/logo.svg" alt="Medico To Home" width={130} height={30} className="h-7 w-auto md:h-10" unoptimized /></Link>
           <span className="text-[13px] text-muted">{percent}% done · {minutesLeft ? `about ${minutesLeft} min left` : "all done"}</span>
         </div>
         <div className="h-1 bg-[#E8F5EF]" role="progressbar" aria-valuenow={percent} aria-valuemin={0} aria-valuemax={100} aria-label="Registration progress">
@@ -162,7 +162,7 @@ export function Registration() {
         </div>
       </header>
 
-      <div className="mx-auto grid max-w-5xl gap-8 px-5 py-8 pb-32 lg:grid-cols-[220px_1fr]">
+      <div className="mx-auto grid max-w-5xl gap-8 px-4 py-6 pb-32 sm:px-5 sm:py-8 lg:grid-cols-[220px_minmax(0,1fr)]">
         <nav aria-label="Registration steps" className="hidden lg:block">
           <ol className="sticky top-24 flex flex-col gap-1">
             {STEPS.map((s, i) => {
@@ -183,7 +183,7 @@ export function Registration() {
           </ol>
         </nav>
 
-        <section key={step} className="fade-up flex flex-col gap-6 rounded-[24px] border border-line bg-white p-6 sm:p-9">
+        <section key={step} className="fade-up flex min-w-0 flex-col gap-6 rounded-[24px] border border-line bg-white p-5 sm:p-9">
           {note && (
             <div role="status" className="rounded-[14px] bg-[#FBF6EA] px-4 py-3 text-[14px] leading-relaxed text-[#7A5410]">
               <strong className="font-medium">{review!.stage === "info_needed" ? "Our team needs a few more details: " : "Your last registration was not approved: "}</strong>
@@ -202,7 +202,7 @@ export function Registration() {
           {step === 3 && <ContactStep p={p} set={set} />}
           {step === 4 && <ExperienceStep p={p} set={set} />}
           {step === 5 && <AwardsStep p={p} set={set} />}
-          {step === 6 && <AvailabilityStep p={p} set={set} onEdit={goTo} />}
+          {step === 6 && <AvailabilityStep p={p} set={set} />}
           {step === 7 && <ServicesStep p={p} set={set} onEdit={goTo} />}
           {step === 8 && <BioStep p={p} set={set} onEdit={goTo} />}
 
@@ -539,12 +539,22 @@ function TownField({ p, set }: StepProps) {
 
 const WORKWEEK: Weekday[] = ["Mon", "Tue", "Wed", "Thu", "Fri"];
 
+/** A day or hour toggle that fills its grid cell, so rows line up on phones. */
+function Slot({ on, onClick, children }: { on: boolean; onClick: () => void; children: ReactNode }) {
+  return (
+    <button type="button" onClick={onClick} aria-pressed={on}
+      className={`cursor-pointer rounded-full border px-1 py-2 text-center text-[14px] whitespace-nowrap transition-colors sm:px-4 ${on ? "border-navy bg-navy text-white" : "border-line bg-white text-navy hover:border-navy"}`}>
+      {children}
+    </button>
+  );
+}
+
 /** A small text button for "select all" style shortcuts. */
 function Quick({ onClick, children }: { onClick: () => void; children: ReactNode }) {
   return <button type="button" onClick={onClick} className="cursor-pointer text-[13px] text-navy underline underline-offset-2 hover:text-navy-soft">{children}</button>;
 }
 
-function AvailabilityStep({ p, set, onEdit }: StepProps & { onEdit: (step: number) => void }) {
+function AvailabilityStep({ p, set }: StepProps) {
   // Pick days, then hours: the same hours apply to every day picked.
   const [days, setDays] = useState<Weekday[]>(() => WEEKDAYS.filter((d) => p.weekly[d]?.length));
   const [hours, setHours] = useState<string[]>(() => p.weekly[WEEKDAYS.find((d) => p.weekly[d]?.length) ?? "Mon"] ?? []);
@@ -553,7 +563,6 @@ function AvailabilityStep({ p, set, onEdit }: StepProps & { onEdit: (step: numbe
     setHours(h);
     set({ weekly: Object.fromEntries(d.map((day) => [day, inDayOrder(h)])) });
   };
-  const towns = townsIn(p.district).filter((t) => t !== p.town);
   const summary = timetableSummary(p);
   return (
     <div className="grid gap-7">
@@ -561,7 +570,7 @@ function AvailabilityStep({ p, set, onEdit }: StepProps & { onEdit: (step: numbe
         <h2 className="text-[15px] font-medium text-navy">When can families book you?</h2>
         <label className="flex cursor-pointer items-center gap-3 text-[14px]">
           <input type="checkbox" className="size-4 accent-navy" checked={p.allDay} onChange={(e) => set({ allDay: e.target.checked })} />
-          Available 24×7, every day <span className="text-muted">(live-in care, night shifts, ambulance)</span>
+          <span>Available 24×7, every day<span className="block text-[12px] text-muted">For live-in care, night shifts and ambulances.</span></span>
         </label>
 
         {!p.allDay && (
@@ -571,8 +580,8 @@ function AvailabilityStep({ p, set, onEdit }: StepProps & { onEdit: (step: numbe
                 <span>1. Days you work</span>
                 <span className="flex gap-3"><Quick onClick={() => save(WORKWEEK, hours)}>Mon–Fri</Quick><Quick onClick={() => save([...WEEKDAYS], hours)}>Every day</Quick></span>
               </legend>
-              <div className="flex flex-wrap gap-2">
-                {WEEKDAYS.map((d) => <Chip key={d} on={days.includes(d)} onClick={() => save(WEEKDAYS.filter((x) => (x === d ? !days.includes(d) : days.includes(x))), hours)}>{d}</Chip>)}
+              <div className="grid grid-cols-4 gap-2 sm:grid-cols-7">
+                {WEEKDAYS.map((d) => <Slot key={d} on={days.includes(d)} onClick={() => save(WEEKDAYS.filter((x) => (x === d ? !days.includes(d) : days.includes(x))), hours)}>{d}</Slot>)}
               </div>
             </fieldset>
 
@@ -583,9 +592,11 @@ function AvailabilityStep({ p, set, onEdit }: StepProps & { onEdit: (step: numbe
               </legend>
               <div className="grid gap-2.5">
                 {DAY_PARTS.map((part) => (
-                  <div key={part.label} className="flex flex-wrap items-center gap-2">
-                    <span className="w-20 flex-none text-[13px] text-muted">{part.label}</span>
-                    {part.times.map((t) => <Chip key={t} on={hours.includes(t)} onClick={() => save(days, toggle(hours, t))}>{shortTime(t)}</Chip>)}
+                  <div key={part.label} className="grid gap-1.5 sm:grid-cols-[5.5rem_minmax(0,1fr)] sm:items-center">
+                    <span className="text-[13px] text-muted">{part.label}</span>
+                    <div className="grid grid-cols-5 gap-1.5 sm:gap-2">
+                      {part.times.map((t) => <Slot key={t} on={hours.includes(t)} onClick={() => save(days, toggle(hours, t))}>{shortTime(t)}</Slot>)}
+                    </div>
                   </div>
                 ))}
               </div>
@@ -599,23 +610,6 @@ function AvailabilityStep({ p, set, onEdit }: StepProps & { onEdit: (step: numbe
             : days.length && !hours.length ? "Now pick the hours you are free." : hours.length ? "Now pick the days you work." : "Pick your days and hours, or skip this and add them later."}
         </p>
       </section>
-
-      <fieldset className="grid gap-3">
-        <legend className="mb-1 text-[15px] font-medium text-navy">Service area</legend>
-        {p.district ? (
-          <>
-            <p className="-mt-1 text-[13px] text-muted">You start from <strong className="font-medium text-navy">{medicoPlace(p)}</strong>. Pick the other towns you will visit.</p>
-            <div className="flex flex-wrap gap-2">{towns.map((t) => <Chip key={t} on={p.serviceTowns.includes(t)} onClick={() => set({ serviceTowns: toggle(p.serviceTowns, t) })}>{t}</Chip>)}</div>
-          </>
-        ) : (
-          <p className="-mt-1 text-[13px] text-muted">Add your district and town to choose the towns you cover. <button type="button" onClick={() => onEdit(3)} className="cursor-pointer text-navy underline">Add them in Contact</button></p>
-        )}
-        <label className={label}>
-          <span>How far will you travel? <strong className="font-semibold text-navy">{p.radiusKm} km</strong></span>
-          <input type="range" min={RADIUS_KM.min} max={RADIUS_KM.max} value={p.radiusKm} onChange={(e) => set({ radiusKm: Number(e.target.value) })} className="accent-navy" />
-          <span className="flex justify-between text-[12px] text-muted"><span>{RADIUS_KM.min} km</span><span>{RADIUS_KM.max} km</span></span>
-        </label>
-      </fieldset>
 
       <fieldset className="grid gap-2">
         <legend className="mb-1.5 text-[15px] font-medium text-navy">Languages you speak</legend>
@@ -672,14 +666,14 @@ function ServicesStep({ p, set, onEdit }: StepProps & { onEdit: (step: number) =
       {failed && !p.services.length && <p className="text-[13px] text-muted">Suggestions could not load. Add your services below.</p>}
       <ul className="grid gap-3">
         {p.services.map((x, i) => (
-          <li key={i} className="grid gap-2 rounded-[16px] border border-line p-3 sm:grid-cols-[1fr_130px_120px_auto] sm:items-end">
-            <label className={label}>Service<input className={input} value={x.name} onChange={(e) => edit(i, { name: e.target.value })} maxLength={80} placeholder="E.g. Home visit" /></label>
+          <li key={i} className="grid grid-cols-2 gap-2 rounded-[16px] border border-line p-3 sm:grid-cols-[minmax(0,1fr)_130px_120px_auto] sm:items-end">
+            <label className={`${label} col-span-2 sm:col-span-1`}>Service<input className={input} value={x.name} onChange={(e) => edit(i, { name: e.target.value })} maxLength={80} placeholder="E.g. Home visit" /></label>
             <label className={label}>Charge (₹ per {unit})
               <input className={input} inputMode="numeric" value={x.price || ""} onChange={(e) => edit(i, { price: Number(e.target.value.replace(/\D/g, "").slice(0, 6)) || 0 })} placeholder="500" />
             </label>
             <label className={label}>Takes<input className={input} value={x.duration} onChange={(e) => edit(i, { duration: e.target.value })} maxLength={30} placeholder="30 min" /></label>
             <button type="button" onClick={() => set({ services: p.services.filter((_, j) => j !== i) })} aria-label={`Remove ${x.name || "service"}`}
-              className="cursor-pointer justify-self-start rounded-full px-3 py-2.5 text-[13px] text-muted underline hover:text-bad sm:justify-self-auto">Remove</button>
+              className="col-span-2 cursor-pointer justify-self-end px-1 py-1 text-[13px] text-muted underline hover:text-bad sm:col-span-1 sm:px-3 sm:py-2.5">Remove</button>
           </li>
         ))}
       </ul>
@@ -712,16 +706,16 @@ function BioStep({ p, set, onEdit }: StepProps & { onEdit: (step: number) => voi
     ["Name", displayName(p), 0], ["Role", [p.role, p.specialisation].filter(Boolean).join(" · "), 0], ["Qualification", p.qualification, 0],
     ["Photo", p.photoUrl ? "Added" : "", 1], ["Registration", [p.council, p.registrationNo].filter(Boolean).join(" · "), 2],
     ["Area", medicoPlace(p), 3], ["Experience", totalYears(p) ? `${totalYears(p)} years` : "", 4], ["Awards", p.awards.filter((a) => a.title).map((a) => a.title).join(", "), 5],
-    ["Timetable", timetableSummary(p).join(" · "), 6], ["Also visits", p.serviceTowns.join(", "), 6], ["Travel", `Up to ${p.radiusKm} km`, 6],
+    ["Timetable", timetableSummary(p).join(" · "), 6],
     ["Languages", spokenLanguages(p).join(", "), 6], ["Services", p.services.filter((x) => x.name).map((x) => `${x.name} ₹${x.price}`).join(", "), 7],
   ];
   return (
     <div className="grid gap-6">
-      <dl className="grid gap-0 divide-y divide-line-soft rounded-[18px] border border-line">
+      <dl className="grid grid-cols-[minmax(0,1fr)] divide-y divide-line-soft rounded-[18px] border border-line">
         {rows.map(([k, v, s]) => (
-          <div key={k} className="flex items-center justify-between gap-4 px-4 py-2.5 text-[14px]">
-            <dt className="w-28 flex-none text-muted">{k}</dt>
-            <dd className={`flex-1 truncate ${v ? "" : "text-faint"}`}>{v || "Not added"}</dd>
+          <div key={k} className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-x-4 gap-y-0.5 px-4 py-3 text-[14px] sm:grid-cols-[7rem_minmax(0,1fr)_auto]">
+            <dt className="text-muted">{k}</dt>
+            <dd className={`col-start-1 row-start-2 break-words sm:col-start-auto sm:row-start-auto ${v ? "" : "text-faint"}`}>{v || "Not added"}</dd>
             <button type="button" onClick={() => onEdit(s)} className="cursor-pointer text-[13px] text-navy underline">Edit</button>
           </div>
         ))}

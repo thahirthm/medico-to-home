@@ -22,8 +22,8 @@ export function HomeView() {
               <span style={{ fontWeight: "600" }}>home</span>
               .
             </h1>
-            <div style={{ width: "100%", maxWidth: "1040px", marginTop: "18px", background: "#fff", border: "1px solid #E6E8EF", borderRadius: v.searchR, boxShadow: "0 1px 0 rgba(2,8,77,.02), 0 20px 50px -24px rgba(2,8,77,.14)", display: "flex", flexWrap: "wrap", alignItems: "stretch", padding: "8px", textAlign: "left", position: "relative", zIndex: "20" }}>
-              <div data-dd="1" style={{ flex: "1.5 1 260px", position: "relative", padding: "12px 20px", borderRadius: "999px", display: "flex", flexDirection: "column", gap: "3px", justifyContent: "center", transition: "background .2s" }} className="mth-hover-6">
+            <div style={{ width: "100%", maxWidth: "1040px", marginTop: "18px", background: "#fff", border: "1px solid #E6E8EF", borderRadius: v.searchR, boxShadow: "0 1px 0 rgba(2,8,77,.02), 0 20px 50px -24px rgba(2,8,77,.14)", display: "flex", flexWrap: "wrap", alignItems: "stretch", padding: "8px", textAlign: "left", position: "relative", zIndex: "20" }} className="mth-hs">
+              <div data-dd="1" style={{ flex: "1.5 1 260px", position: "relative", padding: "12px 20px", borderRadius: "999px", display: "flex", flexDirection: "column", gap: "3px", justifyContent: "center", transition: "background .2s" }} className="mth-hover-6 mth-hs-q">
                 <label style={{ fontSize: "12px", fontWeight: "500", color: "#02084D" }}>What are you looking for?</label>
                 <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                   <input value={v.q} onChange={v.onQ} onFocus={v.onQFocus} onKeyDown={v.onQKey} placeholder="Physiotherapy, nursing, lab test…" style={{ border: "none", outline: "none", background: "transparent", fontSize: "16px", fontWeight: "300", color: "#02084D", width: "100%", padding: "2px 0" }} />
@@ -61,7 +61,7 @@ export function HomeView() {
                   </>
                 )}
               </div>
-              <div data-dd="1" style={{ flex: "1 1 220px", position: "relative", borderLeft: v.segL, borderTop: v.segT }}>
+              <div data-dd="1" style={{ flex: "1 1 220px", position: "relative", borderLeft: v.segL, borderTop: v.segT }} className="mth-hs-loc">
                 <button onClick={v.toggleLoc} style={{ width: "100%", height: "100%", textAlign: "left", border: "none", background: "transparent", padding: "12px 20px", borderRadius: "999px", cursor: "pointer", font: "inherit", display: "flex", flexDirection: "column", gap: "3px", justifyContent: "center", transition: "background .2s" }} className="mth-hover-6">
                   <span style={{ fontSize: "12px", fontWeight: "500", color: "#02084D" }}>Location</span>
                   {" "}
@@ -144,7 +144,7 @@ export function HomeView() {
                   </>
                 )}
               </div>
-              <div data-dd="1" style={{ flex: ".8 1 170px", position: "relative", borderLeft: v.segL, borderTop: v.segT }}>
+              <div data-dd="1" style={{ flex: ".8 1 170px", position: "relative", borderLeft: v.segL, borderTop: v.segT }} className="mth-hs-when">
                 <button onClick={v.toggleWhen} style={{ width: "100%", height: "100%", textAlign: "left", border: "none", background: "transparent", padding: "12px 20px", borderRadius: "999px", cursor: "pointer", font: "inherit", display: "flex", flexDirection: "column", gap: "3px", justifyContent: "center", transition: "background .2s" }} className="mth-hover-6">
                   <span style={{ fontSize: "12px", fontWeight: "500", color: "#02084D" }}>When</span>
                   {" "}
@@ -181,7 +181,7 @@ export function HomeView() {
                   </>
                 )}
               </div>
-              <button onClick={v.doSearch} style={{ flex: "0 0 auto", minHeight: "60px", minWidth: v.searchBtnW, margin: v.searchBtnM, display: "flex", alignItems: "center", justifyContent: "center", gap: "10px", background: "#02084D", color: "#fff", border: "none", borderRadius: "999px", padding: "0 30px", font: "inherit", fontSize: "15px", fontWeight: "600", cursor: "pointer", transition: "background .2s, transform .15s" }} className="mth-hover-7 mth-active-8">
+              <button onClick={v.doSearch} style={{ flex: "0 0 auto", minHeight: "60px", minWidth: v.searchBtnW, margin: v.searchBtnM, display: "flex", alignItems: "center", justifyContent: "center", gap: "10px", background: "#02084D", color: "#fff", border: "none", borderRadius: "999px", padding: "0 30px", font: "inherit", fontSize: "15px", fontWeight: "600", cursor: "pointer", transition: "background .2s, transform .15s" }} className="mth-hover-7 mth-active-8 mth-hs-btn">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.8" strokeLinecap="round">
                   <path d="M11 4a7 7 0 1 0 0 14 7 7 0 0 0 0-14zM21 21l-5-5" />
                 </svg>
@@ -189,27 +189,6 @@ export function HomeView() {
               </button>
             </div>
             <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: "8px 22px", fontSize: "13px", fontWeight: "300", color: "#6B7085", marginTop: "6px" }}>
-              <span style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1F9D6B" strokeWidth="2">
-                  <path d="M5 12.5l4.5 4.5L19 7.5" />
-                </svg>
-                Verified professionals
-              </span>
-              {" "}
-              <span style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1F9D6B" strokeWidth="2">
-                  <path d="M5 12.5l4.5 4.5L19 7.5" />
-                </svg>
-                Transparent prices
-              </span>
-              {" "}
-              <span style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1F9D6B" strokeWidth="2">
-                  <path d="M5 12.5l4.5 4.5L19 7.5" />
-                </svg>
-                Live visit tracking
-              </span>
-              {" "}
               <span style={{ color: "#02084D", fontWeight: "400" }}>1,200+ professionals · ★ 4.8 average rating</span>
             </div>
           </div>
@@ -278,13 +257,13 @@ export function HomeView() {
                 </div>
                 <div style={{ fontSize: "14px", color: "#6B7085", fontWeight: "300" }}>{v.countText}</div>
               </div>
-              <div className="mth-cards" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(250px,1fr))", gap: "20px" }}>
+              <div className="mth-cards" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(210px,1fr))", gap: "20px" }}>
                 {v.loading && (
                   <>
                     {v.skel.map((k: any, i0: number) => (
                       <Fragment key={i0}>
                         <div style={{ border: "1px solid #EEF0F5", borderRadius: "16px", overflow: "hidden" }}>
-                          <div style={{ aspectRatio: "4/5", background: "#F1F2F6", animation: "mthSk 1.4s ease infinite" }}></div>
+                          <div style={{ aspectRatio: "1/1", background: "#F1F2F6", animation: "mthSk 1.4s ease infinite" }}></div>
                           <div style={{ padding: "16px", display: "flex", flexDirection: "column", gap: "10px" }}>
                             <div style={{ height: "14px", width: "60%", background: "#F1F2F6", borderRadius: "6px" }}></div>
                             <div style={{ height: "12px", width: "85%", background: "#F1F2F6", borderRadius: "6px" }}></div>

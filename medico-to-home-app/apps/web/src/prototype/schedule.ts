@@ -43,4 +43,6 @@ function price(p,b,mode){const svc=p.svcs[b.svc]||p.svcs[0];const S=sessions(b,m
  return {unit,n,sub,rate,disc,fee,gst,total:sub-disc+fee+gst,unitLabel,svc}}
 function month(base){const y=base.getFullYear(),m=base.getMonth();const first=new Date(y,m,1);const lead=(first.getDay()+6)%7;const days=new Date(y,m+1,0).getDate();const cells=[];for(let i=0;i<lead;i++)cells.push(null);for(let i=1;i<=days;i++)cells.push(new Date(y,m,i));return {cells,label:MONL[m]+' '+y}}
 const FREQ={daily:'Daily',alt:'Alternate days',week:'Weekdays only',custom:'Custom days'};
-export const MTHL={MON,DOW,get T0(){return today()},SL,ALL,HF,K,P,add,fd,fdl,inr,h,km,offDay,booked,nextToday,availableNow,firstOpen,sessions,price,month,FREQ,setBooked};
+// The times to show for a day: a real timetable shows only its own hours; demo listings show every slot.
+const shownTimes=(p,d)=>real(p)?ALL.filter(t=>openTimes(p,d).includes(t)):ALL;
+export const MTHL={shownTimes,MON,DOW,get T0(){return today()},SL,ALL,HF,K,P,add,fd,fdl,inr,h,km,offDay,booked,nextToday,availableNow,firstOpen,sessions,price,month,FREQ,setBooked};

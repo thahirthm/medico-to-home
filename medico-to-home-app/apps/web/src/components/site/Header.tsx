@@ -12,7 +12,7 @@ export function Header() {
       <header style={{ position: "sticky", top: "0", zIndex: "60", background: v.hdrBg, borderBottom: `1px solid ${v.hdrBd}`, transition: "background .3s ease, border-color .3s ease" }}>
         <div style={{ maxWidth: "1320px", margin: "0 auto", padding: "0 clamp(18px,4vw,48px)", height: "72px", display: "flex", alignItems: "center", gap: "20px" }}>
           <button onClick={v.goHome} aria-label="Medico To Home" style={{ background: "none", border: "none", padding: "0", cursor: "pointer", display: "flex", alignItems: "center", flex: "none" }}>
-            <img src="/brand/logo.svg" alt="Medico To Home" style={{ height: "32px", width: "auto", display: "block" }} />
+            <img src="/brand/logo.svg" alt="Medico To Home" style={{ height: "32px", width: "auto", display: "block" }} className="mth-logo" />
           </button>
           {v.hdrDesk && (
             <>

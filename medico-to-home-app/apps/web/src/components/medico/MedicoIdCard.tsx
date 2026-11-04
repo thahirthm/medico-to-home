@@ -102,7 +102,8 @@ export function MedicoIdCard({ p, id, stage }: { p: MedicoProfile; id: string; s
   };
 
   return (
-    <div className="flex flex-col items-center gap-3">
+    // Clipped sideways: in 3D the hidden back face's corner rings would otherwise widen the page on phones.
+    <div className="flex flex-col items-center gap-3 overflow-x-clip">
       <div className="badge-swing mx-auto flex w-full max-w-[330px] flex-col items-center" style={{ perspective: "1000px" }}>
         {/* Lanyard, and the clip that holds the badge through its slot */}
         <div aria-hidden className="relative z-10 flex flex-col items-center">
