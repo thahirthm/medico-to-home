@@ -1,6 +1,6 @@
 "use client";
 
-import { displayName, medicoPlace, medicoRole, spokenLanguages, totalYears, type MedicoProfile } from "@medico/shared";
+import { availabilityLines, displayName, medicoPlace, medicoRole, spokenLanguages, totalYears, type MedicoProfile } from "@medico/shared";
 import { useRef, useState, type KeyboardEvent, type PointerEvent, type ReactNode } from "react";
 
 // "Travancore-Cochin Medical Council (TCMC)" → "TCMC"; anything without a short form stays as it is.
@@ -228,8 +228,8 @@ export function MedicoIdCard({ p, id, stage }: { p: MedicoProfile; id: string; s
                   </Line>
                 )}
                 <Tags label="Speaks" items={spokenLanguages(p)} />
-                <Tags label="Available" items={p.slots} />
-                {!p.bio && !latest && !awards[0] && !spokenLanguages(p).length && !p.slots.length && (
+                <Tags label="Available" items={availabilityLines(p)} />
+                {!p.bio && !latest && !awards[0] && !spokenLanguages(p).length && !availabilityLines(p).length && (
                   <p className="m-auto text-center text-[13px] text-faint">Profile details will appear here as {first} fills them in.</p>
                 )}
               </div>

@@ -328,7 +328,7 @@ class SiteStore extends Component {
     const km = L.km(p, this.at());
     const similar = M.pros.filter(x => x.cat === p.cat && x.id !== p.id).sort((a, b) => L.km(a, this.at()) - L.km(b, this.at())).slice(0, 4).map(x => this.card(x));
     return {
-      pp: { ...this.card(p), qual: p.qual, reg: p.reg, bio: p.bio, role: c.one, brand: c.brand, locality: p.locality, district: M.LOCS[p.locality][2], radius: p.radius, km: km.toFixed(1), langsList: p.langs, roleQual: c.one + ' · ' + p.qual },
+      pp: { ...this.card(p), qual: p.qual, reg: p.reg, bio: p.bio, role: c.one, brand: c.brand, locality: p.locality, district: M.LOCS[p.locality][2], radius: p.radius, towns: (p.towns || []).join(', '), km: km.toFixed(1), langsList: p.langs, roleQual: c.one + ' · ' + p.qual },
       ppSvcs: p.svcs.map((x, i) => ({ n: x.n, d: x.d, price: L.inr(x.p), unit: '/ ' + c.unit, book: () => this.startBook(p.id, { svc: i }) })),
       ppRevs: p.revs.map(r => ({ ...r, starsTxt: '★★★★★'.slice(0, r.stars) + '☆☆☆☆☆'.slice(0, 5 - r.stars), initial: r.name[0] })),
       week, pslots, hasSlots: pslots.length > 0, noSlots: pslots.length === 0, selDayText: L.fdl(dsel),

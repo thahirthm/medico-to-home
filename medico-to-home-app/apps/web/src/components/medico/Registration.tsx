@@ -1,7 +1,9 @@
 "use client";
 
 import {
-  councilsFor, displayName, emptyMedicoProfile, KERALA_DISTRICTS, MEDICO_GENDERS, MEDICO_LANGUAGES, MEDICO_ROLES, MEDICO_SLOTS,
+  councilsFor, DAY_PARTS, displayName, hasTimetable, inDayOrder, MAX_SERVICES, shortTime, SLOT_TIMES, timetableSummary, WEEKDAYS, weeklySlotCount,
+  type MedicoService, type Weekday,
+   emptyMedicoProfile, KERALA_DISTRICTS, MEDICO_GENDERS, MEDICO_LANGUAGES, MEDICO_ROLES,
   medicoPlace, MEDICO_SUGGESTIONS, normaliseMedico, RADIUS_KM, registrationFor, spokenLanguages, templateBio, totalYears, townsIn, YEARS_MAX, type MedicoProfile, type MedicoRole,
 } from "@medico/shared";
 import Image from "next/image";
@@ -15,6 +17,9 @@ const label = "flex flex-col gap-1.5 text-[13px] text-body";
 const primary = "cursor-pointer rounded-full bg-navy px-7 py-3 text-[15px] font-semibold text-white hover:bg-navy-soft disabled:cursor-default disabled:opacity-50";
 const secondary = "cursor-pointer rounded-full border border-line bg-white px-6 py-3 text-[15px] text-navy hover:border-navy";
 const MIN_PER_STEP = 0.5;
+// Narrower footer buttons on phones, so Back, Skip and Continue fit on one row.
+const footerSecondary = secondary.replace("px-6", "px-4 sm:px-6");
+const footerPrimary = primary.replace("px-7", "px-5 sm:px-7");
 
 type Stage = "loading" | "form";
 interface Saved {
@@ -29,7 +34,8 @@ const STEPS: { title: string; intro: string; done: (p: MedicoProfile) => boolean
   { title: "Contact", intro: "We only use these to reach you. Patients never see them.", done: (p) => !!(p.phone || p.email || p.district) },
   { title: "Experience", intro: "Every year you have given to patients counts. Let's add them up.", done: (p) => totalYears(p) > 0 },
   { title: "Awards", intro: "You earned these. Let families see them.", done: (p) => p.awards.some((a) => a.title) },
-  { title: "Availability", intro: "Work when it suits you. You can change this anytime.", done: (p) => !!(p.slots.length || p.languages.length) },
+  { title: "Availability", intro: "Work when it suits you. Set your week, where you go and the languages you speak.", done: (p) => hasTimetable(p) || p.serviceTowns.length > 0 },
+  { title: "Services & charges", intro: "What you offer and what you charge. We have filled in a starting list for you.", done: (p) => p.services.some((x) => x.name && x.price > 0) },
   { title: "Your bio", intro: "Last step. Let's tell families who you are.", done: (p) => !!p.bio.trim() },
 ];
 
@@ -44,7 +50,7 @@ function Chip({ on, onClick, children }: { on: boolean; onClick: () => void; chi
   );
 }
 
-/** The 8-step Medico registration. Nothing is mandatory; the profile is saved on this device as it is filled in. */
+/** The 9-step Medico registration. Nothing is mandatory; the profile is saved on this device as it is filled in. */
 export function Registration() {
   const router = useRouter();
   const [stage, setStage] = useState<Stage>("loading");
@@ -53,6 +59,8 @@ export function Registration() {
   const [review, setReview] = useState<Saved["application"]>(null);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+  // Approved: changes go straight to the live listing, and the verified details are locked.
+  const [live, setLive] = useState(false);
   const userId = useRef("");
   const draftKey = () => `mth-medico-${userId.current}`;
 
@@ -65,7 +73,11 @@ export function Registration() {
       const meta = data.session.user.user_metadata as { full_name?: string; name?: string };
       const [saved, me] = await Promise.all([api<Saved>("/medico/profile"), api<{ professional: unknown }>("/me")]);
       if (!live) return;
-      if (me.professional || saved.application?.stage === "approved") return router.replace("/pro");
+      // Approved Medicos come here only to edit, from their profile.
+      const editing = new URLSearchParams(window.location.search).has("edit");
+      const approved = !!me.professional || saved.application?.stage === "approved";
+      if (approved && !editing) return router.replace("/pro");
+      setLive(approved);
       let draft: MedicoProfile | null = null;
       try {
         draft = JSON.parse(localStorage.getItem(draftKey()) || "null");
@@ -82,7 +94,6 @@ export function Registration() {
       };
       setP(normaliseMedico(loaded));
       // A sent registration lives on the Medico dashboard, unless they came back to edit it.
-      const editing = new URLSearchParams(window.location.search).has("edit");
       if (app?.submittedAt && app.stage !== "info_needed" && !editing && !draft) return router.replace("/pro");
       setStage("form");
     })().catch((e: Error) => live && (setError(e.message), setStage("form")));
@@ -106,6 +117,14 @@ export function Registration() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
+  // Backing out of an edit drops the draft, so the profile shows as it was saved.
+  const cancelEdit = () => {
+    try {
+      localStorage.removeItem(draftKey());
+    } catch {}
+    router.push("/pro/profile");
+  };
+
   const finish = async () => {
     setBusy(true);
     setError("");
@@ -114,7 +133,7 @@ export function Registration() {
       try {
         localStorage.removeItem(draftKey());
       } catch {}
-      router.replace("/pro?sent=1");
+      router.replace(live ? "/pro/profile" : "/pro?sent=1");
       return;
     } catch (e) {
       setError((e as Error).message);
@@ -177,14 +196,15 @@ export function Registration() {
             <p className="mt-1.5 text-[15px] text-body">{current.intro}</p>
           </div>
 
-          {step === 0 && <AboutStep p={p} set={set} />}
+          {step === 0 && <AboutStep p={p} set={set} locked={live} />}
           {step === 1 && <PhotoStep p={p} set={set} />}
-          {step === 2 && <RegistrationStep p={p} set={set} />}
+          {step === 2 && <RegistrationStep p={p} set={set} locked={live} />}
           {step === 3 && <ContactStep p={p} set={set} />}
           {step === 4 && <ExperienceStep p={p} set={set} />}
           {step === 5 && <AwardsStep p={p} set={set} />}
-          {step === 6 && <AvailabilityStep p={p} set={set} />}
-          {step === 7 && <BioStep p={p} set={set} onEdit={goTo} />}
+          {step === 6 && <AvailabilityStep p={p} set={set} onEdit={goTo} />}
+          {step === 7 && <ServicesStep p={p} set={set} onEdit={goTo} />}
+          {step === 8 && <BioStep p={p} set={set} onEdit={goTo} />}
 
           {error && <p role="alert" className="text-sm text-bad">{error}</p>}
         </section>
@@ -192,13 +212,18 @@ export function Registration() {
 
       <footer className="keyboard-hide fixed inset-x-0 bottom-0 z-10 border-t border-line bg-white">
         <div className="mx-auto flex max-w-5xl items-center justify-between gap-3 px-5 py-3">
-          {step > 0 ? <button onClick={() => goTo(step - 1)} className={secondary}>Back</button> : <span />}
+          {step > 0 ? <button onClick={() => goTo(step - 1)} className={footerSecondary}>Back</button> : <span />}
           <div className="flex items-center gap-3">
-            {!current.done(p) && !last && <button onClick={() => goTo(step + 1)} className="cursor-pointer px-3 py-3 text-[15px] text-muted underline hover:text-navy">Skip</button>}
+            {/* Every step can wait: the draft stays on this device, so nothing typed is lost. */}
             {last ? (
-              <button onClick={finish} disabled={busy} className={primary}>{busy ? "Saving…" : "Finish"}</button>
+              <button onClick={() => (live ? cancelEdit() : router.push("/"))} className={footerSecondary}>{live ? "Cancel" : "Finish later"}</button>
             ) : (
-              <button onClick={() => goTo(step + 1)} className={primary}>Continue</button>
+              <button onClick={() => goTo(step + 1)} className={footerSecondary}><span className="hidden sm:inline">Skip, </span>do it later</button>
+            )}
+            {last ? (
+              <button onClick={finish} disabled={busy} className={footerPrimary}>{busy ? "Saving…" : live ? "Save changes" : "Finish"}</button>
+            ) : (
+              <button onClick={() => goTo(step + 1)} className={footerPrimary}>Continue</button>
             )}
           </div>
         </div>
@@ -283,7 +308,9 @@ function Suggest({ label: text, value, options, onChange, placeholder }: { label
   );
 }
 
-function AboutStep({ p, set }: StepProps) {
+const VERIFIED_NOTE = "This was verified when you were approved. To change it, please contact our team.";
+
+function AboutStep({ p, set, locked }: StepProps & { locked?: boolean }) {
   const suggestions = MEDICO_SUGGESTIONS[p.role as MedicoRole];
   const example = (list: string[] | undefined, fallback: string) => (list ? `E.g. ${list.slice(0, 2).join(", ")}` : fallback);
   // Changing role clears a specialisation or qualification picked from the old role's list; anything typed in stays.
@@ -300,7 +327,11 @@ function AboutStep({ p, set }: StepProps) {
       <label className={label}>Full name<input className={input} value={p.name} onChange={(e) => set({ name: e.target.value })} autoComplete="name" placeholder="As on your registration certificate" /></label>
       <fieldset className="grid gap-2">
         <legend className="mb-1.5 text-[13px] text-body">What do you do?</legend>
-        <div className="flex flex-wrap gap-2">{MEDICO_ROLES.map((r) => <Chip key={r} on={p.role === r} onClick={() => pickRole(r)}>{r}</Chip>)}</div>
+        {locked ? (
+          <p className="text-[15px] text-navy">{p.role} <span className="block text-[12px] text-muted">{VERIFIED_NOTE}</span></p>
+        ) : (
+          <div className="flex flex-wrap gap-2">{MEDICO_ROLES.map((r) => <Chip key={r} on={p.role === r} onClick={() => pickRole(r)}>{r}</Chip>)}</div>
+        )}
       </fieldset>
       <div className="grid gap-5 sm:grid-cols-2">
         <Suggest label="Specialisation" value={p.specialisation} options={suggestions?.specialisations ?? []} onChange={(v) => set({ specialisation: v })}
@@ -361,9 +392,18 @@ function PhotoStep({ p, set }: StepProps) {
   );
 }
 
-function RegistrationStep({ p, set }: StepProps) {
+function RegistrationStep({ p, set, locked }: StepProps & { locked?: boolean }) {
   // Only the councils or certifying bodies that fit the role chosen in step 1.
   const spec = registrationFor(p.role);
+  if (locked) {
+    return (
+      <dl className="grid gap-3 rounded-[18px] border border-line px-4 py-3 text-[14px]">
+        <div><dt className="text-[13px] text-muted">{spec.bodyLabel}</dt><dd>{p.council || "Not added"}</dd></div>
+        <div><dt className="text-[13px] text-muted">{spec.numberLabel}</dt><dd>{p.registrationNo || "Not added"}</dd></div>
+        <p className="text-[13px] text-muted">{VERIFIED_NOTE}</p>
+      </dl>
+    );
+  }
   return (
     <div className="grid gap-5">
       <label className={label}>{spec.bodyLabel}
@@ -497,26 +537,157 @@ function TownField({ p, set }: StepProps) {
   );
 }
 
-function AvailabilityStep({ p, set }: StepProps) {
+const WORKWEEK: Weekday[] = ["Mon", "Tue", "Wed", "Thu", "Fri"];
+
+/** A small text button for "select all" style shortcuts. */
+function Quick({ onClick, children }: { onClick: () => void; children: ReactNode }) {
+  return <button type="button" onClick={onClick} className="cursor-pointer text-[13px] text-navy underline underline-offset-2 hover:text-navy-soft">{children}</button>;
+}
+
+function AvailabilityStep({ p, set, onEdit }: StepProps & { onEdit: (step: number) => void }) {
+  // Pick days, then hours: the same hours apply to every day picked.
+  const [days, setDays] = useState<Weekday[]>(() => WEEKDAYS.filter((d) => p.weekly[d]?.length));
+  const [hours, setHours] = useState<string[]>(() => p.weekly[WEEKDAYS.find((d) => p.weekly[d]?.length) ?? "Mon"] ?? []);
+  const save = (d: Weekday[], h: string[]) => {
+    setDays(d);
+    setHours(h);
+    set({ weekly: Object.fromEntries(d.map((day) => [day, inDayOrder(h)])) });
+  };
+  const towns = townsIn(p.district).filter((t) => t !== p.town);
+  const summary = timetableSummary(p);
   return (
-    <div className="grid gap-6">
-      <fieldset className="grid gap-2">
-        <legend className="mb-1.5 text-[13px] text-body">When are you usually free?</legend>
-        <div className="flex flex-wrap gap-2">{MEDICO_SLOTS.map((s) => <Chip key={s} on={p.slots.includes(s)} onClick={() => set({ slots: toggle(p.slots, s) })}>{s}</Chip>)}</div>
+    <div className="grid gap-7">
+      <section className="grid gap-5">
+        <h2 className="text-[15px] font-medium text-navy">When can families book you?</h2>
+        <label className="flex cursor-pointer items-center gap-3 text-[14px]">
+          <input type="checkbox" className="size-4 accent-navy" checked={p.allDay} onChange={(e) => set({ allDay: e.target.checked })} />
+          Available 24×7, every day <span className="text-muted">(live-in care, night shifts, ambulance)</span>
+        </label>
+
+        {!p.allDay && (
+          <>
+            <fieldset className="grid gap-2">
+              <legend className="mb-1.5 flex w-full items-center justify-between gap-3 text-[13px] text-body">
+                <span>1. Days you work</span>
+                <span className="flex gap-3"><Quick onClick={() => save(WORKWEEK, hours)}>Mon–Fri</Quick><Quick onClick={() => save([...WEEKDAYS], hours)}>Every day</Quick></span>
+              </legend>
+              <div className="flex flex-wrap gap-2">
+                {WEEKDAYS.map((d) => <Chip key={d} on={days.includes(d)} onClick={() => save(WEEKDAYS.filter((x) => (x === d ? !days.includes(d) : days.includes(x))), hours)}>{d}</Chip>)}
+              </div>
+            </fieldset>
+
+            <fieldset className="grid gap-2">
+              <legend className="mb-1.5 flex w-full items-center justify-between gap-3 text-[13px] text-body">
+                <span>2. Hours you are free <span className="text-muted">(each is a one-hour slot)</span></span>
+                <span className="flex gap-3"><Quick onClick={() => save(days, SLOT_TIMES)}>All</Quick>{hours.length > 0 && <Quick onClick={() => save(days, [])}>Clear</Quick>}</span>
+              </legend>
+              <div className="grid gap-2.5">
+                {DAY_PARTS.map((part) => (
+                  <div key={part.label} className="flex flex-wrap items-center gap-2">
+                    <span className="w-20 flex-none text-[13px] text-muted">{part.label}</span>
+                    {part.times.map((t) => <Chip key={t} on={hours.includes(t)} onClick={() => save(days, toggle(hours, t))}>{shortTime(t)}</Chip>)}
+                  </div>
+                ))}
+              </div>
+            </fieldset>
+          </>
+        )}
+
+        <p aria-live="polite" className={`rounded-[14px] px-4 py-3 text-[14px] ${summary.length ? "bg-[#E8F5EF] text-[#2E7D5B]" : "bg-wash text-muted"}`}>
+          {summary.length
+            ? <>Families can book you <strong className="font-semibold">{summary.join("; ")}</strong>{!p.allDay && ` · ${weeklySlotCount(p)} slots a week`}</>
+            : days.length && !hours.length ? "Now pick the hours you are free." : hours.length ? "Now pick the days you work." : "Pick your days and hours, or skip this and add them later."}
+        </p>
+      </section>
+
+      <fieldset className="grid gap-3">
+        <legend className="mb-1 text-[15px] font-medium text-navy">Service area</legend>
+        {p.district ? (
+          <>
+            <p className="-mt-1 text-[13px] text-muted">You start from <strong className="font-medium text-navy">{medicoPlace(p)}</strong>. Pick the other towns you will visit.</p>
+            <div className="flex flex-wrap gap-2">{towns.map((t) => <Chip key={t} on={p.serviceTowns.includes(t)} onClick={() => set({ serviceTowns: toggle(p.serviceTowns, t) })}>{t}</Chip>)}</div>
+          </>
+        ) : (
+          <p className="-mt-1 text-[13px] text-muted">Add your district and town to choose the towns you cover. <button type="button" onClick={() => onEdit(3)} className="cursor-pointer text-navy underline">Add them in Contact</button></p>
+        )}
+        <label className={label}>
+          <span>How far will you travel? <strong className="font-semibold text-navy">{p.radiusKm} km</strong></span>
+          <input type="range" min={RADIUS_KM.min} max={RADIUS_KM.max} value={p.radiusKm} onChange={(e) => set({ radiusKm: Number(e.target.value) })} className="accent-navy" />
+          <span className="flex justify-between text-[12px] text-muted"><span>{RADIUS_KM.min} km</span><span>{RADIUS_KM.max} km</span></span>
+        </label>
       </fieldset>
+
       <fieldset className="grid gap-2">
-        <legend className="mb-1.5 text-[13px] text-body">Languages you speak</legend>
+        <legend className="mb-1.5 text-[15px] font-medium text-navy">Languages you speak</legend>
         <div className="flex flex-wrap gap-2">{MEDICO_LANGUAGES.map((l) => <Chip key={l} on={p.languages.includes(l)} onClick={() => set({ languages: toggle(p.languages, l) })}>{l}</Chip>)}</div>
         {p.languages.includes("Other") && (
           <input className={`${input} mt-1`} aria-label="Other languages" value={p.otherLanguages} onChange={(e) => set({ otherLanguages: e.target.value })}
             placeholder="Please specify, e.g. Kannada, Tulu" maxLength={120} autoFocus />
         )}
       </fieldset>
-      <label className={label}>
-        <span>How far will you travel? <strong className="font-semibold text-navy">{p.radiusKm} km</strong></span>
-        <input type="range" min={RADIUS_KM.min} max={RADIUS_KM.max} value={p.radiusKm} onChange={(e) => set({ radiusKm: Number(e.target.value) })} className="accent-navy" />
-        <span className="flex justify-between text-[12px] text-muted"><span>{RADIUS_KM.min} km</span><span>{RADIUS_KM.max} km</span></span>
-      </label>
+    </div>
+  );
+}
+
+type Suggested = { unit: string; services: MedicoService[] };
+
+/** Services and charges, started from the profession's usual services. Every row can be changed or removed. */
+function ServicesStep({ p, set, onEdit }: StepProps & { onEdit: (step: number) => void }) {
+  const [suggested, setSuggested] = useState<Suggested | null>(null);
+  const [failed, setFailed] = useState(false);
+  const filled = useRef(p.services.length > 0);
+
+  useEffect(() => {
+    if (!p.role) return;
+    let live = true;
+    api<Suggested>(`/medico/services?role=${encodeURIComponent(p.role)}`)
+      .then((r) => {
+        if (!live) return;
+        setSuggested(r);
+        // Fill in the suggestions once, the first time this step opens with no services.
+        if (!filled.current && r.services.length) {
+          filled.current = true;
+          set({ services: r.services });
+        }
+      })
+      .catch(() => live && setFailed(true));
+    return () => {
+      live = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [p.role]);
+
+  const edit = (i: number, patch: Partial<MedicoService>) => set({ services: p.services.map((x, j) => (j === i ? { ...x, ...patch } : x)) });
+  const missing = suggested?.services.filter((x) => !p.services.some((y) => y.name === x.name)) ?? [];
+  const unit = suggested?.unit ?? "visit";
+
+  if (!p.role) {
+    return <p className="rounded-[14px] bg-wash px-4 py-3 text-[14px] text-body">Choose what you do in step 1 and we will suggest your services and charges. <button type="button" onClick={() => onEdit(0)} className="cursor-pointer text-navy underline">Choose it now</button></p>;
+  }
+  return (
+    <div className="grid gap-5">
+      <p className="rounded-[14px] bg-[#E8F5EF] px-4 py-3 text-[14px] leading-relaxed text-[#2E7D5B]">
+        We filled in what {p.role.toLowerCase()}s usually offer, at typical Kerala charges. Change any price, remove what you don&apos;t do, or add your own.
+      </p>
+      {failed && !p.services.length && <p className="text-[13px] text-muted">Suggestions could not load. Add your services below.</p>}
+      <ul className="grid gap-3">
+        {p.services.map((x, i) => (
+          <li key={i} className="grid gap-2 rounded-[16px] border border-line p-3 sm:grid-cols-[1fr_130px_120px_auto] sm:items-end">
+            <label className={label}>Service<input className={input} value={x.name} onChange={(e) => edit(i, { name: e.target.value })} maxLength={80} placeholder="E.g. Home visit" /></label>
+            <label className={label}>Charge (₹ per {unit})
+              <input className={input} inputMode="numeric" value={x.price || ""} onChange={(e) => edit(i, { price: Number(e.target.value.replace(/\D/g, "").slice(0, 6)) || 0 })} placeholder="500" />
+            </label>
+            <label className={label}>Takes<input className={input} value={x.duration} onChange={(e) => edit(i, { duration: e.target.value })} maxLength={30} placeholder="30 min" /></label>
+            <button type="button" onClick={() => set({ services: p.services.filter((_, j) => j !== i) })} aria-label={`Remove ${x.name || "service"}`}
+              className="cursor-pointer justify-self-start rounded-full px-3 py-2.5 text-[13px] text-muted underline hover:text-bad sm:justify-self-auto">Remove</button>
+          </li>
+        ))}
+      </ul>
+      <div className="flex flex-wrap items-center gap-2">
+        {p.services.length < MAX_SERVICES && <button type="button" onClick={() => set({ services: [...p.services, { name: "", price: 0, duration: "" }] })} className={`${secondary} py-2 text-[14px]`}>+ Add a service</button>}
+        {missing.map((x) => <button key={x.name} type="button" onClick={() => set({ services: [...p.services, x] })} className="cursor-pointer rounded-full border border-dashed border-line px-3.5 py-2 text-[13px] text-navy hover:border-navy">+ {x.name}</button>)}
+      </div>
+      <p className="text-[12px] text-muted">Families see these charges on your profile. You receive each charge less our 12% platform commission.</p>
     </div>
   );
 }
@@ -541,7 +712,8 @@ function BioStep({ p, set, onEdit }: StepProps & { onEdit: (step: number) => voi
     ["Name", displayName(p), 0], ["Role", [p.role, p.specialisation].filter(Boolean).join(" · "), 0], ["Qualification", p.qualification, 0],
     ["Photo", p.photoUrl ? "Added" : "", 1], ["Registration", [p.council, p.registrationNo].filter(Boolean).join(" · "), 2],
     ["Area", medicoPlace(p), 3], ["Experience", totalYears(p) ? `${totalYears(p)} years` : "", 4], ["Awards", p.awards.filter((a) => a.title).map((a) => a.title).join(", "), 5],
-    ["Languages", spokenLanguages(p).join(", "), 6], ["Travel", `Up to ${p.radiusKm} km`, 6],
+    ["Timetable", timetableSummary(p).join(" · "), 6], ["Also visits", p.serviceTowns.join(", "), 6], ["Travel", `Up to ${p.radiusKm} km`, 6],
+    ["Languages", spokenLanguages(p).join(", "), 6], ["Services", p.services.filter((x) => x.name).map((x) => `${x.name} ₹${x.price}`).join(", "), 7],
   ];
   return (
     <div className="grid gap-6">

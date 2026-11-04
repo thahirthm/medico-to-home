@@ -1,7 +1,7 @@
 "use client";
 
 import {
-  medicoPlace, PERSONAL_FIELDS, professionByLabel, spokenLanguages, totalYears, VERIFICATION_STEPS, WORK_FIELDS,
+  availabilityLines, medicoPlace, PERSONAL_FIELDS, professionByLabel, spokenLanguages, totalYears, VERIFICATION_STEPS, WORK_FIELDS,
   type ApplicationDocument, type Details, type Field, type MedicoProfile, type VerificationRecord, type VerificationStep,
 } from "@medico/shared";
 import { useState, type ReactNode } from "react";
@@ -172,7 +172,11 @@ function MedicoApplication({ profile: p }: { profile: MedicoProfile }) {
         ...p.workplaces.filter((w) => w.place).map((w) => [w.place, [w.role, [w.from, w.to].filter(Boolean).join("–")].filter(Boolean).join(" · ")] as const),
         ...p.awards.filter((x) => x.title).map((x) => [`Award: ${x.title}`, [x.by, x.year].filter(Boolean).join(", ")] as const),
       ]} />
-      <Section title="Availability" rows={[["Free", p.slots.join(", ") || "Not added"], ["Languages", spokenLanguages(p).join(", ") || "Not added"], ["Travels up to", `${p.radiusKm} km`]]} />
+      <Section title="Availability" rows={[
+        ["Timetable", availabilityLines(p).join(" · ") || "Not added"], ["Also visits", (p.serviceTowns ?? []).join(", ") || "Not added"],
+        ["Languages", spokenLanguages(p).join(", ") || "Not added"], ["Travels up to", `${p.radiusKm} km`],
+      ]} />
+      <Section title="Services and charges" rows={(p.services ?? []).length ? p.services.map((x) => [x.name, [`₹${x.price}`, x.duration].filter(Boolean).join(" · ")] as const) : [["Services", "Not added"] as const]} />
     </div>
   );
 }
@@ -243,7 +247,7 @@ function facts(a: Application) {
     return {
       name: p.name, role: p.role, specialisation: p.specialisation, qualification: p.qualification, gender: p.gender, photo: p.photoUrl, bio: p.bio,
       council: p.council, registration: p.registrationNo, phone: p.phone, email: p.email, district: medicoPlace(p),
-      years: totalYears(p), languages: spokenLanguages(p), slots: p.slots, radius: `${p.radiusKm} km`,
+      years: totalYears(p), languages: spokenLanguages(p), slots: availabilityLines(p), radius: `${p.radiusKm} km`,
       workplaces: p.workplaces.filter((w) => w.place).map((w) => [w.place, [w.role, [w.from, w.to].filter(Boolean).join("–")].filter(Boolean).join(" · ")] as const),
       awards: p.awards.filter((x) => x.title).map((x) => [x.title, [x.by, x.year].filter(Boolean).join(", ")] as const),
     };

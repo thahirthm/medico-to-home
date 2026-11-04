@@ -3,3 +3,4 @@ export * from "./onboarding";
 export * from "./medico";
 export * from "./councils";
 export * from "./kerala";
+export * from "./availability";

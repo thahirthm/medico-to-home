@@ -11,6 +11,7 @@ import { medicoApproved, medicoInfoNeeded, medicoLive, medicoRejected, medicoSte
 import { BUCKET, signedDownload } from "../storage";
 import { formatIst, startOfIstDay, startOfIstWeek } from "../time";
 import { weeklyEarnings } from "./earnings";
+import { listingServices } from "./medico";
 
 const STAGES = VERIFICATION_STEPS.map((s) => s.stage) as string[];
 const DAY_MS = 86_400_000;
@@ -62,12 +63,16 @@ async function approveMedico(application: { id: number; profile_id: string | nul
   // Their own town's service area when there is one, else the first in their district.
   const locality = (await pool.query("select id from localities where district = $1 order by (name = $2) desc, id limit 1", [p.district, p.town ?? ""])).rows[0];
   if (!locality) throw new ApiError(400, `Add a service area in ${p.district || "their district"} under Content first, or ask the applicant for their district.`);
+  // Their own services set the listing's prices; the lowest is the "from" price on their card.
+  const { services, basePrice } = listingServices(p);
   await pool.query(
-    `insert into professionals (name, gender, category_key, qualification, experience_years, locality_id, languages, base_price, radius_km, bio, photo_url, registration_no, status, profile_id)
-     values ($1,$2,$3,$4,$5,$6,$7,500,$8,$9,$10,$11,'pending',$12)`,
+    `insert into professionals (name, gender, category_key, qualification, experience_years, locality_id, languages, base_price, radius_km, bio, photo_url, registration_no,
+       weekly, all_day, service_towns, services, status, profile_id)
+     values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,'pending',$17)`,
     [
       displayName(p), p.gender === "Male" ? "M" : "F", category, [p.qualification, p.specialisation].filter(Boolean).join(", "), totalYears(p), locality.id,
-      spokenLanguages(p), p.radiusKm, p.bio, p.photoUrl, p.registrationNo, application.profile_id,
+      spokenLanguages(p), basePrice, p.radiusKm, p.bio, p.photoUrl, p.registrationNo,
+      JSON.stringify(p.weekly ?? {}), !!p.allDay, p.serviceTowns ?? [], JSON.stringify(services), application.profile_id,
     ],
   );
   await pool.query("update applications set stage = 'approved', decision_note = '' where id = $1", [application.id]);

@@ -1,5 +1,5 @@
 import Anthropic from "@anthropic-ai/sdk";
-import { bioFacts, COUNCILS, displayName, KERALA_DISTRICTS, MEDICO_CATEGORY, MEDICO_GENDERS, MEDICO_LANGUAGES, MEDICO_SLOTS, normaliseMedico, RADIUS_KM, templateBio, totalYears, YEARS_MAX, type MedicoProfile } from "@medico/shared";
+import { bioFacts, COUNCILS, spokenLanguages, inDayOrder, MAX_SERVICES, SLOT_TIMES, servicePrice, TYPICAL_PRICE, WEEKDAYS, displayName, KERALA_DISTRICTS, MEDICO_CATEGORY, MEDICO_GENDERS, MEDICO_LANGUAGES, MEDICO_SLOTS, normaliseMedico, RADIUS_KM, templateBio, totalYears, YEARS_MAX, type MedicoProfile } from "@medico/shared";
 import type { FastifyInstance } from "fastify";
 import { randomUUID } from "node:crypto";
 import { z } from "zod";
@@ -41,6 +41,14 @@ const profileBody = z.object({
   workplaces: z.array(z.object({ place: text(160), role: text(120), from: year, to: z.string().trim().regex(/^(\d{4}|Present)?$/).default("") })).max(15).default([]),
   awards: z.array(z.object({ title: text(160), by: text(160), year })).max(20).default([]),
   slots: z.array(z.enum(MEDICO_SLOTS)).max(MEDICO_SLOTS.length).default([]),
+  weekly: z.partialRecord(z.enum(WEEKDAYS), z.array(z.enum(SLOT_TIMES as [string, ...string[]])).transform(inDayOrder)).default({}),
+  allDay: z.boolean().default(false),
+  serviceTowns: z.array(text(80)).max(40).transform((towns) => [...new Set(towns.filter(Boolean))]).default([]),
+  services: z.array(z.object({
+    name: z.string().trim().min(1, "Every service needs a name.").max(80),
+    price: z.coerce.number().int("Charges are whole rupees.").min(0).max(100000, "Please check the charge for each service."),
+    duration: text(30),
+  })).max(MAX_SERVICES, `Up to ${MAX_SERVICES} services.`).default([]),
   languages: z.array(z.enum(MEDICO_LANGUAGES)).max(MEDICO_LANGUAGES.length).default([]),
   otherLanguages: text(120),
   radiusKm: z.coerce.number().int().min(RADIUS_KM.min).max(RADIUS_KM.max).default(RADIUS_KM.default),
@@ -83,6 +91,33 @@ async function writeBio(profile: MedicoProfile, log: { warn: (o: unknown, m: str
   }
 }
 
+/** The listing's prices and services from a profile: their own services, with the lowest as the "from" price. */
+export function listingServices(p: Pick<MedicoProfile, "services">) {
+  const services = (p.services ?? []).filter((x) => x.name && x.price > 0);
+  return { services, basePrice: services.length ? Math.min(...services.map((x) => x.price)) : 500 };
+}
+
+// An approved Medico's edits go straight to their live listing. Role, council and number stay as verified.
+async function updateApproved(user: User, current: { id: number; details: { profile?: MedicoProfile } }, edited: MedicoProfile) {
+  const before = current.details.profile;
+  const p = { ...edited, role: before?.role ?? edited.role, council: before?.council ?? edited.council, registrationNo: before?.registrationNo ?? edited.registrationNo };
+  const { services, basePrice } = listingServices(p);
+  await pool.query(
+    "update applications set name = $2, phone = $3, gender = $4, email = $5, district = $6, details = $7, updated_at = now() where id = $1",
+    [current.id, p.name, p.phone, p.gender, p.email || user.email, p.district, { kind: "medico", profile: { ...p, years: totalYears(p) } }],
+  );
+  await pool.query(
+    `update professionals set name = $2, gender = $3, qualification = $4, experience_years = $5, languages = $6, base_price = $7, radius_km = $8, bio = $9, photo_url = $10,
+       weekly = $11, all_day = $12, service_towns = $13, services = $14,
+       locality_id = coalesce((select id from localities where district = $15 order by (name = $16) desc, id limit 1), locality_id)
+     where profile_id = $1`,
+    [
+      user.id, displayName(p), p.gender === "Male" ? "M" : "F", [p.qualification, p.specialisation].filter(Boolean).join(", "), totalYears(p), spokenLanguages(p),
+      basePrice, p.radiusKm, p.bio, p.photoUrl, JSON.stringify(p.weekly), p.allDay, p.serviceTowns, JSON.stringify(services), p.district, p.town,
+    ],
+  );
+}
+
 async function latest(user: User) {
   const { rows } = await pool.query(
     "select id, stage, decision_note, details, submitted_at from applications where profile_id = $1 order by created_at desc limit 1",
@@ -99,6 +134,23 @@ export async function medicoRoutes(app: FastifyInstance) {
     return {
       account: me.rows[0],
       application: app_ ? { stage: app_.stage, decisionNote: app_.decision_note, submittedAt: app_.submitted_at, profile: app_.details?.kind === "medico" ? app_.details.profile : null } : null,
+    };
+  });
+
+  // Starting services and charges for a profession: the catalogue's services at a typical Kerala price.
+  app.get("/medico/services", async (request) => {
+    await requireUser(request);
+    const { role } = z.object({ role: z.string() }).parse(request.query);
+    const category = MEDICO_CATEGORY[role];
+    if (!category) return { unit: "visit", services: [] };
+    const [cat, svcs] = await Promise.all([
+      pool.query("select unit from categories where key = $1", [category]),
+      pool.query("select name, multiplier, duration from service_templates where category_key = $1 order by sort_order, id", [category]),
+    ]);
+    const base = TYPICAL_PRICE[category] ?? 500;
+    return {
+      unit: cat.rows[0]?.unit ?? "visit",
+      services: svcs.rows.map((s) => ({ name: s.name, price: servicePrice(base, Number(s.multiplier)), duration: s.duration })),
     };
   });
 
@@ -122,7 +174,10 @@ export async function medicoRoutes(app: FastifyInstance) {
     const user = await requireUser(request);
     const p: MedicoProfile = profileBody.parse(request.body);
     const current = await latest(user);
-    if (current?.stage === "approved") throw new ApiError(409, "Your profile is already approved. Change it from professional mode.");
+    if (current?.stage === "approved") {
+      await updateApproved(user, current, p);
+      return { ok: true, live: true };
+    }
 
     const details = { kind: "medico", profile: { ...p, years: totalYears(p) } };
     const firstSend = !current?.submitted_at || current.stage === "rejected";

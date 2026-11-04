@@ -189,6 +189,7 @@ export function ProfessionalView() {
                 <div style={{ position: "absolute", left: "calc(50% + 76px)", top: "calc(50% + 28px)", background: "#fff", borderRadius: "999px", padding: "3px 10px", fontSize: "12px" }}>You · {v.pp.km} km</div>
                 <div style={{ position: "absolute", left: "14px", bottom: "14px", background: "#fff", borderRadius: "999px", padding: "6px 12px", fontSize: "12px" }}>Visits within {v.pp.radius} km of {v.pp.locality}, {v.pp.district}</div>
               </div>
+              {v.pp.towns && <p style={{ margin: "0", fontSize: "14px", color: "#4A4F6A", lineHeight: "1.5" }}>Also visits {v.pp.towns}</p>}
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
               <h3 style={{ margin: "0", fontSize: "13px", letterSpacing: ".08em", textTransform: "uppercase", color: "#6B7085", fontWeight: "500" }}>Reviews · ★ {v.pp.rating} from {v.pp.reviews}</h3>

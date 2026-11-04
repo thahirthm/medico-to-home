@@ -57,7 +57,7 @@ export function ProProfile() {
   return (
     <>
       <PageHead title="Profile" note="Your Medico ID and everything families see.">
-        {!me.professional && <Link href="/medico/register?edit" className="rounded-full bg-navy px-4 py-2 text-[13px] text-white hover:bg-navy-soft">Edit profile</Link>}
+        <Link href="/medico/register?edit" className="rounded-full bg-navy px-4 py-2 text-[13px] text-white hover:bg-navy-soft">Edit profile</Link>
       </PageHead>
       <div className="grid gap-6 lg:grid-cols-[380px_minmax(0,1fr)] lg:items-start">
         <div className="flex flex-col gap-4 lg:sticky lg:top-20">

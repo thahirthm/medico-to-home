@@ -1,6 +1,6 @@
 "use client";
 
-import { totalYears, type MedicoProfile } from "@medico/shared";
+import { availabilityLines, spokenLanguages, totalYears, type MedicoProfile } from "@medico/shared";
 import type { ReactNode } from "react";
 
 // A Medico's full profile, shown on their dashboard while verification runs and on the Profile page.
@@ -107,10 +107,20 @@ export function ProfileDetails({ p }: { p: MedicoProfile }) {
 
     <Detail title="Availability">
       <div className="grid gap-4 text-[14px]">
-        <div className="grid gap-2"><span className="text-muted">When you work</span><Tags items={p.slots} empty="Not added" /></div>
-        <div className="grid gap-2"><span className="text-muted">Languages</span><Tags items={p.languages} empty="Not added" /></div>
+        <div className="grid gap-2"><span className="text-muted">When you work</span><Tags items={availabilityLines(p)} empty="Not added" /></div>
+        <div className="grid gap-2"><span className="text-muted">Languages</span><Tags items={spokenLanguages(p)} empty="Not added" /></div>
         <div className="flex justify-between gap-4 border-t border-line-soft pt-3"><span className="text-muted">Travels up to</span><span>{p.radiusKm} km{p.district ? ` from ${p.district}` : ""}</span></div>
       </div>
+    </Detail>
+
+    <Detail title="Services & charges">
+      {(p.services ?? []).length ? (
+        <ul className="grid gap-2 text-[14px]">
+          {p.services.map((x) => (
+            <li key={x.name} className="flex justify-between gap-4"><span>{x.name}{x.duration && <span className="text-muted"> · {x.duration}</span>}</span><span className="font-medium">₹{x.price.toLocaleString("en-IN")}</span></li>
+          ))}
+        </ul>
+      ) : <p className="text-[14px] text-faint">Not added</p>}
     </Detail>
 
     <Detail title="Contact" note="Only our team sees these">

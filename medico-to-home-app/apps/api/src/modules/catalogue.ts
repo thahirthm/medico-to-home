@@ -1,4 +1,4 @@
-import { servicePrice } from "@medico/shared";
+import { hasTimetable, servicePrice, weekdayOf, type MedicoService } from "@medico/shared";
 import type { FastifyInstance } from "fastify";
 import { z } from "zod";
 import { pool } from "../db";
@@ -12,6 +12,16 @@ const initials = (name: string) => {
 };
 
 const COVERAGE_KM = 30;
+
+// Today's date key in India, e.g. "2026-11-5".
+const istToday = () => new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Kolkata" }).format(new Date()).split("-").map(Number).join("-");
+
+// A real timetable decides "available today": round the clock, or the first time open today.
+function todayFrom(p: { weekly: Record<string, string[]>; all_day: boolean; available_today_from: string }) {
+  const t = { weekly: p.weekly, allDay: p.all_day };
+  if (!hasTimetable(t)) return p.available_today_from;
+  return p.all_day ? "24×7" : (p.weekly[weekdayOf(istToday())]?.[0] ?? "");
+}
 
 export async function catalogueRoutes(app: FastifyInstance) {
   app.get("/catalogue", async () => {
@@ -52,12 +62,18 @@ export async function catalogueRoutes(app: FastifyInstance) {
         locality: p.locality,
         langs: p.languages,
         price: p.base_price,
-        today: p.available_today_from,
+        today: todayFrom(p),
+        week: hasTimetable({ weekly: p.weekly, allDay: p.all_day }) ? p.weekly : null,
+        allDay: p.all_day,
+        towns: p.service_towns,
         initials: initials(p.name),
         reg: `${cats.rows.find((c) => c.key === p.category_key)?.registration_label ?? ""} ${p.registration_no}`.trim(),
         bio: p.bio,
         radius: p.radius_km,
-        svcs: (bySvc.get(p.category_key) ?? []).map((s) => ({ n: s.name, p: servicePrice(p.base_price, Number(s.multiplier)), d: s.duration })),
+        // Their own services and charges when they set them, else the category's at their base price.
+        svcs: (p.services as MedicoService[]).length
+          ? (p.services as MedicoService[]).map((s) => ({ n: s.name, p: s.price, d: s.duration }))
+          : (bySvc.get(p.category_key) ?? []).map((s) => ({ n: s.name, p: servicePrice(p.base_price, Number(s.multiplier)), d: s.duration })),
         revs: (byRev.get(p.id) ?? []).slice(0, 4).map((r) => ({ name: r.author_name, place: r.place, stars: r.stars, text: r.body })),
       })),
       THER: ther.rows.map((t) => ({ id: t.id, label: t.label, cat: t.category_key, brand: t.brand, helps: t.helps, steps: t.steps, plan: t.plan })),

@@ -1,5 +1,5 @@
 import { randomInt } from "node:crypto";
-import { carePlanDayPrice, quote, servicePrice, type CareHours } from "@medico/shared";
+import { carePlanDayPrice, hasTimetable, isOpen, quote, servicePrice, type CareHours, type MedicoService } from "@medico/shared";
 import type { FastifyInstance } from "fastify";
 import type { PoolClient } from "pg";
 import { z } from "zod";
@@ -76,13 +76,22 @@ export async function bookingRoutes(app: FastifyInstance) {
     const pro = (await pool.query(`select p.*, c.mode, c.allow_plan from professionals p join categories c on c.key = p.category_key where p.id = $1 and p.status = 'live'`, [body.professionalId])).rows[0];
     if (!pro) throw new ApiError(404, "This professional is not available.");
     if (body.plan && !pro.allow_plan) throw new ApiError(400, "Plans are not offered for this service.");
-    const services = (await pool.query("select * from service_templates where category_key = $1 order by sort_order, id", [pro.category_key])).rows;
+    // The same list the profile shows: their own services and charges, else the category's at their base price.
+    const own = pro.services as MedicoService[];
+    const services = own.length
+      ? own.map((s) => ({ name: s.name, duration: s.duration, price: s.price }))
+      : (await pool.query("select * from service_templates where category_key = $1 order by sort_order, id", [pro.category_key])).rows
+          .map((s) => ({ name: s.name as string, duration: s.duration as string, price: servicePrice(pro.base_price, Number(s.multiplier)) }));
     const service = services[body.serviceIndex];
     if (!service) throw new ApiError(400, "Please choose a service.");
     if (!body.plan && body.dates.length !== 1) throw new ApiError(400, "A single visit has one date.");
+    const timetable = { weekly: pro.weekly, allDay: pro.all_day };
+    if (hasTimetable(timetable) && body.dates.some((d) => !isOpen(timetable, d, body.slot))) {
+      throw new ApiError(400, `${pro.name} does not work at ${body.slot} on one of those days. Please choose another time.`);
+    }
 
     const isCare = pro.mode === "care";
-    const base = servicePrice(pro.base_price, Number(service.multiplier));
+    const base = service.price;
     const unit = isCare && body.plan ? carePlanDayPrice(base, body.hours as CareHours) : base;
     const price = quote(unit, body.dates.length, body.plan);
 

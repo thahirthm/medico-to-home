@@ -1,6 +1,7 @@
 // Medico registration: the 8-step profile a professional fills in after signing in.
 // Every field is optional. Shared by the registration screens and the API.
 
+import { timetableSummary, type MedicoService, type Weekly } from "./availability";
 import { councilsFor } from "./councils";
 
 export const MEDICO_ROLES = [
@@ -208,6 +209,12 @@ export const spokenLanguages = (p: Pick<MedicoProfile, "languages"> & { otherLan
   ...(p.languages.includes("Other") ? (p.otherLanguages ?? "").split(",").map((l) => l.trim()).filter(Boolean) : []),
 ];
 
+/** When they work: the timetable, or the older free-time choices for registrations sent before it. */
+export const availabilityLines = (p: Partial<Pick<MedicoProfile, "weekly" | "allDay" | "slots">>) => {
+  const lines = timetableSummary(p);
+  return lines.length ? lines : (p.slots ?? []);
+};
+
 /** "Feroke, Kozhikode", or just the district when no town is given. */
 export const medicoPlace = (p: Pick<MedicoProfile, "district"> & { town?: string }) =>
   [p.town && p.town !== p.district ? p.town : "", p.district].filter(Boolean).join(", ");
@@ -247,7 +254,13 @@ export interface MedicoProfile {
   years: number;
   workplaces: Workplace[];
   awards: Award[];
+  /** Replaced by the weekly timetable; kept so older registrations still show what they chose. */
   slots: string[];
+  weekly: Weekly;
+  allDay: boolean;
+  /** Towns they will visit besides their own, within the travel distance. */
+  serviceTowns: string[];
+  services: MedicoService[];
   languages: string[];
   /** Languages not in the list, typed in after choosing "Other", comma separated. */
   otherLanguages: string;
@@ -259,7 +272,7 @@ export const emptyMedicoProfile = (): MedicoProfile => ({
   name: "", role: "", specialisation: "", qualification: "", gender: "", photoUrl: "",
   council: "", registrationNo: "", phone: "", email: "", district: "", town: "",
   experienceMode: "years", years: 0, workplaces: [], awards: [],
-  slots: [], languages: [], otherLanguages: "", radiusKm: RADIUS_KM.default, bio: "",
+  slots: [], weekly: {}, allDay: false, serviceTowns: [], services: [], languages: [], otherLanguages: "", radiusKm: RADIUS_KM.default, bio: "",
 });
 
 const CURRENT_YEAR = () => new Date().getFullYear();
