@@ -2,7 +2,7 @@
 
 import { useState, type FormEvent } from "react";
 import { sendEmailCode, signInWithGoogle, verifyEmailCode } from "@/lib/api";
-import { GoogleButton, OrDivider } from "./GoogleButton";
+import { GoogleSignIn, OrDivider } from "./GoogleButton";
 
 // Google only for now. Set to true to bring back the emailed 6-digit code (needs the Supabase email template and SMTP).
 const EMAIL_SIGN_IN = false;
@@ -103,7 +103,7 @@ export function SignInFlow({ onSignedIn, beforeLeave, title = "Log in or sign up
   return (
     <form onSubmit={send} className="flex flex-col gap-3.5">
       <h2 className="text-[28px] font-light tracking-tight">{title}</h2>
-      <GoogleButton onClick={google} busy={googleBusy} />
+      <GoogleSignIn onSignedIn={onSignedIn} onError={setError} fallback={google} fallbackBusy={googleBusy} />
       {EMAIL_SIGN_IN && (
         <>
           <OrDivider />

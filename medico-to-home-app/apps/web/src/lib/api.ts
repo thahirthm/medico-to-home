@@ -33,6 +33,15 @@ export async function verifyEmailCode(email: string, code: string) {
 }
 
 /** Sends the browser to Google and back to `returnTo`, where the session is picked up. */
+/** The Google sign-in client. It is public (Google shows it in every sign-in page), so it may live in the code. */
+export const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "323789165189-htknuhtg0pe7gd93btcnhs4ag13aieen.apps.googleusercontent.com";
+
+/** Finishes Google's own sign-in popup: Supabase checks Google's token and opens the session, with no redirect. */
+export async function signInWithGoogleToken(token: string, nonce: string) {
+  const { error } = await supabase.auth.signInWithIdToken({ provider: "google", token, nonce });
+  if (error) throw new Error("Google sign-in did not finish. Please try again.");
+}
+
 export async function signInWithGoogle(returnTo: string) {
   const settings = await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/auth/v1/settings`, { headers: { apikey: process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY! } })
     .then((r) => r.json())

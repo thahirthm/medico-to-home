@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { GoogleButton } from "@/components/auth/GoogleButton";
+import { GoogleSignIn } from "@/components/auth/GoogleButton";
 import { getMe, isMedico, signInWithGoogle, supabase } from "@/lib/api";
 import { BenefitsSlider } from "./BenefitsSlider";
 
@@ -34,6 +34,9 @@ export function MedicoLogin() {
       live = false;
     };
   }, [router]);
+
+  // Google's popup signed them in on this page: open their dashboard, or registration if it is not sent yet.
+  const signedIn = () => getMe().then((me) => router.replace(isMedico(me) ? "/pro" : "/medico/register")).catch((e: Error) => setError(e.message));
 
   const google = async () => {
     setBusy(true);
@@ -67,7 +70,7 @@ export function MedicoLogin() {
             <p className="py-6 text-center text-sm text-muted">Checking your sign-in…</p>
           ) : (
             <div className="flex flex-col gap-3.5">
-              <GoogleButton onClick={google} busy={busy} />
+              <GoogleSignIn onSignedIn={signedIn} onError={setError} fallback={google} fallbackBusy={busy} />
               {PHONE_SIGN_IN && (
                 <>
                   <div className="flex items-center gap-3 text-[13px] text-muted" role="separator"><span className="h-px flex-1 bg-line" />or<span className="h-px flex-1 bg-line" /></div>
