@@ -1,4 +1,4 @@
-import { professionByLabel } from "@medico/shared";
+import { displayName, MEDICO_CATEGORY, professionByLabel, totalYears, VERIFICATION_STEPS, type MedicoProfile } from "@medico/shared";
 import type { FastifyInstance, FastifyRequest } from "fastify";
 import { randomBytes } from "node:crypto";
 import { z } from "zod";
@@ -6,11 +6,13 @@ import { audit, requireStaff, STAFF_ROLES, type Module } from "../auth";
 import { pool } from "../db";
 import { env } from "../env";
 import { ApiError } from "../errors";
-import { signedDownload } from "../storage";
+import { sendMail } from "../mail/send";
+import { medicoApproved, medicoInfoNeeded, medicoLive, medicoRejected, medicoStepPassed } from "../mail/templates";
+import { BUCKET, signedDownload } from "../storage";
 import { formatIst, startOfIstDay, startOfIstWeek } from "../time";
 import { weeklyEarnings } from "./earnings";
 
-const STAGES = ["documents", "council", "police", "interview"];
+const STAGES = VERIFICATION_STEPS.map((s) => s.stage) as string[];
 const DAY_MS = 86_400_000;
 const text = (v: unknown) => (typeof v === "string" ? v : "");
 const int = (v: unknown, fallback: number) => (Number.parseInt(text(v), 10) > 0 ? Number.parseInt(text(v), 10) : fallback);
@@ -52,6 +54,32 @@ function contentTable(name: string) {
 
 const pick = (body: unknown, columns: string[]) => Object.entries(z.record(z.string(), z.unknown()).parse(body)).filter(([k]) => columns.includes(k));
 
+// A Medico registration becomes a professional profile on the same account, hidden ('pending') until staff set it live.
+async function approveMedico(application: { id: number; profile_id: string | null; details: { profile: MedicoProfile } }) {
+  const p = application.details.profile;
+  const category = MEDICO_CATEGORY[p.role];
+  if (!category) throw new ApiError(400, "The applicant has not chosen a role yet. Ask them for it first.");
+  const locality = (await pool.query("select id from localities where district = $1 order by id limit 1", [p.district])).rows[0];
+  if (!locality) throw new ApiError(400, `Add a service area in ${p.district || "their district"} under Content first, or ask the applicant for their district.`);
+  await pool.query(
+    `insert into professionals (name, gender, category_key, qualification, experience_years, locality_id, languages, base_price, radius_km, bio, photo_url, registration_no, status, profile_id)
+     values ($1,$2,$3,$4,$5,$6,$7,500,$8,$9,$10,$11,'pending',$12)`,
+    [
+      displayName(p), p.gender === "Male" ? "M" : "F", category, [p.qualification, p.specialisation].filter(Boolean).join(", "), totalYears(p), locality.id,
+      p.languages, p.radiusKm, p.bio, p.photoUrl, p.registrationNo, application.profile_id,
+    ],
+  );
+  await pool.query("update applications set stage = 'approved', decision_note = '' where id = $1", [application.id]);
+  return { stage: "approved" };
+}
+
+// Where to email an applicant: the address on their registration, else their account's.
+async function applicantEmail(application: { email?: string; profile_id: string | null }) {
+  if (application.email) return application.email;
+  if (!application.profile_id) return "";
+  return (await pool.query("select email from profiles where id = $1", [application.profile_id])).rows[0]?.email ?? "";
+}
+
 export async function adminRoutes(app: FastifyInstance) {
   app.get("/admin/overview", async (request) => {
     await admin(request, "overview");
@@ -87,6 +115,92 @@ export async function adminRoutes(app: FastifyInstance) {
     return rows;
   });
 
+  // One account in full. Family members show their basic details and how much health data they hold, never the records themselves.
+  app.get<{ Params: { id: string } }>("/admin/users/:id", async (request) => {
+    const me = await admin(request, "users");
+    const id = z.string().uuid("User not found.").parse(request.params.id);
+    const account = (
+      await pool.query(
+        `select p.id, p.full_name, p.email, p.phone, p.dob, p.emergency_contact, p.city, p.role, p.staff_roles, p.last_mode, p.terms_accepted_at, p.created_at,
+           u.last_sign_in_at, coalesce((select array_agg(distinct i.provider) from auth.identities i where i.user_id = p.id), '{}') sign_in_with
+         from profiles p join auth.users u on u.id = p.id where p.id = $1`,
+        [id],
+      )
+    ).rows[0];
+    if (!account) throw new ApiError(404, "User not found.");
+    const [family, addresses, bookings, pro, application] = await Promise.all([
+      pool.query(
+        `select pa.id, pa.relation, pa.name, pa.age, pa.gender, pa.blood_group, pa.share_records, pa.created_at,
+           jsonb_array_length(pa.conditions) + jsonb_array_length(pa.allergies) + jsonb_array_length(pa.medications) health_entries,
+           (select count(*) from medical_documents d where d.patient_id = pa.id)::int reports
+         from patients pa where pa.owner_id = $1 order by pa.relation <> 'Me', pa.created_at`,
+        [id],
+      ),
+      pool.query("select id, label, house, street, landmark, locality, pincode from addresses where owner_id = $1 order by created_at", [id]),
+      pool.query(
+        `select b.id, b.service_name, b.patient_name, b.status, b.total_paise, b.payment_status, b.sessions, b.created_at, p.name professional,
+           (select min(v.starts_at) from visits v where v.booking_id = b.id and v.status not in ('cancelled', 'skipped')) next_at
+         from bookings b join professionals p on p.id = b.professional_id where b.owner_id = $1 order by b.created_at desc limit 50`,
+        [id],
+      ),
+      pool.query("select p.id, p.name, p.status, p.rating, p.review_count, c.one role from professionals p join categories c on c.key = p.category_key where p.profile_id = $1", [id]),
+      pool.query("select id, profession, stage, decision_note, created_at from applications where profile_id = $1 order by created_at desc limit 1", [id]),
+    ]);
+    await audit(me.id, "user.read", id);
+    return { account, family: family.rows, addresses: addresses.rows, bookings: bookings.rows, professional: pro.rows[0] ?? null, application: application.rows[0] ?? null };
+  });
+
+  // Deletes the login and everything personal: profile, family health cards, addresses, records, reports and any
+  // Medico application. Past bookings stay for the professional's earnings, without the account, address or notes.
+  app.delete<{ Params: { id: string } }>("/admin/users/:id", async (request) => {
+    const me = await admin(request, "users");
+    const id = z.string().uuid("User not found.").parse(request.params.id);
+    if (id === me.id) throw new ApiError(400, "You cannot delete your own account.");
+    const account = (await pool.query("select email, role from profiles where id = $1", [id])).rows[0];
+    if (!account) throw new ApiError(404, "User not found.");
+    if (account.role === "admin") throw new ApiError(400, "This is a staff account. Remove their staff access under Staff first.");
+    const open = await pool.query("select count(*)::int n from bookings where owner_id = $1 and status in ('confirmed', 'active', 'pending_payment')", [id]);
+    if (open.rows[0].n) throw new ApiError(409, `This user has ${open.rows[0].n} open booking${open.rows[0].n > 1 ? "s" : ""}. Cancel or complete them before deleting the account.`);
+
+    const client = await pool.connect();
+    let files: { bucket: string; paths: string[] }[] = [];
+    try {
+      await client.query("begin");
+      const [docs, apps] = await Promise.all([
+        client.query("select storage_path from medical_documents where owner_id = $1", [id]),
+        client.query("select documents, details->'profile'->>'photoUrl' photo from applications where profile_id = $1", [id]),
+      ]);
+      const photoPrefix = `${env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/medico-photos/`;
+      files = [
+        { bucket: BUCKET, paths: [...docs.rows.map((d) => d.storage_path), ...apps.rows.flatMap((a) => (a.documents ?? []).map((d: { path: string }) => d.path))] },
+        { bucket: "medico-photos", paths: apps.rows.map((a) => a.photo).filter((u) => u?.startsWith(photoPrefix)).map((u) => u.slice(photoPrefix.length)) },
+      ];
+      await client.query("update bookings set owner_id = null, address = jsonb_build_object('locality', address->>'locality'), notes = '' where owner_id = $1", [id]);
+      await client.query("update professionals set status = 'hidden' where profile_id = $1", [id]);
+      await client.query("delete from applications where profile_id = $1", [id]);
+      // Removing the login cascades to the profile, family, addresses and records.
+      await client.query("delete from auth.users where id = $1", [id]);
+      await client.query("insert into audit_log (actor, action, subject) values ($1, 'user.delete', $2)", [me.id, `${id} ${account.email}`]);
+      await client.query("commit");
+    } catch (e) {
+      await client.query("rollback");
+      throw e;
+    } finally {
+      client.release();
+    }
+    // Files go after the rows are gone; a file left behind is harmless, a row pointing at a missing file is not.
+    await Promise.all(
+      files.filter((f) => f.paths.length).map((f) =>
+        fetch(`${env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/${f.bucket}`, {
+          method: "DELETE",
+          headers: { apikey: env.SUPABASE_SECRET_KEY, Authorization: `Bearer ${env.SUPABASE_SECRET_KEY}`, "Content-Type": "application/json" },
+          body: JSON.stringify({ prefixes: f.paths }),
+        }).catch(() => {}),
+      ),
+    );
+    return { ok: true };
+  });
+
   app.get("/admin/applications", async (request) => {
     await admin(request, "applications");
     return (await pool.query("select * from applications order by created_at desc")).rows;
@@ -103,9 +217,9 @@ export async function adminRoutes(app: FastifyInstance) {
   });
 
   app.post<{ Params: { id: string } }>("/admin/applications/:id/decide", async (request) => {
-    await admin(request, "applications");
-    const { action, note } = z
-      .object({ action: z.enum(["pass", "ask", "reject"]), note: z.string().trim().default("") })
+    const me = await admin(request, "applications");
+    const { action, note, checks } = z
+      .object({ action: z.enum(["pass", "ask", "reject"]), note: z.string().trim().default(""), checks: z.array(z.string()).default([]) })
       .refine((b) => b.action === "pass" || b.note, { message: "Please write what the applicant needs to know." })
       .parse(request.body);
     const application = (await pool.query("select * from applications where id = $1", [request.params.id])).rows[0];
@@ -114,15 +228,32 @@ export async function adminRoutes(app: FastifyInstance) {
     if (action === "reject" || action === "ask") {
       const stage = action === "reject" ? "rejected" : "info_needed";
       await pool.query("update applications set stage = $2, decision_note = $3 where id = $1", [application.id, stage, note]);
+      sendMail(await applicantEmail(application), action === "reject" ? medicoRejected(application.name, note) : medicoInfoNeeded(application.name, note));
       return { stage };
     }
     if (application.stage === "info_needed") throw new ApiError(409, "Waiting for the applicant to send the missing details.");
+    // A step passes only with every check ticked; who passed it, and when, is kept with the application.
+    const step = VERIFICATION_STEPS.find((s) => s.stage === application.stage);
+    if (!step) throw new ApiError(409, "This application is already decided.");
+    const missing = step.checks.filter((c) => !checks.includes(c.key));
+    if (missing.length) throw new ApiError(400, `Tick every check before passing ${step.label.toLowerCase()}: ${missing.map((c) => c.label.toLowerCase()).join("; ")}.`);
+    const staff = (await pool.query("select coalesce(nullif(full_name, ''), email) name from profiles where id = $1", [me.id])).rows[0];
+    const record = { checks: step.checks.map((c) => c.key), note, by: staff?.name ?? "Staff", at: new Date().toISOString() };
+    await pool.query("update applications set checks = checks || jsonb_build_object($2::text, $3::jsonb) where id = $1", [application.id, step.stage, JSON.stringify(record)]);
+    await audit(me.id, `application.${step.stage}.passed`, String(application.id));
     const next = STAGES[STAGES.indexOf(application.stage) + 1];
+    const email = await applicantEmail(application);
     if (next) {
       await pool.query("update applications set stage = $2 where id = $1", [application.id, next]);
+      sendMail(email, medicoStepPassed(application.name, step.label, VERIFICATION_STEPS.find((s) => s.stage === next)!.label));
       return { stage: next };
     }
     if (application.stage !== "interview") throw new ApiError(409, "This application is already decided.");
+    if (application.details?.kind === "medico") {
+      const approved = await approveMedico(application);
+      sendMail(email, medicoApproved(application.name));
+      return approved;
+    }
     const d = application.details as Record<string, unknown>;
     // The area they chose, else the first area in their district.
     const locality = (await pool.query("select id from localities where name = $1 or district = $2 order by (name = $1) desc, id limit 1", [text(d.locality), application.district])).rows[0];
@@ -139,6 +270,7 @@ export async function adminRoutes(app: FastifyInstance) {
       ],
     );
     await pool.query("update applications set stage = 'approved', decision_note = '' where id = $1", [application.id]);
+    sendMail(email, medicoApproved(application.name));
     return { stage: "approved" };
   });
 
@@ -172,10 +304,28 @@ export async function adminRoutes(app: FastifyInstance) {
     return { ok: true };
   });
 
+  // Live means families can find and book them. Taking a profile off live also takes them offline.
   app.patch<{ Params: { id: string } }>("/admin/professionals/:id/status", async (request) => {
-    await admin(request, "professionals");
+    const me = await admin(request, "professionals");
     const { status } = z.object({ status: z.enum(["pending", "live", "hidden"]) }).parse(request.body);
-    await pool.query("update professionals set status = $2 where id = $1", [request.params.id, status]);
+    const before = (await pool.query("select p.name, p.status, pr.email from professionals p left join profiles pr on pr.id = p.profile_id where p.id = $1", [request.params.id])).rows[0];
+    if (!before) throw new ApiError(404, "Professional not found.");
+    await pool.query("update professionals set status = $2, online = online and $3 where id = $1", [request.params.id, status, status === "live"]);
+    // Their first time going live is worth an email; later toggles are not.
+    if (status === "live" && before.status === "pending") sendMail(before.email, medicoLive(before.name));
+    await audit(me.id, `professional.${status}`, request.params.id);
+    return { ok: true };
+  });
+
+  // Staff can switch a professional online or offline, for example when they cannot be reached.
+  app.patch<{ Params: { id: string } }>("/admin/professionals/:id/online", async (request) => {
+    const me = await admin(request, "professionals");
+    const { online } = z.object({ online: z.boolean() }).parse(request.body);
+    const pro = (await pool.query("select status from professionals where id = $1", [request.params.id])).rows[0];
+    if (!pro) throw new ApiError(404, "Professional not found.");
+    if (online && pro.status !== "live") throw new ApiError(409, "Make the profile live before switching them online.");
+    await pool.query("update professionals set online = $2 where id = $1", [request.params.id, online]);
+    await audit(me.id, online ? "professional.online" : "professional.offline", request.params.id);
     return { ok: true };
   });
 

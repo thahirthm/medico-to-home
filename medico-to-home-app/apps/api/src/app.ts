@@ -10,6 +10,7 @@ import { accountRoutes } from "./modules/account";
 import { adminRoutes } from "./modules/admin";
 import { bookingRoutes } from "./modules/bookings";
 import { catalogueRoutes } from "./modules/catalogue";
+import { medicoRoutes } from "./modules/medico";
 import { proRoutes } from "./modules/pro";
 
 export async function buildApp() {
@@ -23,7 +24,14 @@ export async function buildApp() {
   app.setErrorHandler((error, request, reply) => {
     if (error instanceof ApiError) return reply.code(error.statusCode).send({ message: error.message });
     if ((error as { statusCode?: number }).statusCode === 429) return reply.code(429).send({ message: "Too many attempts. Please wait a minute and try again." });
-    if (error instanceof ZodError) return reply.code(400).send({ message: error.issues[0]?.message ?? "Please check the details." });
+    if (error instanceof ZodError) {
+      // Our own messages read well; zod's built-in ones ("Too small: expected string…") do not, so name the field instead.
+      const issue = error.issues[0];
+      const own = issue && !/^(Too small|Too big|Invalid|Expected|Required)/i.test(issue.message);
+      const field = String(issue?.path.at(-1) ?? "").replace(/([a-z])([A-Z])/g, "$1 $2").replace(/_/g, " ").toLowerCase();
+      request.log.warn({ issue }, "validation failed");
+      return reply.code(400).send({ message: own ? issue.message : field ? `Please check the ${field}.` : "Please check the details." });
+    }
     if ((error as { code?: string }).code === "23505") return reply.code(409).send({ message: "That already exists." });
     if ((error as { code?: string }).code === "23503") return reply.code(409).send({ message: "This is still in use, so it cannot be removed." });
     request.log.error(error);
@@ -52,6 +60,7 @@ export async function buildApp() {
   await app.register(accountRoutes);
   await app.register(bookingRoutes);
   await app.register(proRoutes);
+  await app.register(medicoRoutes);
   await app.register(adminRoutes);
   return app;
 }

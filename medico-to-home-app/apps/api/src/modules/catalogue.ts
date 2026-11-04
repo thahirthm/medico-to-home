@@ -1,11 +1,9 @@
-import { randomUUID } from "node:crypto";
-import { GENDERS, missingForApplication, professionByLabel, servicePrice } from "@medico/shared";
+import { servicePrice } from "@medico/shared";
 import type { FastifyInstance } from "fastify";
 import { z } from "zod";
-import { requireMember } from "../auth";
 import { pool } from "../db";
 import { ApiError } from "../errors";
-import { MAX_BYTES, safeFileName, signedUpload } from "../storage";
+import { reverseGeocode } from "../geocode";
 import { startOfIstDay } from "../time";
 
 const initials = (name: string) => {
@@ -67,16 +65,20 @@ export async function catalogueRoutes(app: FastifyInstance) {
     };
   });
 
-  app.get("/localities/nearest", async (request) => {
+  // Where the user is: a readable place for their exact position, and the closest areas we serve.
+  app.get("/localities/nearest", { config: { rateLimit: { max: 30, timeWindow: "1 minute" } } }, async (request) => {
     const query = z.object({ lat: z.coerce.number().min(-90).max(90), lng: z.coerce.number().min(-180).max(180) }).parse(request.query);
-    const { rows } = await pool.query(
-      `select name, district, extensions.st_distance(location, extensions.st_setsrid(extensions.st_makepoint($2, $1), 4326)::extensions.geography) / 1000 km
-       from localities order by location operator(extensions.<->) extensions.st_setsrid(extensions.st_makepoint($2, $1), 4326)::extensions.geography limit 1`,
-      [query.lat, query.lng],
-    );
-    const nearest = rows[0];
-    if (!nearest) throw new ApiError(404, "No service areas yet.");
-    return { name: nearest.name, district: nearest.district, km: Math.round(nearest.km * 10) / 10, covered: nearest.km <= COVERAGE_KM };
+    const [areas, place] = await Promise.all([
+      pool.query(
+        `select name, district, extensions.st_distance(location, extensions.st_setsrid(extensions.st_makepoint($2, $1), 4326)::extensions.geography) / 1000 km
+         from localities order by location operator(extensions.<->) extensions.st_setsrid(extensions.st_makepoint($2, $1), 4326)::extensions.geography limit 5`,
+        [query.lat, query.lng],
+      ),
+      reverseGeocode(query.lat, query.lng),
+    ]);
+    const nearest = areas.rows.map((r) => ({ name: r.name as string, district: r.district as string, km: Math.round(r.km * 10) / 10 }));
+    if (!nearest[0]) throw new ApiError(404, "No service areas yet.");
+    return { place, nearest, covered: nearest[0].km <= COVERAGE_KM };
   });
 
   // Real bookings that must block the dummy slots.
@@ -87,71 +89,5 @@ export async function catalogueRoutes(app: FastifyInstance) {
       [request.params.id, startOfIstDay()],
     );
     return rows.map((r) => [new Date(r.starts_at).getTime(), new Date(r.blocked_until).getTime()]);
-  });
-
-  // Applying needs a signed-in account; approval unlocks professional mode on that same account.
-  const applicationBody = z.object({
-    name: z.string().trim().min(2, "Please enter your full name."),
-    phone: z.string().trim().regex(/^(\+?91)?\s*\d{10}$/, "Please enter a 10-digit mobile number."),
-    gender: z.enum(GENDERS as [string, ...string[]], { message: "Please choose your gender." }),
-    profession: z.string().min(1),
-    district: z.enum(["Kozhikode", "Malappuram"]),
-    details: z.record(z.string(), z.union([z.string().trim().max(1000), z.array(z.string().max(100)).max(20)])),
-    documents: z.array(z.object({ kind: z.string(), fileName: z.string().max(200), path: z.string(), size: z.number().int() })).max(20),
-  });
-
-  // Checks everything the shared form rules require, and that every file belongs to this applicant.
-  const parseApplication = (user: { id: string }, raw: unknown) => {
-    const body = applicationBody.parse(raw);
-    const profession = professionByLabel(body.profession);
-    if (!profession) throw new ApiError(400, "Please choose your profession.");
-    const kinds = new Set(profession.documents.map((d) => d.key));
-    if (body.documents.some((d) => !kinds.has(d.kind) || !d.path.startsWith(`applications/${user.id}/`))) throw new ApiError(400, "One of the files is not valid. Please upload it again.");
-    const missing = missingForApplication(body.profession, body.details, body.documents);
-    if (missing.length) throw new ApiError(400, `Please complete: ${missing.join(", ")}.`);
-    return { ...body, registration: String(body.details.registration_no ?? body.details.licence_no ?? "") };
-  };
-
-  app.post("/applications/documents/sign", async (request) => {
-    const user = await requireMember(request);
-    const body = z.object({ kind: z.string().min(1).max(40), fileName: z.string().min(1).max(200), size: z.number().int().positive().max(MAX_BYTES, "Files must be 20 MB or smaller.") }).parse(request.body);
-    const path = `applications/${user.id}/${body.kind}-${randomUUID()}-${safeFileName(body.fileName)}`;
-    return { uploadUrl: await signedUpload(path), path };
-  });
-
-  app.get("/applications/mine", async (request) => {
-    const user = await requireMember(request);
-    const { rows } = await pool.query(
-      "select id, name, phone, gender, profession, district, details, documents, stage, decision_note, created_at from applications where profile_id = $1 order by created_at desc limit 1",
-      [user.id],
-    );
-    return rows[0] ?? null;
-  });
-
-  app.post("/applications", async (request, reply) => {
-    const user = await requireMember(request);
-    const body = parseApplication(user, request.body);
-    const open = await pool.query("select 1 from applications where profile_id = $1 and stage <> 'rejected'", [user.id]);
-    if (open.rowCount) throw new ApiError(409, "You have already applied. We will contact you soon.");
-    await pool.query(
-      `insert into applications (name, phone, gender, email, profession, district, registration_no, details, documents, profile_id)
-       values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)`,
-      [body.name, body.phone, body.gender, user.email ?? "", body.profession, body.district, body.registration, body.details, JSON.stringify(body.documents), user.id],
-    );
-    return reply.code(201).send({ ok: true });
-  });
-
-  // After "Info needed", the applicant fixes the details and the application returns to review.
-  app.put("/applications/mine", async (request) => {
-    const user = await requireMember(request);
-    const body = parseApplication(user, request.body);
-    const { rowCount } = await pool.query(
-      `update applications set name = $2, phone = $3, gender = $4, profession = $5, district = $6, registration_no = $7, details = $8, documents = $9,
-         stage = 'documents', decision_note = '', updated_at = now()
-       where profile_id = $1 and stage = 'info_needed'`,
-      [user.id, body.name, body.phone, body.gender, body.profession, body.district, body.registration, body.details, JSON.stringify(body.documents)],
-    );
-    if (!rowCount) throw new ApiError(409, "There is nothing to update on your application.");
-    return { ok: true };
   });
 }

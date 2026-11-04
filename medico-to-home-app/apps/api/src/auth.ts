@@ -85,7 +85,7 @@ export async function requireMember(request: FastifyRequest): Promise<User> {
 export async function requireStaff(request: FastifyRequest, module: Module): Promise<User> {
   const user = await requireUser(request);
   if (user.role !== "admin") throw new ApiError(403, "You do not have access to this page.");
-  if (user.aal !== "aal2") throw new ApiError(403, "Please enter your 2-step code.");
+  if (env.ADMIN_TWO_STEP === "on" && user.aal !== "aal2") throw new ApiError(403, "Please enter your 2-step code.");
   if (!canOpen(user.staff_roles, module)) throw new ApiError(403, "Your staff role does not include this section.");
   return user;
 }

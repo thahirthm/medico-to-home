@@ -1,5 +1,10 @@
 "use client";
 
+import type { MedicoProfile } from "@medico/shared";
+import Link from "next/link";
+import { MedicoIdCard } from "@/components/medico/MedicoIdCard";
+import { ProfileDetails, ProfileStats } from "@/components/medico/MedicoProfileView";
+import { useMe } from "./AuthGate";
 import { Card, Loading, PageHead, rupees, StatTile, StatusPill } from "./ui";
 import { useApi } from "./useApi";
 
@@ -41,7 +46,31 @@ export function ProEarnings() {
   );
 }
 
+/** The Medico's ID card and full profile. Listings set up by staff without a registration show their basic details. */
 export function ProProfile() {
+  const me = useMe();
+  const { data, error } = useApi<{ application: { stage: string; profile: MedicoProfile | null } | null }>("/medico/profile");
+  if (!data) return <Loading error={error} />;
+  const p = data.application?.profile;
+  if (!data.application || !p) return <ListingProfile />;
+  const stage = me.professional ? "approved" : data.application.stage;
+  return (
+    <>
+      <PageHead title="Profile" note="Your Medico ID and everything families see.">
+        {!me.professional && <Link href="/medico/register?edit" className="rounded-full bg-navy px-4 py-2 text-[13px] text-white hover:bg-navy-soft">Edit profile</Link>}
+      </PageHead>
+      <div className="grid gap-6 lg:grid-cols-[380px_minmax(0,1fr)] lg:items-start">
+        <div className="flex flex-col gap-4 lg:sticky lg:top-20">
+          <MedicoIdCard p={p} id={me.id} stage={stage} />
+          <ProfileStats p={p} />
+        </div>
+        <ProfileDetails p={p} />
+      </div>
+    </>
+  );
+}
+
+function ListingProfile() {
   const { data, error } = useApi<{ name: string; role: string; qualification: string; locality: string; radius: number; languages: string[]; status: string }>("/pro/me");
   if (!data) return <Loading error={error} />;
   const rows = [["Name", data.name], ["Profession", data.role], ["Qualification", data.qualification], ["Base area", data.locality], ["Service radius", `${data.radius} km`], ["Languages", data.languages.join(", ")]];

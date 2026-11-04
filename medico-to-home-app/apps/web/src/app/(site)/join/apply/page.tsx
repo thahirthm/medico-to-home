@@ -1,7 +1,6 @@
-import { ApplyForm } from "@/components/onboarding/ApplyForm";
+import { redirect } from "next/navigation";
 
-export const metadata = { title: "Apply to join" };
-
+// The application now lives in the Medico onboarding flow.
 export default function Page() {
-  return <ApplyForm />;
+  redirect("/medico");
 }

@@ -13,8 +13,8 @@ export const storage = (path: string, body: unknown) =>
   });
 
 /** A one-time URL the browser uploads straight to, so files never pass through the API. */
-export async function signedUpload(path: string) {
-  const res = await storage(`/object/upload/sign/${BUCKET}/${path}`, {});
+export async function signedUpload(path: string, bucket: string = BUCKET) {
+  const res = await storage(`/object/upload/sign/${bucket}/${path}`, {});
   if (!res.ok) throw new ApiError(502, "Could not prepare the upload.");
   const { url } = (await res.json()) as { url: string };
   return `${env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1${url}`;

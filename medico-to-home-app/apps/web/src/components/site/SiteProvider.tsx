@@ -6,7 +6,7 @@
 // the API; only the time slots are still dummy.
 import { usePathname, useRouter } from "next/navigation";
 import { Component, createContext, useContext } from "react";
-import { api, getMe, setMode, supabase } from "@/lib/api";
+import { api, getMe, isMedico, setMode, supabase } from "@/lib/api";
 import { MTH, setCatalogue } from "@/prototype/catalogue";
 import { MTHL } from "@/prototype/schedule";
 
@@ -17,7 +17,7 @@ const PENDING_KEY = "mth-pending-login";
 export const useSite = (): any => useContext(SiteContext);
 
 function pathFor(view, proId, bookingId) {
-  return { home: "/", about: "/about", join: "/join", apply: "/join/apply", acct: "/account", pro: `/professionals/${proId}`, book: `/book/${proId}`, done: `/bookings/${bookingId}` }[view] ?? "/";
+  return { home: "/", about: "/about", join: "/join", apply: "/join/apply", acct: "/account", setup: "/welcome", pro: `/professionals/${proId}`, book: `/book/${proId}`, done: `/bookings/${bookingId}` }[view] ?? "/";
 }
 
 function fromPath(path) {
@@ -26,8 +26,9 @@ function fromPath(path) {
   if (a === "book") return { view: "book", proId: b };
   if (a === "bookings") return { view: "done", bookingId: b };
   if (a === "about") return { view: "about" };
-  if (a === "join") return { view: b === "apply" ? "apply" : "join" };
+  if (a === "join") return { view: "join" };
   if (a === "account") return { view: "acct" };
+  if (a === "welcome") return { view: "setup" };
   if (a === "legal") return { view: "legal" };
   return { view: "home" };
 }
@@ -45,13 +46,14 @@ class SiteStore extends Component {
     this._md = (e) => { if (!e.target.closest('[data-dd]')) { const s = this.state; if (s.locOpen || s.qOpen || s.whenOpen) this.setState({ locOpen: false, qOpen: false, whenOpen: false }); } };
     window.addEventListener('resize', this._rs); window.addEventListener('scroll', this._sc); document.addEventListener('mousedown', this._md);
     this.startLocation(); this.reveal(); this.ensure();
+    if (new URLSearchParams(window.location.search).get('login') === 'patient') { window.history.replaceState(null, '', window.location.pathname); this.setState({ login: true }); }
     // A used or expired email link comes back with an error in the address instead of a session.
     const linkError = new URLSearchParams(window.location.hash.slice(1)).get('error_code') || new URLSearchParams(window.location.search).get('error_code');
     if (linkError) {
       window.history.replaceState(null, '', window.location.pathname);
       this.setState({ login: true }); this.toast(linkError === 'otp_expired' ? 'That sign-in link has expired or was already used. Please ask for a new code.' : 'That sign-in link did not work. Please ask for a new code.');
     }
-    supabase.auth.getSession().then(({ data }) => { if (data.session) this.afterAuth().then((me) => { if (me.needs_setup) this.setState({ login: true }); else this.resumePending(); }).catch(() => {}).finally(() => this.setState({ authReady: true })); else this.setState({ authReady: true }); });
+    supabase.auth.getSession().then(({ data }) => { if (data.session) this.afterAuth().then((me) => { if (this.toMedico(me)) return; if (me.needs_setup) this.toSetup(); else this.resumePending(); }).catch(() => {}).finally(() => this.setState({ authReady: true })); else this.setState({ authReady: true }); });
   }
   componentDidUpdate(prev) {
     if (prev.pathname !== this.props.pathname) this.setState(fromPath(this.props.pathname));
@@ -66,7 +68,7 @@ class SiteStore extends Component {
       this.setState({ proId: p.id, b: { ...this.mkB(p), step: 0 } });
     }
     if (!s.authReady) return;
-    if ((s.view === 'acct' || s.view === 'done') && !s.user && !s.login && !this._loginAsked) { this._loginAsked = true; this.setState({ login: true }); }
+    if ((s.view === 'acct' || s.view === 'done' || s.view === 'setup') && !s.user && !s.login && !this._loginAsked) { this._loginAsked = true; this.setState({ login: true }); }
     if (s.view === 'acct' && s.user && !s.acct) this.setState({ acct: this.buildAcct() });
     if (s.view === 'done' && s.user && s.bookingId) this.watchBooking(s.bookingId); else { clearInterval(this._ti); this._watching = null; }
   }
@@ -80,18 +82,28 @@ class SiteStore extends Component {
     // Returned too, because this.state is not updated yet when the caller continues.
     return me;
   }
+  // A new account fills in the registration page before anything else; it returns where it came from.
+  toSetup() {
+    if (this.state.view !== 'setup') this._setupFrom = this.state.view;
+    this.setState({ login: false }); this.go('setup');
+  }
   resumePending() {
     let pending = null; try { pending = JSON.parse(sessionStorage.getItem(PENDING_KEY) || 'null'); sessionStorage.removeItem(PENDING_KEY); } catch {}
     if (!pending) return;
     this.toast('You are logged in');
     this.setState(pending.b ? { b: pending.b, proId: pending.proId } : {}, () => this.continueAfterLogin(pending.to));
   }
+  // A Medico working in professional mode belongs on their dashboard, not the patient site. "Patient mode" there switches back.
+  toMedico(me) {
+    if (!me || me.last_mode !== 'professional' || !isMedico(me)) return false;
+    window.location.replace('/pro'); return true;
+  }
   // After signing in: finish what the user started, or open the mode they used last.
   continueAfterLogin(to) {
     const me = this.state.me;
     if (to === 'confirm') this.confirm();
     else if (to) this.go(to);
-    else if (me && me.professional && me.last_mode === 'professional') window.location.assign('/pro');
+    else this.toMedico(me);
   }
   // Where this account's application stands, shown on the Join page. The form itself lives at /join/apply.
   joinState() {
@@ -103,6 +115,12 @@ class SiteStore extends Component {
       joinNoteTitle: stage === 'info_needed' ? 'We need a few more details' : 'Your last application was not approved',
       joinButton: stage === 'info_needed' ? 'Update your application' : stage === 'rejected' ? 'Apply again' : 'Start your application',
     };
+  }
+  // Booking fields from a saved address. Its locality must be one of our areas; if it is blank or unknown, the area chosen on the site is used.
+  addrFields(a) {
+    const loc = this.state.loc; const known = a && MTH.LOCS[a.locality];
+    if (!a) return { addr: 'new', addressId: undefined, house: '', street: '', landmark: '', locality: loc, pin: (MTH.LOCS[loc] || [])[3] || '' };
+    return { addr: a.id, addressId: a.id, house: a.house, street: a.street, landmark: a.landmark, locality: known ? a.locality : loc, pin: a.pincode || (MTH.LOCS[known ? a.locality : loc] || [])[3] || '' };
   }
   refreshBookings() { return api('/bookings').then(bookings => this.setState({ bookings })).catch(() => {}); }
   watchBooking(id) {
@@ -117,7 +135,7 @@ class SiteStore extends Component {
     const s = this.state; const members = {};
     s.patients.forEach(x => { members[x.id] = { ...x, phone: '' }; });
     const self = s.patients.find(x => x.rel === 'Me');
-    return { tab: 'records', member: self ? self.id : Object.keys(members)[0], edit: false, d: { cond: '', since: '', alg: '', medN: '', medD: '', medF: 'Once daily', hT: '', hN: '', newM: '' },
+    return { tab: 'records', member: self ? self.id : Object.keys(members)[0], edit: false, d: { cond: '', since: '', alg: '', medN: '', medD: '', medF: 'Once daily', hT: '', hN: '' },
       info: { name: s.me.full_name, phone: s.me.phone || '', email: s.me.email, dob: s.me.dob, emerg: s.me.emergency_contact }, members };
   }
   savePatient(id) {
@@ -145,22 +163,33 @@ class SiteStore extends Component {
     if (!this._io) this._io = new IntersectionObserver((es) => es.forEach(e => { if (e.isIntersecting) { e.target.style.opacity = 1; e.target.style.transform = 'none'; this._io.unobserve(e.target); } }), { threshold: .08 });
     document.querySelectorAll('[data-reveal]:not([data-rv])').forEach(el => { el.setAttribute('data-rv', '1'); el.style.opacity = 0; el.style.transform = 'translateY(16px)'; el.style.transition = 'opacity .7s ease, transform .7s cubic-bezier(.2,.7,.2,1)'; this._io.observe(el); });
   }
+  // Distances are measured from the user's exact position when we have it, else from the chosen area.
+  at() { return this.state.here || this.state.loc; }
   startLocation() {
-    let saved = null; try { saved = localStorage.getItem('mth-loc'); } catch {}
-    if (saved && MTH.LOCS[saved]) this.setState({ loc: saved, locLoading: false, gridLoading: false }); else this.detect();
+    let saved = null, here = null; try { saved = localStorage.getItem('mth-loc'); here = JSON.parse(localStorage.getItem('mth-here') || 'null'); } catch {}
+    if (saved && MTH.LOCS[saved]) this.setState({ loc: saved, here, locLoading: false, gridLoading: false }); else this.detect();
   }
-  pickLoc(name) { this.setState({ loc: name, locOpen: false, locLoading: false }); try { localStorage.setItem('mth-loc', name); } catch {} }
+  // An area picked from the list replaces the exact position; detect() keeps it.
+  pickLoc(name, here = null) {
+    this.setState({ loc: name, here, outside: null, locOpen: false, locLoading: false });
+    try { localStorage.setItem('mth-loc', name); if (here) localStorage.setItem('mth-here', JSON.stringify(here)); else localStorage.removeItem('mth-here'); } catch {}
+  }
   detect() {
     this.setState({ locLoading: true, gridLoading: false, locOpen: false });
     const stop = (msg) => { this.setState({ locLoading: false }); if (msg) this.toast(msg); };
     if (!navigator.geolocation) return stop('Location is not available in this browser. Please pick your area.');
+    // A fresh, precise fix (GPS on phones), not a cached or network-only guess.
     navigator.geolocation.getCurrentPosition(async (pos) => {
+      const { latitude: lat, longitude: lng, accuracy } = pos.coords;
       try {
-        const n = await api(`/localities/nearest?lat=${pos.coords.latitude}&lng=${pos.coords.longitude}`);
-        if (n.covered) { this.pickLoc(n.name); stop('Showing care near ' + n.name); this.flash(); }
-        else stop(`We do not serve your area yet (${Math.round(n.km)} km from ${n.name}). Please pick an area.`);
+        const n = await api(`/localities/nearest?lat=${lat.toFixed(6)}&lng=${lng.toFixed(6)}`);
+        const here = { lat, lng, accuracy: Math.round(accuracy), label: n.place ? n.place.label : 'Your location', address: n.place ? n.place.address : `${lat.toFixed(5)}, ${lng.toFixed(5)}` };
+        this.setState({ nearby: n.nearest });
+        if (n.covered) { this.pickLoc(n.nearest[0].name, here); stop('Showing care near ' + here.label); this.flash(); }
+        // Outside our areas: show where they are and let them choose a nearby area we serve.
+        else this.setState({ outside: here, locOpen: true, locLoading: false });
       } catch (e) { stop(e.message); }
-    }, (err) => stop(err.code === 1 ? 'Location permission is off. Please pick your area.' : 'Could not find your location. Please pick your area.'), { timeout: 10000, maximumAge: 300000 });
+    }, (err) => stop(err.code === 1 ? 'Location permission is off. Please pick your area.' : 'Could not find your location. Please pick your area.'), { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 });
   }
   flash() { this.setState({ gridLoading: true, gridLimit: GRID_PAGE }); clearTimeout(this._fl); this._fl = setTimeout(() => this.setState({ gridLoading: false }), 420); }
   toast(t) { this.setState({ toast: t }); clearTimeout(this._tt); this._tt = setTimeout(() => this.setState({ toast: '' }), 2400); }
@@ -177,7 +206,7 @@ class SiteStore extends Component {
   openPro(id) { this.go('pro', { proId: id, proDay: null }); }
   icon(k) { return MTH.I[k] || ''; }
   card(p) {
-    const M = MTH, L = MTHL, c = M.CATS[p.cat], km = L.km(p, this.state.loc);
+    const M = MTH, L = MTHL, c = M.CATS[p.cat], km = L.km(p, this.at());
     const today = !!p.today;
     return { id: p.id, img: p.img, hasImg: !!p.img, noImg: !p.img, initials: p.initials, name: p.name, rating: p.rating.toFixed(1), reviews: p.reviews,
       roleLine: c.one + ' · ' + p.qual, exp: p.exp, langs: p.langs.join(', '), distLine: km.toFixed(1) + ' km away · ' + p.locality,
@@ -192,8 +221,8 @@ class SiteStore extends Component {
     if (s.qApplied) { const q = s.qApplied.toLowerCase(); list = list.filter(p => (p.name + ' ' + p.qual + ' ' + M.CATS[p.cat].label + ' ' + p.svcs.map(x => x.n).join(' ')).toLowerCase().includes(q) || q.split(' ').some(w => w.length > 3 && M.CATS[p.cat].label.toLowerCase().includes(w.slice(0, 5)))); }
     list = list.filter(p => p.price <= f.price || f.price >= 1600).filter(p => f.gender === 'Any' || (f.gender === 'Female' ? p.g === 'F' : p.g === 'M'))
       .filter(p => f.langs.every(l => p.langs.includes(l))).filter(p => p.exp >= f.exp).filter(p => p.rating >= f.rating)
-      .filter(p => !f.dist || L.km(p, s.loc) <= f.dist).filter(p => !s.availNow || p.today);
-    const byR = (a, b) => b.rating - a.rating || b.reviews - a.reviews; const byK = (a, b) => L.km(a, s.loc) - L.km(b, s.loc);
+      .filter(p => !f.dist || L.km(p, this.at()) <= f.dist).filter(p => !s.availNow || p.today);
+    const byR = (a, b) => b.rating - a.rating || b.reviews - a.reviews; const byK = (a, b) => L.km(a, this.at()) - L.km(b, this.at());
     return list.sort(s.sort === 'near' ? byK : byR);
   }
   filterCount() { const f = this.state.f; return (f.price < 1600) + (f.gender !== 'Any') + (f.langs.length > 0) + (f.exp > 0) + (f.rating > 0) + (f.dist > 0); }
@@ -215,8 +244,8 @@ class SiteStore extends Component {
     const tabs = ['all', ...M.ORDER].map(k => { const on = s.cat === k; return { label: k === 'all' ? 'All' : M.CATS[k].label, icon: this.icon(k), bg: on ? '#02084D' : '#fff', fg: on ? '#fff' : '#02084D', bd: on ? '#02084D' : '#E6E8EF', stroke: on ? '#fff' : '#02084D', pick: () => this.setCat(k) }; });
     const all = this.filtered();
     const pool = M.pros.filter(p => s.cat === 'all' || p.cat === s.cat);
-    const top = pool.slice().sort((a, b) => L.km(a, s.loc) - L.km(b, s.loc)).slice(0, 14).sort((a, b) => b.rating - a.rating || b.reviews - a.reviews).slice(0, 4).map(p => this.card(p));
-    const avail = pool.filter(p => p.today).sort((a, b) => L.km(a, s.loc) - L.km(b, s.loc)).slice(0, 4).map(p => this.card(p));
+    const top = pool.slice().sort((a, b) => L.km(a, this.at()) - L.km(b, this.at())).slice(0, 14).sort((a, b) => b.rating - a.rating || b.reviews - a.reviews).slice(0, 4).map(p => this.card(p));
+    const avail = pool.filter(p => p.today).sort((a, b) => L.km(a, this.at()) - L.km(b, this.at())).slice(0, 4).map(p => this.card(p));
     const plural = s.cat === 'all' ? 'professionals' : M.CATS[s.cat].plural;
     const chip = (on) => ({ bg: on ? '#02084D' : '#fff', fg: on ? '#fff' : '#02084D', bd: on ? '#02084D' : '#E6E8EF' });
     const fc = this.filterCount(); const f = s.f;
@@ -227,7 +256,9 @@ class SiteStore extends Component {
       mob, desk: !mob, sugs, qOpen: s.qOpen && sugs.length > 0, q: s.q,
       onQ: (e) => this.setState({ q: e.target.value, qOpen: true }), onQFocus: () => this.setState({ qOpen: true, locOpen: false, whenOpen: false }),
       onQKey: (e) => { if (e.key === 'Enter') this.doSearch(); }, clearQ: () => this.setState({ q: '', qApplied: '' }), hasQ: !!s.q,
-      loc: s.loc, locDistrict: (M.LOCS[s.loc] || [])[2] || 'Kozhikode', locLoading: s.locLoading, locReady: !s.locLoading, locOpen: s.locOpen,
+      loc: s.loc, locDistrict: (M.LOCS[s.loc] || [])[2] || 'Kozhikode', locText: s.here ? s.here.label : `${s.loc}, ${(M.LOCS[s.loc] || [])[2] || 'Kozhikode'}`,
+      here: s.here, outside: s.outside, accuracyText: (h) => h.accuracy > 1000 ? 'Approximate location' : `Accurate to about ${h.accuracy} m`,
+      nearby: (s.nearby || []).map(n => ({ ...n, on: n.name === s.loc && !s.here, kmText: n.km < 10 ? n.km.toFixed(1) + ' km' : Math.round(n.km) + ' km', pick: () => { this.pickLoc(n.name); this.flash(); } })), locLoading: s.locLoading, locReady: !s.locLoading, locOpen: s.locOpen,
       toggleLoc: () => this.setState(x => ({ locOpen: !x.locOpen, qOpen: false, whenOpen: false })), useMyLoc: () => this.detect(),
       kozLocs: locGroup('Kozhikode'), mlpLocs: locGroup('Malappuram'),
       when: s.when, whenOpen: s.whenOpen, toggleWhen: () => this.setState(x => ({ whenOpen: !x.whenOpen, qOpen: false, locOpen: false })), whenOpts, days,
@@ -235,7 +266,7 @@ class SiteStore extends Component {
       tabs, top, avail, grid: all.slice(0, s.gridLimit).map(p => this.card(p)), gridHasMore: !s.gridLoading && all.length > s.gridLimit, moreLabel: 'Show more (' + (all.length - s.gridLimit) + ' more)', showMore: () => this.setState(x => ({ gridLimit: x.gridLimit + GRID_PAGE })), gridEmpty: !s.gridLoading && all.length === 0, gridHas: !s.gridLoading && all.length > 0,
       loading: s.gridLoading, notLoading: !s.gridLoading, skel: [1, 2, 3, 4, 5, 6, 7, 8], skel4: [1, 2, 3, 4],
       hasAvail: avail.length > 0, catTitle: s.cat === 'all' ? 'professionals' : M.CATS[s.cat].plural,
-      countText: all.length + ' ' + (all.length === 1 && s.cat !== 'all' ? M.CATS[s.cat].one.toLowerCase() : plural) + ' near ' + s.loc,
+      countText: all.length + ' ' + (all.length === 1 && s.cat !== 'all' ? M.CATS[s.cat].one.toLowerCase() : plural) + ' near ' + (s.here ? s.here.label : s.loc),
       qAppliedText: s.qApplied ? 'Results for “' + s.qApplied + '”' : '', hasQApplied: !!s.qApplied,
       emptyText: 'No ' + plural + ' available at this time — try another date or nearby area.',
       resetFilters: () => { this.setState({ f: { price: 1600, gender: 'Any', langs: [], exp: 0, rating: 0, dist: 0 }, availNow: false }); this.flash(); },
@@ -275,7 +306,7 @@ class SiteStore extends Component {
     const plan = o.plan != null ? (c.allowPlan && o.plan) : c.plan; const d = o.date || L.K(fo.d);
     const lc = M.LOCS[this.state.loc] || M.LOCS['Nadakkavu'];
     const saved = this.state.addresses[0]; const self = this.state.patients.find(x => x.rel === 'Me');
-    const b = { step: 0, svc: o.svc || 0, plan, addr: saved ? saved.id : 'new', addressId: saved ? saved.id : undefined, house: saved ? saved.house : '', street: saved ? saved.street : '', landmark: saved ? saved.landmark : '', locality: saved ? saved.locality : this.state.loc, pin: saved ? saved.pincode : lc[3],
+    const b = { step: 0, svc: o.svc || 0, plan, ...this.addrFields(saved), pin: saved ? this.addrFields(saved).pin : lc[3],
       date: d, slot: o.slot || fo.t, sessions: 10, customN: '12', start: d, freq: c.mode === 'care' ? 'daily' : 'alt', days: [0, 1, 2, 3, 4, 5], skip: [], hours: 12, ndays: 7,
       who: 'self', fam: '', patientId: self ? self.id : undefined, pname: self ? self.name : '', age: self ? self.age : '', gender: self ? self.gender : '', notes: '', files: [], share: true, pay: 'later', listOpen: false, calOff: 0, err: '' };
     this.go('book', { proId: id, b });
@@ -289,8 +320,8 @@ class SiteStore extends Component {
       return { dow: i === 0 ? 'Today' : i === 1 ? 'Tmrw' : L.DOW[d.getDay()], n: d.getDate(), sub: off ? 'Off' : free + ' slots', bg: on ? '#02084D' : '#fff', fg: on ? '#fff' : off ? '#B5B8C6' : '#02084D', bd: on ? '#02084D' : '#E6E8EF', pick: () => this.setState({ proDay: i }) }; });
     const offSel = L.offDay(p, dsel);
     const pslots = offSel ? [] : L.ALL.map(t => { const bk = L.booked(p, dsel, t); return { t, label: bk ? 'Booked' : t, bg: bk ? '#F6F7FA' : '#fff', fg: bk ? '#B5B8C6' : '#02084D', bd: bk ? '#F0F1F5' : '#E6E8EF', cur: bk ? 'default' : 'pointer', pick: () => { if (!bk) this.startBook(p.id, { date: L.K(dsel), slot: t, plan: false }); } }; });
-    const km = L.km(p, s.loc);
-    const similar = M.pros.filter(x => x.cat === p.cat && x.id !== p.id).sort((a, b) => L.km(a, s.loc) - L.km(b, s.loc)).slice(0, 4).map(x => this.card(x));
+    const km = L.km(p, this.at());
+    const similar = M.pros.filter(x => x.cat === p.cat && x.id !== p.id).sort((a, b) => L.km(a, this.at()) - L.km(b, this.at())).slice(0, 4).map(x => this.card(x));
     return {
       pp: { ...this.card(p), qual: p.qual, reg: p.reg, bio: p.bio, role: c.one, brand: c.brand, locality: p.locality, district: M.LOCS[p.locality][2], radius: p.radius, km: km.toFixed(1), langsList: p.langs, roleQual: c.one + ' · ' + p.qual },
       ppSvcs: p.svcs.map((x, i) => ({ n: x.n, d: x.d, price: L.inr(x.p), unit: '/ ' + c.unit, book: () => this.startBook(p.id, { svc: i }) })),
@@ -336,7 +367,7 @@ class SiteStore extends Component {
     const rows = [[L.inr(pr.unit) + ' × ' + pr.n + ' ' + (pr.n === 1 ? pr.unitLabel : (mode === 'care' && b.plan ? 'days' : c.unit + 's')), L.inr(pr.sub)]];
     if (pr.disc) rows.push(['Package discount (' + Math.round(pr.rate * 100) + '% off)', '− ' + L.inr(pr.disc)]);
     rows.push(['Platform fee', L.inr(pr.fee)], ['GST (18% on platform fee)', L.inr(pr.gst)]);
-    const addrOpts = [...s.addresses.map(a => ({ l: a.label + ' · ' + (a.house || a.locality), ...chip(b.addr === a.id), pick: () => this.setB({ addr: a.id, addressId: a.id, house: a.house, street: a.street, landmark: a.landmark, locality: a.locality, pin: a.pincode }) })),
+    const addrOpts = [...s.addresses.map(a => ({ l: a.label + ' · ' + (a.house || a.locality), ...chip(b.addr === a.id), pick: () => this.setB(this.addrFields(a)) })),
       { l: '+ New address', ...chip(b.addr === 'new'), pick: () => this.setB({ addr: 'new', addressId: undefined, house: '', street: '', landmark: '', locality: s.loc, pin: (M.LOCS[s.loc] || [])[3] || '' }) }];
     const fld = (k) => (e) => this.setB({ [k]: e.target.value });
     const famList = s.patients.filter(x => x.rel !== 'Me'); const self = s.patients.find(x => x.rel === 'Me');
@@ -382,7 +413,7 @@ class SiteStore extends Component {
     const D = A.d; const dset = (k) => (e) => { const v = e.target.value; set(a => { a.d[k] = v; }); };
     const bmi = (+m.h && +m.w) ? (m.w / Math.pow(m.h / 100, 2)).toFixed(1) : '—';
     const tabs = [['records', 'Medical records'], ['bookings', 'Bookings'], ['details', 'Personal details'], ['addresses', 'Addresses']].map(([k, l]) => ({ l, ...chip(A.tab === k), pick: () => set(a => { a.tab = k; }) }));
-    const members = Object.keys(A.members).map(k => { const x = A.members[k]; return { l: x.rel, sub: x.name, init: (x.name || x.rel)[0], ...chip(A.member === k), pick: () => set(a => { a.member = k; a.edit = false; }) }; });
+    const members = Object.keys(A.members).map(k => { const x = A.members[k]; return { l: x.rel === 'Me' ? 'Me' : (x.name || x.rel).split(' ')[0], sub: x.rel === 'Me' ? x.name : x.rel, init: ((x.name || x.rel)[0] || '?').toUpperCase(), on: A.member === k, ...chip(A.member === k), pick: () => set(a => { a.member = k; a.edit = false; }) }; });
     const fld = (k) => (e) => { const v = e.target.value; mm(x => { x[k] = v; }); };
     const ifld = (k) => (e) => { const v = e.target.value; set(a => { a.info[k] = v; }); };
     const upcoming = s.b && s.view !== 'book' && this._booked ? [] : [];
@@ -400,8 +431,8 @@ class SiteStore extends Component {
       acReps: m.reps.map((c, i) => ({ ...c, date: new Date(c.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }), size: c.size > 1048576 ? (c.size / 1048576).toFixed(1) + ' MB' : Math.max(1, Math.round(c.size / 1024)) + ' KB',
         rm: () => api(`/documents/${c.id}`, { method: 'DELETE' }).then(() => set(a => { a.members[a.member].reps.splice(i, 1); })).catch(e => this.toast(e.message)),
         view: () => api(`/documents/${c.id}/url`).then(r => window.open(r.url, '_blank', 'noopener')).catch(e => this.toast(e.message)) })), acNoReps: m.reps.length === 0,
-      dCond: D.cond, dSince: D.since, dAlg: D.alg, dMedN: D.medN, dMedD: D.medD, dMedF: D.medF, dHT: D.hT, dHN: D.hN, dNewM: D.newM,
-      onDCond: dset('cond'), onDSince: dset('since'), onDAlg: dset('alg'), onDMedN: dset('medN'), onDMedD: dset('medD'), onDMedF: dset('medF'), onDHT: dset('hT'), onDHN: dset('hN'), onDNewM: dset('newM'),
+      dCond: D.cond, dSince: D.since, dAlg: D.alg, dMedN: D.medN, dMedD: D.medD, dMedF: D.medF, dHT: D.hT, dHN: D.hN,
+      onDCond: dset('cond'), onDSince: dset('since'), onDAlg: dset('alg'), onDMedN: dset('medN'), onDMedD: dset('medD'), onDMedF: dset('medF'), onDHT: dset('hT'), onDHN: dset('hN'),
       acFreqs: ['Once daily', 'Twice daily', 'Three times daily', 'At night', 'As needed'],
       addCond: () => { if (!D.cond.trim()) return; set(a => { a.members[a.member].conds.push({ n: a.d.cond.trim(), since: a.d.since.trim() || String(new Date().getFullYear()) }); a.d.cond = ''; a.d.since = ''; }); this.savePatient(A.member); },
       addAlg: () => { if (!D.alg.trim()) return; set(a => { a.members[a.member].alg.push(a.d.alg.trim()); a.d.alg = ''; }); this.savePatient(A.member); },
@@ -409,8 +440,25 @@ class SiteStore extends Component {
       addMed: () => { if (!D.medN.trim()) return; set(a => { a.members[a.member].meds.push({ n: a.d.medN.trim(), dose: a.d.medD.trim() || '—', freq: a.d.medF }); a.d.medN = ''; a.d.medD = ''; }); this.savePatient(A.member); },
       addHist: () => { if (!D.hT.trim()) return; set(a => { a.members[a.member].hist.unshift({ date: new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }), title: a.d.hT.trim(), by: 'Added by you', note: a.d.hN.trim() }); a.d.hT = ''; a.d.hN = ''; }); this.savePatient(A.member); this.toast('Added to history'); },
       addRep: () => this.uploadReport(A.member),
-      addMember: () => { if (!D.newM.trim()) return; api('/patients', { body: { name: D.newM.trim(), rel: D.newM.trim().split(' ')[0] } }).then(n => { set(a => { a.members[n.id] = n; a.member = n.id; a.d.newM = ''; a.edit = true; }); this.setState(x => ({ patients: [...x.patients, n] })); }).catch(e => this.toast(e.message)); },
       acShare: m.share, acShareBg: m.share ? N : '#D9DCE6', acShareX: m.share ? '20px' : '2px', acTogShare: () => mm(x => { x.share = !x.share; }),
+      // The health card on the right follows whoever is selected; the account holder's card carries their contact details too.
+      acCard: (() => { const base = { id: m.id, name: m.name || '', gender: m.gender || '', blood: m.blood || '', h: m.h || '', w: m.w || '', conds: (m.conds || []).map(c => c.n), alg: m.alg || [], meds: (m.meds || []).map(x => x.n) };
+        if (m.rel !== 'Me') return { ...base, relation: m.rel, age: m.age || '' };
+        const home = s.addresses[0];
+        return { ...base, id: s.me.id, name: A.info.name || '', email: s.me.email, phone: (A.info.phone || '').replace(/\D/g, '').slice(-10), city: s.me.city || '', dob: A.info.dob || '', language: s.me.preferred_language || '',
+          emergency: A.info.emerg || '', address: home ? [home.house, home.street, home.landmark, home.locality, home.pincode].filter(Boolean).join(', ') : '' }; })(),
+      acEditCard: () => { if (m.rel === 'Me') this.toSetup(); else set(a => { a.tab = 'records'; a.edit = true; }); },
+      acCards: members, acHasFamily: members.length > 1,
+      acAdding: !!A.adding, acStartAdd: () => set(a => { a.adding = true; }), acCancelAdd: () => { set(a => { a.adding = false; }); window.scrollTo({ top: 0 }); },
+      acRemoveMember: () => {
+        if (m.rel === 'Me') return; const first = (m.name || m.rel).split(' ')[0];
+        if (!window.confirm(`Remove ${first} from your family?\n\nTheir health card, medical records and uploaded reports will be deleted. Past bookings stay in your history.`)) return;
+        api(`/patients/${m.id}`, { method: 'DELETE' }).then(() => {
+          set(a => { delete a.members[m.id]; const self = Object.keys(a.members).find(k => a.members[k].rel === 'Me'); a.member = self || Object.keys(a.members)[0]; a.edit = false; });
+          this.setState(x => ({ patients: x.patients.filter(p => p.id !== m.id) })); this.toast(`${first} removed from your family`);
+        }).catch(e => this.toast(e.message));
+      },
+      acMemberAdded: (n) => { set(a => { a.members[n.id] = { ...n, phone: '' }; a.member = n.id; a.adding = false; a.tab = 'records'; a.edit = false; }); this.setState(x => ({ patients: [...x.patients, n] })); window.scrollTo({ top: 0 }); this.toast(`Health card created for ${n.name.split(' ')[0]}`); },
       acInfo: A.info, onIName: ifld('name'), onIPhone: ifld('phone'), onIDob: ifld('dob'), onIEmerg: ifld('emerg'),
       saveInfo: () => api('/me', { method: 'PATCH', body: { full_name: A.info.name || undefined, phone: A.info.phone, dob: A.info.dob, emergency_contact: A.info.emerg } }).then(() => this.afterAuth()).then(() => this.toast('Personal details saved')).catch(e => this.toast(e.message)),
       logout: () => { supabase.auth.signOut({ scope: 'local' }); this._loginAsked = false; this.setState({ user: null, me: null, patients: [], addresses: [], bookings: [], acct: null }); this.go('home'); this.toast('Logged out'); },
@@ -418,7 +466,7 @@ class SiteStore extends Component {
       ...this.acctBookings(),
     };
   }
-  mkB(p) { const L = MTHL; const fo = L.firstOpen(p); const self = this.state.patients.find(x => x.rel === 'Me'); const saved = this.state.addresses[0]; return { step: 4, svc: 0, plan: false, addr: saved ? saved.id : 'new', addressId: saved ? saved.id : undefined, house: saved ? saved.house : '', street: saved ? saved.street : '', landmark: saved ? saved.landmark : '', locality: saved ? saved.locality : this.state.loc, pin: saved ? saved.pincode : (MTH.LOCS[this.state.loc] || [])[3] || '', date: L.K(fo.d), slot: fo.t, sessions: 10, customN: '12', start: L.K(fo.d), freq: 'alt', days: [0, 1, 2, 3, 4, 5], skip: [], hours: 12, ndays: 7, who: 'self', fam: '', patientId: self ? self.id : undefined, pname: self ? self.name : '', age: self ? self.age : '', gender: self ? self.gender : '', notes: '', files: [], share: true, pay: 'later', listOpen: false, calOff: 0, err: '' }; }
+  mkB(p) { const L = MTHL; const fo = L.firstOpen(p); const self = this.state.patients.find(x => x.rel === 'Me'); const saved = this.state.addresses[0]; return { step: 4, svc: 0, plan: false, ...this.addrFields(saved), date: L.K(fo.d), slot: fo.t, sessions: 10, customN: '12', start: L.K(fo.d), freq: 'alt', days: [0, 1, 2, 3, 4, 5], skip: [], hours: 12, ndays: 7, who: 'self', fam: '', patientId: self ? self.id : undefined, pname: self ? self.name : '', age: self ? self.age : '', gender: self ? self.gender : '', notes: '', files: [], share: true, pay: 'later', listOpen: false, calOff: 0, err: '' }; }
   liveVals(STAT, N, L) {
     const s = this.state; const v = s.live; const fmtDate = (d) => new Date(d).toLocaleDateString('en-IN', { timeZone: 'Asia/Kolkata', weekday: 'short', day: 'numeric', month: 'short' }); const fmtTime = (d) => new Date(d).toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata', hour: 'numeric', minute: '2-digit', hour12: true }).toUpperCase();
     const ORDER = ['accepted', 'on_the_way', 'arrived', 'in_session', 'completed'];
@@ -444,7 +492,8 @@ class SiteStore extends Component {
   }
   async confirm() {
     const s = this.state; const b = s.b; const M = MTH, L = MTHL; const p = M.pros.find(x => x.id === s.proId); const mode = M.CATS[p.cat].mode;
-    if (!s.user || s.me.needs_setup) { this._afterLogin = 'confirm'; this.setState({ login: true }); return; }
+    if (!s.user) { this._afterLogin = 'confirm'; this.setState({ login: true }); return; }
+    if (s.me.needs_setup) { this._afterLogin = 'confirm'; this.toSetup(); return; }
     if (s.booking) return; this.setState({ booking: true });
     const dates = L.sessions(b, mode).map(L.K);
     try {
@@ -465,27 +514,27 @@ class SiteStore extends Component {
       ready: s.ready, mob, desk: !mob, isHome: s.view === 'home', isPro: s.view === 'pro', isBook: s.view === 'book', isDone: s.view === 'done', isAbout: s.view === 'about', isJoin: s.view === 'join',
       hdrBg: s.scrolled || s.view !== 'home' ? '#fff' : 'rgba(255,255,255,0)', hdrBd: s.scrolled || s.view !== 'home' ? '#E6E8EF' : 'rgba(230,232,239,0)',
       goHome: () => this.go('home'), goAbout: () => this.go('about'), goJoin: () => this.go('join'), goServices: () => this.scrollTo('mth-services'), goHow: () => this.scrollTo('mth-how'), goBrowse: () => this.scrollTo('mth-browse'), goExplain: () => this.scrollTo('mth-explain'),
-      navFg: (v) => v, aboutFg: s.view === 'about' ? '#02084D' : '#4A4F6A', joinFg: s.view === 'join' || s.view === 'apply' ? '#02084D' : '#4A4F6A',
+      navFg: (v) => v, aboutFg: s.view === 'about' ? '#02084D' : '#4A4F6A', joinFg: s.view === 'join' ? '#02084D' : '#4A4F6A',
       menu: s.menu, toggleMenu: () => this.setState(x => ({ menu: !x.menu })), closeMenu: () => this.setState({ menu: false }),
       sos: s.sos, openSos: () => this.setState({ sos: true, menu: false }), closeSos: () => this.setState({ sos: false }), sosAmb: () => { this.setState({ sos: false }); this.setCat('ambulance', true); },
-      login: s.login, openLogin: () => this.setState({ login: true, menu: false }), closeLogin: () => this.setState({ login: false }),
-      loginSetup: !!(s.me && s.me.needs_setup), me: s.me,
+      login: s.login, openLogin: () => { if (s.me && s.me.needs_setup) this.toSetup(); else this.setState({ login: true, menu: false }); }, closeLogin: () => this.setState({ login: false }),
+      me: s.me, patients: s.patients, addresses: s.addresses, areas: Object.keys(MTH.LOCS), area: s.loc,
       savePending: () => { try { sessionStorage.setItem(PENDING_KEY, JSON.stringify({ to: this._afterLogin || null, b: s.b, proId: s.proId })); } catch {} },
       signedIn: async () => {
         try { sessionStorage.removeItem(PENDING_KEY); } catch {}
         let me; try { me = await this.afterAuth(); } catch (e) { this.toast(e.message); return; }
-        if (me.needs_setup) return;
+        if (me.needs_setup) { this.toSetup(); return; }
         const to = this._afterLogin; this._afterLogin = null; this.toast('You are logged in'); this.setState({ login: false }, () => this.continueAfterLogin(to));
       },
       setupDone: async () => {
         await this.afterAuth();
         let pending = null; try { pending = JSON.parse(sessionStorage.getItem(PENDING_KEY) || 'null'); sessionStorage.removeItem(PENDING_KEY); } catch {}
-        const to = this._afterLogin || (pending && pending.to); this._afterLogin = null; this.toast('Welcome to Medico To Home');
+        const to = this._afterLogin || (pending && pending.to) || this._setupFrom || 'home'; this._afterLogin = null; this._setupFrom = null; this.toast('Welcome to Medico To Home');
         this.setState({ login: false, ...(pending && pending.b ? { b: pending.b, proId: pending.proId } : {}) }, () => this.continueAfterLogin(to));
       },
       // Role switcher: shown only to approved professionals.
       isProfessional: !!(s.me && s.me.professional), toProMode: () => setMode('professional').then(() => window.location.assign('/pro')).catch(e => this.toast(e.message)),
-      userInitial: ((s.me && s.me.full_name) || (s.me && s.me.email) || 'M')[0].toUpperCase(), goAcct: () => this.go('acct'), acctOrLogin: () => { if (s.user) this.go('acct'); else { this._afterLogin = 'acct'; this.setState({ login: true, menu: false }); } }, acctLabel: s.user ? 'My profile' : 'Log in',
+      userInitial: ((s.me && s.me.full_name) || (s.me && s.me.email) || 'M')[0].toUpperCase(), goAcct: () => this.go('acct'), acctOrLogin: () => { if (s.me && s.me.needs_setup) this.toSetup(); else if (s.user) this.go('acct'); else { this._afterLogin = 'acct'; this.setState({ login: true, menu: false }); } }, acctLabel: s.user ? 'My profile' : 'Patient login',
       isAcct: s.view === 'acct',
       loggedIn: !!s.user, loggedOut: !s.user, userName: s.user || '',
       toast: s.toast, hasToast: !!s.toast, year: '2026',
@@ -494,7 +543,7 @@ class SiteStore extends Component {
       fDoctor: () => this.setCat('doctor', true), fNurse: () => this.setCat('nurse', true), fPhysio: () => this.setCat('physio', true), fLab: () => this.setCat('lab', true), fCare: () => this.setCat('caregiver', true),
       faqs: MTH.faqs.map(f => [f.question, f.answer])
         .map(([q, a], i) => ({ q, a, open: s.faq === i, rot: s.faq === i ? '45deg' : '0deg', tog: () => this.setState({ faq: s.faq === i ? -1 : i }) })),
-      goApply: () => this.go('apply'), authReady: s.authReady, proLogin: () => window.location.assign('/pro'),
+      goApply: () => window.location.assign('/medico'), authReady: s.authReady, proLogin: () => window.location.assign('/medico'),
       earnS: s.earnS, earnP: s.earnP, earnPText: '₹' + s.earnP.toLocaleString('en-IN'), earnMonth: '₹' + (Math.round(s.earnS * s.earnP * 4.3 * 0.88 / 100) * 100).toLocaleString('en-IN'),
       onEarnS: (e) => this.setState({ earnS: +e.target.value }), onEarnP: (e) => this.setState({ earnP: +e.target.value }),
       ...this.joinState(),

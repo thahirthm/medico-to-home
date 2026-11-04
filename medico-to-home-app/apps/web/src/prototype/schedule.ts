@@ -17,7 +17,7 @@ const fd=d=>d.getDate()+' '+MON[d.getMonth()];
 const fdl=d=>DOW[d.getDay()]+', '+d.getDate()+' '+MON[d.getMonth()];
 const inr=n=>'₹'+Math.round(n).toLocaleString('en-IN');
 const h=s=>{let x=0;for(const c of s)x=(x*31+c.charCodeAt(0))>>>0;return x};
-function km(p,loc){const L=MTH.LOCS;const a=L[p.locality],b=L[loc]||L['Nadakkavu'];const R=6371,toR=Math.PI/180;const dl=(b[0]-a[0])*toR,dn=(b[1]-a[1])*toR;const x=Math.sin(dl/2)**2+Math.cos(a[0]*toR)*Math.cos(b[0]*toR)*Math.sin(dn/2)**2;const d=2*R*Math.asin(Math.sqrt(x))*1.35;return Math.max(.6+(h(p.id)%9)/10,d)}
+function km(p,loc){const L=MTH.LOCS;const a=L[p.locality],b=loc&&typeof loc==='object'?[loc.lat,loc.lng]:(L[loc]||L['Nadakkavu']);const R=6371,toR=Math.PI/180;const dl=(b[0]-a[0])*toR,dn=(b[1]-a[1])*toR;const x=Math.sin(dl/2)**2+Math.cos(a[0]*toR)*Math.cos(b[0]*toR)*Math.sin(dn/2)**2;const d=2*R*Math.asin(Math.sqrt(x))*1.35;return Math.max(.6+(h(p.id)%9)/10,d)}
 function offDay(p,d){if(d<today()&&K(d)!==K(today()))return true;if(K(d)===K(today()))return !p.today;if(p.today==='24×7')return false;return h(p.id+K(d))%5===0}
 const REAL={};
 function setBooked(id,ranges){REAL[id]=ranges}

@@ -54,16 +54,23 @@ export interface Me {
   phone: string | null;
   email: string;
   city: string;
+  dob: string;
+  emergency_contact: string;
+  preferred_language: string;
   role: "patient" | "professional" | "admin";
   last_mode: "patient" | "professional";
   needs_setup: boolean;
   professional: { id: string; name: string; status: string } | null;
-  application: { stage: string; decision_note: string; profession: string } | null;
+  application: { stage: string; decision_note: string; profession: string; submitted_at: string | null } | null;
   staff: boolean;
   two_step: boolean;
   modules: string[];
 }
 
 export const getMe = () => api<Me>("/me");
+
+/** A Medico: approved, or with a sent registration that is being checked. They get the Medico dashboard, not the patient site. */
+export const isMedico = (me: Pick<Me, "professional" | "application"> | null) =>
+  !!me && (!!me.professional || (!!me.application?.submitted_at && me.application.stage !== "rejected"));
 
 export const setMode = (mode: "patient" | "professional") => api("/me/mode", { method: "PUT", body: { mode } });

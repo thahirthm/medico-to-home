@@ -22,12 +22,28 @@ interface Professional {
   registration_no: string;
   available_today_from: string;
   status: string;
+  online: boolean;
   rating: string;
   review_count: number;
   is_demo: boolean;
 }
 
 const QUALITY_FLOOR = 4.3;
+
+function Switch({ on, disabled, onClick, label, tone = "bg-good" }: { on: boolean; disabled?: boolean; onClick: () => void; label: string; tone?: string }) {
+  return (
+    <button role="switch" aria-checked={on} aria-label={label} disabled={disabled} onClick={onClick}
+      className={`relative h-6 w-11 flex-none cursor-pointer rounded-full transition-colors disabled:cursor-not-allowed disabled:opacity-40 ${on ? tone : "bg-line"}`}>
+      <span className={`absolute top-0.5 size-5 rounded-full bg-white shadow transition-[left] ${on ? "left-[22px]" : "left-0.5"}`} />
+    </button>
+  );
+}
+
+const LISTING: Record<string, { label: string; note: string }> = {
+  live: { label: "Live", note: "Families can book" },
+  pending: { label: "Not live yet", note: "Approved, waiting for you" },
+  hidden: { label: "Hidden", note: "Taken off by staff" },
+};
 const blank = { name: "", gender: "F", category_key: "doctor", qualification: "", experience_years: 0, locality: "", languages: [] as string[], base_price: 500, radius_km: 8, bio: "", photo_url: "", registration_no: "", available_today_from: "", status: "pending" };
 type Draft = typeof blank & { id?: string };
 
@@ -113,17 +129,27 @@ export function ProfessionalsTable() {
   const cats = useApi<{ key: string; label: string }[]>("/admin/content/categories");
   const locs = useApi<{ name: string }[]>("/admin/localities");
   const [query, setQuery] = useState("");
+  const [waitingOnly, setWaitingOnly] = useState(false);
+  const [busy, setBusy] = useState("");
   const [category, setCategory] = useState("all");
   const [draft, setDraft] = useState<Draft | null>(null);
 
   const rows = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return (data ?? []).filter((p) => (category === "all" || p.category_key === category) && (!q || `${p.name} ${p.locality}`.toLowerCase().includes(q)));
-  }, [data, query, category]);
+    return (data ?? []).filter((p) => (!waitingOnly || p.status === "pending") && (category === "all" || p.category_key === category) && (!q || `${p.name} ${p.locality}`.toLowerCase().includes(q)));
+  }, [data, query, category, waitingOnly]);
 
   if (!data || !cats.data || !locs.data) return <Loading error={error || cats.error || locs.error} />;
 
-  const setStatus = (id: string, status: string) => api(`/admin/professionals/${id}/status`, { method: "PATCH", body: { status } }).then(reload).catch((e: Error) => alert(e.message));
+  const change = (id: string, path: string, body: object) => {
+    setBusy(id + path);
+    api(`/admin/professionals/${id}/${path}`, { method: "PATCH", body }).then(reload).catch((e: Error) => alert(e.message)).finally(() => setBusy(""));
+  };
+  const setStatus = (p: Professional, live: boolean) => {
+    if (!live && !confirm(`Take ${p.name} off live? Families will no longer find or book them, and they go offline.`)) return;
+    change(p.id, "status", { status: live ? "live" : "hidden" });
+  };
+  const waiting = data.filter((p) => p.status === "pending");
 
   return (
     <>
@@ -137,8 +163,20 @@ export function ProfessionalsTable() {
           {cats.data.map((c) => <Chip key={c.key} active={category === c.key} onClick={() => setCategory(c.key)}>{c.label}</Chip>)}
         </div>
       </div>
+      {waiting.length > 0 && !waitingOnly && (
+        <div role="status" className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-warn-soft px-5 py-3.5 text-[14px] text-warn">
+          <span><strong className="font-medium">{waiting.length} approved {waiting.length === 1 ? "Medico is" : "Medicos are"} waiting to go live.</strong> Check their profile and switch Live on so families can book them.</span>
+          <button onClick={() => setWaitingOnly(true)} className={plainButton}>Show {waiting.length === 1 ? "them" : `all ${waiting.length}`}</button>
+        </div>
+      )}
+      {waitingOnly && (
+        <div className="mb-4 flex items-center justify-between gap-3 text-[14px]">
+          <span>Showing approved Medicos waiting to go live.</span>
+          <button onClick={() => setWaitingOnly(false)} className={plainButton}>Show everyone</button>
+        </div>
+      )}
       <Card>
-        <Table head={["Name", "Category", "Locality", "Price", "Rating", "Status", ""]}>
+        <Table head={["Name", "Category", "Locality", "Price", "Rating", "Listing", "Availability", ""]}>
           {rows.map((p) => (
             <tr key={p.id}>
               <td>
@@ -148,13 +186,30 @@ export function ProfessionalsTable() {
               <td>{p.role}</td>
               <td>{p.locality}</td>
               <td>{rupees(p.base_price)}</td>
-              <td>★ {Number(p.rating).toFixed(1)} <span className="text-muted">({p.review_count})</span></td>
               <td>
-                {p.status === "hidden" ? <StatusPill tone="bad">Hidden</StatusPill> : p.status === "pending" ? <StatusPill tone="warn">Pending</StatusPill> : p.is_demo ? <StatusPill tone="plain">Live · demo</StatusPill> : Number(p.rating) && Number(p.rating) < QUALITY_FLOOR ? <StatusPill tone="warn">Needs review</StatusPill> : <StatusPill tone="good">Live</StatusPill>}
+                ★ {Number(p.rating).toFixed(1)} <span className="text-muted">({p.review_count})</span>
+                {p.status === "live" && Number(p.rating) > 0 && Number(p.rating) < QUALITY_FLOOR && <div className="mt-1"><StatusPill tone="warn">Needs review</StatusPill></div>}
+              </td>
+              <td>
+                <div className="flex items-center gap-3">
+                  <Switch on={p.status === "live"} disabled={busy === p.id + "status"} onClick={() => setStatus(p, p.status !== "live")} label={`${p.name}: live`} />
+                  <span className="leading-tight whitespace-nowrap">
+                    <span className={`block text-[13px] ${p.status === "live" ? "text-good" : p.status === "pending" ? "text-warn" : "text-bad"}`}>{LISTING[p.status]?.label ?? p.status}{p.is_demo && p.status === "live" ? " · demo" : ""}</span>
+                    <span className="block text-[12px] text-muted">{LISTING[p.status]?.note}</span>
+                  </span>
+                </div>
+              </td>
+              <td>
+                <div className="flex items-center gap-3">
+                  <Switch on={p.online} disabled={p.status !== "live" || busy === p.id + "online"} onClick={() => change(p.id, "online", { online: !p.online })} label={`${p.name}: online`} />
+                  <span className="flex items-center gap-1.5 text-[13px] whitespace-nowrap">
+                    <span className={`size-2 rounded-full ${p.online ? "bg-good" : "bg-line"}`} />
+                    {p.online ? "Online" : "Offline"}
+                  </span>
+                </div>
               </td>
               <td className="whitespace-nowrap text-right text-[13px]">
                 <button onClick={() => setDraft({ ...blank, ...p, id: p.id })} className={rowAction}>Edit</button>
-                <button onClick={() => setStatus(p.id, p.status === "live" ? "hidden" : "live")} className={rowAction}>{p.status === "live" ? "Hide" : "Make live"}</button>
               </td>
             </tr>
           ))}

@@ -4,7 +4,6 @@
 // Converted from the prototype. Reads demo values from the site store.
 import { Fragment } from "react";
 import { useSite } from "./SiteProvider";
-import { AccountSetup } from "@/components/auth/AccountSetup";
 import { SignInFlow } from "@/components/auth/SignInFlow";
 
 export function Overlays() {
@@ -138,7 +137,10 @@ export function Overlays() {
                   </svg>
                 </button>
               </div>
-              {v.loginSetup ? <AccountSetup me={v.me} onDone={v.setupDone} /> : <SignInFlow onSignedIn={v.signedIn} beforeLeave={v.savePending} />}
+              <SignInFlow title="Patient login" onSignedIn={v.signedIn} beforeLeave={v.savePending} />
+              <p style={{ margin: "0", textAlign: "center", fontSize: "14px", color: "#4A4F6A" }}>
+                Doctor, nurse or caregiver? <a href="/medico" style={{ color: "#02084D", fontWeight: "500", textDecoration: "underline" }}>Medico login</a>
+              </p>
             </div>
           </div>
         </>

@@ -81,7 +81,7 @@ export function HomeView() {
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#02084D" strokeWidth="1.5">
                           <path d="M12 2v3M12 19v3M2 12h3M19 12h3M12 6a6 6 0 1 0 0 12 6 6 0 0 0 0-12zM12 10a2 2 0 1 0 0 4 2 2 0 0 0 0-4z" />
                         </svg>
-                        <span style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{v.loc}, {v.locDistrict}</span>
+                        <span style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{v.locText}</span>
                       </>
                     )}
                   </span>
@@ -95,6 +95,37 @@ export function HomeView() {
                         </svg>
                         Use my current location{" "}
                       </button>
+                      {v.here && (
+                        <div style={{ display: "flex", gap: "10px", background: "#F6F7FA", borderRadius: "12px", padding: "12px 14px" }}>
+                          <span aria-hidden style={{ color: "#1F9D6B", fontSize: "16px", lineHeight: "1.3" }}>●</span>
+                          <span style={{ display: "flex", flexDirection: "column", gap: "2px", minWidth: "0" }}>
+                            <span style={{ fontSize: "12px", color: "#6B7085" }}>Your location</span>
+                            <span style={{ fontSize: "14px", fontWeight: "500", color: "#02084D" }}>{v.here.address}</span>
+                            <span style={{ fontSize: "12px", color: "#6B7085" }}>{v.accuracyText(v.here)} · served from {v.loc}</span>
+                          </span>
+                        </div>
+                      )}
+                      {v.outside && (
+                        <div role="status" style={{ display: "flex", flexDirection: "column", gap: "4px", background: "#FDF1EC", borderRadius: "12px", padding: "12px 14px", color: "#8A3B1F" }}>
+                          <span style={{ fontSize: "12px" }}>Your location</span>
+                          <span style={{ fontSize: "14px", fontWeight: "500" }}>{v.outside.address}</span>
+                          <span style={{ fontSize: "13px", lineHeight: "1.5" }}>We do not visit here yet. Choose the nearest area we serve:</span>
+                        </div>
+                      )}
+                      {v.nearby.length > 0 && (
+                        <>
+                          <div style={{ fontSize: "11px", letterSpacing: ".08em", textTransform: "uppercase", color: "#6B7085", fontWeight: "500" }}>Nearest areas we serve</div>
+                          <div style={{ display: "flex", flexDirection: "column" }}>
+                            {v.nearby.map((n: any) => (
+                              <button key={n.name} onClick={n.pick} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "10px", border: "none", borderBottom: "1px solid #EEF0F5", background: n.on ? "#F6F7FA" : "#fff", padding: "10px 6px", font: "inherit", fontSize: "14px", color: "#02084D", cursor: "pointer", textAlign: "left" }}>
+                                <span>{n.name}, <span style={{ color: "#6B7085" }}>{n.district}</span></span>
+                                <span style={{ fontSize: "13px", color: "#6B7085", whiteSpace: "nowrap" }}>{n.kmText}</span>
+                              </button>
+                            ))}
+                          </div>
+                          <div style={{ fontSize: "11px", letterSpacing: ".08em", textTransform: "uppercase", color: "#6B7085", fontWeight: "500" }}>All areas</div>
+                        </>
+                      )}
                       <div style={{ fontSize: "11px", letterSpacing: ".08em", textTransform: "uppercase", color: "#6B7085", fontWeight: "500" }}>Kozhikode</div>
                       <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
                         {v.kozLocs.map((l: any, i0: number) => (

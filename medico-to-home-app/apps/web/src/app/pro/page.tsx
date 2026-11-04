@@ -1,7 +1,7 @@
-import { TodayVisits } from "@/components/ops/TodayVisits";
+import { ProDashboard } from "@/components/ops/ProDashboard";
 
-export const metadata = { title: "Today" };
+export const metadata = { title: "Dashboard" };
 
 export default function Page() {
-  return <TodayVisits />;
+  return <ProDashboard />;
 }

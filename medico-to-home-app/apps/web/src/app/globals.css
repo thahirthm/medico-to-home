@@ -27,3 +27,55 @@ body {
   font-weight: 300;
   -webkit-font-smoothing: antialiased;
 }
+
+/* Gentle fade-up for steps and slides (Medico onboarding). Respects reduced motion. */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: none; }
+}
+.fade-up { animation: fadeUp .35s ease both; }
+@media (prefers-reduced-motion: reduce) {
+  .fade-up { animation: none; }
+}
+
+/* Medico card (patient registration): a soft shine across the card and shimmer on empty lines. */
+@keyframes cardSheen {
+  0%, 70% { transform: translateX(-120%) skewX(-18deg); }
+  100% { transform: translateX(260%) skewX(-18deg); }
+}
+@keyframes cardShimmer {
+  from { background-position: 100% 0; }
+  to { background-position: -100% 0; }
+}
+.card-sheen { animation: cardSheen 6s ease-in-out infinite; }
+.card-shimmer {
+  background: linear-gradient(90deg, rgba(255,255,255,.12) 25%, rgba(255,255,255,.3) 50%, rgba(255,255,255,.12) 75%);
+  background-size: 200% 100%;
+  animation: cardShimmer 1.6s linear infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .card-sheen, .card-shimmer { animation: none; }
+}
+
+/* Medico ID badge: drops in and swings on its lanyard, then sways gently; the status dot breathes. */
+@keyframes badgeDrop {
+  0% { opacity: 0; transform: translateY(-40px) rotate(-7deg); }
+  35% { opacity: 1; transform: translateY(0) rotate(5deg); }
+  55% { transform: rotate(-3deg); }
+  72% { transform: rotate(1.5deg); }
+  86% { transform: rotate(-.6deg); }
+  100% { transform: rotate(0); }
+}
+@keyframes badgeSway {
+  0%, 100% { transform: rotate(-.8deg); }
+  50% { transform: rotate(.8deg); }
+}
+@keyframes dotPulse {
+  0% { box-shadow: 0 0 0 0 currentColor; }
+  70%, 100% { box-shadow: 0 0 0 6px transparent; }
+}
+.badge-swing { transform-origin: 50% 0; animation: badgeDrop 1.3s cubic-bezier(.3,.7,.4,1) both, badgeSway 7s ease-in-out 1.3s infinite; }
+.dot-pulse { animation: dotPulse 1.8s ease-out infinite; }
+@media (prefers-reduced-motion: reduce) {
+  .badge-swing, .dot-pulse { animation: none; }
+}

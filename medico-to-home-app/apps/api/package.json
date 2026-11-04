@@ -12,15 +12,18 @@
     "test": "vitest run --passWithNoTests"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^1.4.0",
     "@fastify/cors": "^11",
     "@fastify/rate-limit": "^11.2.1",
     "@medico/shared": "*",
     "fastify": "^5",
+    "nodemailer": "^7.0.13",
     "pg": "^8",
     "zod": "^4"
   },
   "devDependencies": {
     "@types/node": "^22",
+    "@types/nodemailer": "^8.0.2",
     "@types/pg": "^8",
     "esbuild": "^0.25",
     "tsx": "^4",

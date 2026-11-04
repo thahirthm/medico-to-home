@@ -25,6 +25,45 @@ export async function proRoutes(app: FastifyInstance) {
     return { name: pro.name, role: pro.role, qualification: pro.qualification, locality: pro.locality, radius: pro.radius_km, languages: pro.languages, status: pro.status };
   });
 
+  // The dashboard: online switch, today's schedule, new requests waiting for a reply, and this week's earnings.
+  app.get("/pro/dashboard", async (request) => {
+    const pro = await professional(await requireUser(request));
+    const from = startOfIstDay();
+    const [today, requests, week] = await Promise.all([
+      pool.query(
+        `select v.id, v.starts_at, v.status, b.patient_name, b.service_name, b.address->>'locality' locality
+         from visits v join bookings b on b.id = v.booking_id
+         where v.professional_id = $1 and v.starts_at >= $2 and v.starts_at < $3 and v.status not in ('skipped', 'cancelled') order by v.starts_at`,
+        [pro.id, from, new Date(from.getTime() + DAY_MS)],
+      ),
+      pool.query(
+        `select v.id, v.starts_at, b.patient_name, b.service_name, b.address->>'locality' locality, round((b.subtotal_paise - b.discount_paise)::numeric / b.sessions / 100) fee
+         from visits v join bookings b on b.id = v.booking_id
+         where v.professional_id = $1 and v.status = 'scheduled' and v.starts_at >= $2 order by v.starts_at limit 10`,
+        [pro.id, new Date()],
+      ),
+      weeklyEarnings(startOfIstWeek(), pro.id),
+    ]);
+    const time = (d: Date) => formatIst(d, { hour: "numeric", minute: "2-digit", hour12: true });
+    const day = (d: Date) => formatIst(d, { weekday: "short", day: "numeric", month: "short" });
+    return {
+      name: pro.name, role: pro.role, photo: pro.photo_url, status: pro.status, online: pro.online === true,
+      rating: Number(pro.rating), reviews: pro.review_count, locality: pro.locality,
+      today: today.rows.map((v) => ({ id: v.id, time: time(new Date(v.starts_at)), patient: v.patient_name, service: v.service_name, locality: v.locality ?? "", status: v.status })),
+      requests: requests.rows.map((v) => ({ id: v.id, when: `${day(new Date(v.starts_at))}, ${time(new Date(v.starts_at))}`, patient: v.patient_name, service: v.service_name, locality: v.locality ?? "", fee: Number(v.fee) })),
+      week: { visits: week[0]?.visits ?? 0, net: week[0]?.net ?? 0 },
+    };
+  });
+
+  // Online means families can send new requests now; offline pauses them.
+  app.put("/pro/online", async (request) => {
+    const pro = await professional(await requireUser(request));
+    const { online } = z.object({ online: z.boolean() }).parse(request.body);
+    if (online && pro.status !== "live") throw new ApiError(409, "You can go online once our team has made your profile live.");
+    await pool.query("update professionals set online = $2 where id = $1", [pro.id, online]);
+    return { online };
+  });
+
   app.get("/pro/visits", async (request) => {
     const user = await requireUser(request);
     const pro = await professional(user);

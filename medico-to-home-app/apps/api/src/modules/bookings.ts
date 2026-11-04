@@ -6,6 +6,8 @@ import { z } from "zod";
 import { requireMember, requireUser, type User } from "../auth";
 import { pool } from "../db";
 import { ApiError } from "../errors";
+import { adminEmails, sendMail } from "../mail/send";
+import { bookingForAdmin, bookingForPatient, bookingForProfessional } from "../mail/templates";
 import { formatIst, istDate, SLOTS, startOfIstDay } from "../time";
 
 const TRAVEL_BUFFER_MIN = 30;
@@ -21,11 +23,33 @@ const bookingBody = z.object({
   slot: z.enum(SLOTS as [string, ...string[]]),
   hours: z.union([z.literal(4), z.literal(8), z.literal(12), z.literal(24)]).default(12),
   patient: z.object({ id: z.string().uuid().optional(), name: z.string().trim().min(1, "Please enter the patient's name."), age: z.string().default(""), gender: z.string().default(""), relation: z.string().default("Me") }),
-  address: z.object({ addressId: z.string().uuid().optional(), label: z.string().default("Home"), house: z.string().trim().min(1, "Please enter your house or flat name."), street: z.string().default(""), landmark: z.string().default(""), locality: z.string().min(1), pincode: z.string().trim().regex(/^\d{6}$/, "Please enter a 6-digit pincode.") }),
+  address: z.object({ addressId: z.string().uuid().optional(), label: z.string().default("Home"), house: z.string().trim().min(1, "Please enter your house or flat name."), street: z.string().default(""), landmark: z.string().default(""), locality: z.string().trim().min(1, "Please choose your area."), pincode: z.string().trim().regex(/^\d{6}$/, "Please enter a 6-digit pincode.") }),
   notes: z.string().default(""),
   share: z.boolean().default(true),
   payMethod: z.enum(["gpay", "phonepe", "paytm", "card", "later"]),
 });
+
+const PAY: Record<string, string> = { later: "Pay after the first visit", gpay: "Google Pay", phonepe: "PhonePe", paytm: "Paytm", card: "Card" };
+const inr = (rupees: number) => "₹" + Math.round(rupees).toLocaleString("en-IN");
+
+// The booking emails: one to whoever booked, one to the Medico (if their listing has an account) and one to the team.
+async function emailBooking(id: string, user: User, body: z.infer<typeof bookingBody>, pro: { name: string; profile_id: string | null; category_key: string }, service: string, sessions: number, total: number, firstStart: Date) {
+  const [me, proAccount, category] = await Promise.all([
+    pool.query("select full_name, email, phone from profiles where id = $1", [user.id]),
+    pro.profile_id ? pool.query("select email from profiles where id = $1", [pro.profile_id]) : Promise.resolve({ rows: [] }),
+    pool.query("select one from categories where key = $1", [pro.category_key]),
+  ]);
+  const a = body.address;
+  const mail = {
+    id, patient: body.patient.name, bookedBy: me.rows[0]?.full_name || body.patient.name, bookedByEmail: me.rows[0]?.email || user.email, bookedByPhone: me.rows[0]?.phone || "",
+    professional: pro.name, role: category.rows[0]?.one ?? "", service, sessions, plan: body.plan,
+    firstVisit: formatIst(firstStart, { weekday: "short", day: "numeric", month: "short", year: "numeric", hour: "numeric", minute: "2-digit", hour12: true }),
+    address: [a.house, a.street, a.landmark, a.locality, a.pincode].filter(Boolean).join(", "), total: inr(total), payment: PAY[body.payMethod] ?? body.payMethod, notes: body.notes,
+  };
+  sendMail(mail.bookedByEmail, bookingForPatient(mail));
+  sendMail(proAccount.rows[0]?.email, bookingForProfessional(mail));
+  sendMail(adminEmails(), bookingForAdmin(mail));
+}
 
 const durationMinutes = (label: string) => Number(/(\d+)/.exec(label.includes("min") ? label : "")?.[1] ?? 60);
 
@@ -100,6 +124,7 @@ export async function bookingRoutes(app: FastifyInstance) {
     } finally {
       client.release();
     }
+    emailBooking(id, user, body, pro, service.name, price.sessions, price.total, visits[0]!.starts).catch((e: Error) => request.log.error(e, "booking emails"));
     return reply.code(201).send({ id, total: price.total });
   });
 

@@ -5,6 +5,8 @@ import { audit, canOpen, MODULES, requireUser, type Module, type User } from "..
 import { pool } from "../db";
 import { env } from "../env";
 import { ApiError } from "../errors";
+import { adminEmails, sendMail } from "../mail/send";
+import { newAccountForAdmin, welcomePatient } from "../mail/templates";
 
 import { BUCKET, MAX_BYTES, safeFileName, signedDownload, signedUpload } from "../storage";
 
@@ -50,9 +52,9 @@ export async function accountRoutes(app: FastifyInstance) {
   app.get("/me", async (request) => {
     const user = await requireUser(request);
     const [me, pro, application] = await Promise.all([
-      pool.query("select id, full_name, phone, email, dob, emergency_contact, city, role, staff_roles, last_mode, terms_accepted_at from profiles where id = $1", [user.id]),
+      pool.query("select id, full_name, phone, email, dob, emergency_contact, city, preferred_language, role, staff_roles, last_mode, terms_accepted_at from profiles where id = $1", [user.id]),
       pool.query("select id, name, status from professionals where profile_id = $1", [user.id]),
-      pool.query("select stage, decision_note, profession from applications where profile_id = $1 order by created_at desc limit 1", [user.id]),
+      pool.query("select stage, decision_note, profession, submitted_at from applications where profile_id = $1 order by created_at desc limit 1", [user.id]),
     ]);
     const p = me.rows[0];
     const staff = p.role === "admin";
@@ -67,20 +69,56 @@ export async function accountRoutes(app: FastifyInstance) {
     };
   });
 
-  // New account: name, mobile, city and accepting the terms, asked once after the first sign-in.
+  // New account registration, asked once after the first sign-in. Name, mobile, city and the terms are
+  // required; personal, address, emergency and health details are optional and fill the "Me" record.
   app.post("/me/setup", async (request) => {
     const user = await requireUser(request);
+    const text = z.string().trim().max(200).default("");
+    const list = z.array(z.string().trim().min(1).max(120)).max(40).default([]);
     const body = z
       .object({
         full_name: z.string().trim().min(2, "Please enter your full name."),
         phone: z.string().trim().regex(/^\d{10}$/, "Please enter a 10-digit mobile number."),
         city: z.string().trim().min(2, "Please choose your city."),
         accept_terms: z.literal(true, { message: "Please accept the terms and privacy policy." }),
+        gender: text,
+        dob: z.string().trim().regex(/^(\d{4}-\d{2}-\d{2})?$/, "Please enter a valid date of birth.").default(""),
+        language: text,
+        emergency_contact: text,
+        address: z.object({ house: text, street: text, landmark: text, locality: text, pincode: z.string().trim().regex(/^(\d{6})?$/, "Please enter a 6-digit pincode.").default("") }).optional(),
+        health: z.object({ blood: text, h: text, w: text, conds: list, alg: list, meds: list }).optional(),
       })
       .parse(request.body);
-    await pool.query("update profiles set full_name = $2, phone = $3, city = $4, terms_accepted_at = coalesce(terms_accepted_at, now()) where id = $1", [user.id, body.full_name, body.phone, body.city]);
-    await ensureSelf(user, body.full_name);
-    await pool.query("update patients set name = $2 where owner_id = $1 and relation = 'Me'", [user.id, body.full_name]);
+    const before = (await pool.query("select email, terms_accepted_at from profiles where id = $1", [user.id])).rows[0];
+    await pool.query(
+      `update profiles set full_name = $2, phone = $3, city = $4, dob = $5, emergency_contact = $6, preferred_language = $7,
+       terms_accepted_at = coalesce(terms_accepted_at, now()) where id = $1`,
+      [user.id, body.full_name, body.phone, body.city, body.dob, body.emergency_contact, body.language],
+    );
+
+    const self = await ensureSelf(user, body.full_name);
+    const born = body.dob ? new Date(body.dob) : null;
+    const age = born && !isNaN(+born) ? String(Math.floor((Date.now() - +born) / 31_557_600_000)) : self.age;
+    // Keep what the records page already knows (since when, dose) for anything ticked again.
+    const conds = (body.health?.conds ?? []).map((n) => self.conditions.find((c: { n: string }) => c.n === n) ?? { n, since: "" });
+    const meds = (body.health?.meds ?? []).map((n) => self.medications.find((m: { n: string }) => m.n === n) ?? { n, dose: "", freq: "" });
+    await pool.query(
+      `update patients set name = $2, age = $3, gender = $4, blood_group = $5, height_cm = $6, weight_kg = $7,
+       conditions = $8, allergies = $9, medications = $10 where id = $1`,
+      [self.id, body.full_name, age, body.gender, body.health?.blood ?? "", body.health?.h ?? "", body.health?.w ?? "", JSON.stringify(conds), JSON.stringify(body.health?.alg ?? []), JSON.stringify(meds)],
+    );
+
+    const a = body.address;
+    if (a && Object.values(a).some(Boolean)) {
+      const home = await pool.query("select id from addresses where owner_id = $1 and label = 'Home' order by created_at limit 1", [user.id]);
+      if (home.rows[0]) await pool.query("update addresses set house = $2, street = $3, landmark = $4, locality = $5, pincode = $6 where id = $1", [home.rows[0].id, a.house, a.street, a.landmark, a.locality, a.pincode]);
+      else await pool.query("insert into addresses (owner_id, label, house, street, landmark, locality, pincode) values ($1, 'Home', $2, $3, $4, $5, $6)", [user.id, a.house, a.street, a.landmark, a.locality, a.pincode]);
+    }
+    if (!before?.terms_accepted_at) {
+      const email = before?.email || user.email;
+      sendMail(email, welcomePatient(body.full_name));
+      sendMail(adminEmails(), newAccountForAdmin({ kind: "patient", id: user.id, name: body.full_name, email, phone: body.phone, place: body.city }));
+    }
     return { ok: true };
   });
 
@@ -88,9 +126,14 @@ export async function accountRoutes(app: FastifyInstance) {
   app.put("/me/mode", async (request) => {
     const user = await requireUser(request);
     const { mode } = z.object({ mode: z.enum(["patient", "professional"]) }).parse(request.body);
+    // Professional mode opens once a Medico registration is sent; while it is checked, the dashboard shows its progress.
     if (mode === "professional") {
-      const pro = await pool.query("select 1 from professionals where profile_id = $1", [user.id]);
-      if (!pro.rowCount) throw new ApiError(403, "Professional mode opens after your application is approved.");
+      const pro = await pool.query(
+        `select 1 from professionals where profile_id = $1
+         union all select 1 from applications where profile_id = $1 and submitted_at is not null and stage <> 'rejected'`,
+        [user.id],
+      );
+      if (!pro.rowCount) throw new ApiError(403, "Professional mode opens after you send your Medico registration.");
     }
     await pool.query("update profiles set last_mode = $2 where id = $1", [user.id, mode]);
     return { mode };
@@ -143,7 +186,11 @@ export async function accountRoutes(app: FastifyInstance) {
     const user = await requireUser(request);
     const patient = await ownedPatient(user, request.params.id);
     if (patient.relation === "Me") throw new ApiError(400, "Your own profile cannot be removed.");
+    // Their records go with them (the rows cascade); the uploaded files are removed from storage as well.
+    const docs = await pool.query("select storage_path from medical_documents where patient_id = $1", [patient.id]);
     await pool.query("delete from patients where id = $1", [patient.id]);
+    await Promise.all(docs.rows.map((d) => fetch(`${env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/${BUCKET}/${d.storage_path}`, { method: "DELETE", headers: { apikey: env.SUPABASE_SECRET_KEY } }).catch(() => {})));
+    await audit(user.id, "patient.delete", patient.id);
     return { ok: true };
   });
 

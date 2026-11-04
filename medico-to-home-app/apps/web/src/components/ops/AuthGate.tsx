@@ -1,44 +1,45 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { createContext, useCallback, useContext, useEffect, useState, type FormEvent, type ReactNode } from "react";
-import { AccountSetup } from "@/components/auth/AccountSetup";
-import { SignInFlow } from "@/components/auth/SignInFlow";
-import { getMe, setMode, staffLogIn, supabase, type Me } from "@/lib/api";
+import { getMe, isMedico, setMode, staffLogIn, supabase, type Me } from "@/lib/api";
 import { field, Loading } from "./ui";
 
 type Area = "admin" | "professional";
-type State = "loading" | "login" | "setup" | "two-step" | "not-pro" | "denied" | "ok";
+// Admin 2-step code. NEXT_PUBLIC_ADMIN_TWO_STEP=off skips it for local testing only; it must match the API's ADMIN_TWO_STEP.
+const TWO_STEP = process.env.NEXT_PUBLIC_ADMIN_TWO_STEP !== "off";
+type State = "loading" | "login" | "two-step" | "denied" | "ok";
 
 const MeContext = createContext<Me | null>(null);
 /** The signed-in account inside a gated area. */
 export const useMe = () => useContext(MeContext)!;
 
 /**
- * Professional mode: the same account as the patient side (email code or Google), unlocked by an approved application.
+ * Professional mode: signed in on the Medico login page, open once the Medico registration is sent (it shows the checks until approved).
  * Admin: invited staff only, email + password and then a 2-step code from an authenticator app.
  */
 export function AuthGate({ area, children }: { area: Area; children: ReactNode }) {
   const [state, setState] = useState<State>("loading");
   const [me, setMe] = useState<Me | null>(null);
+  const router = useRouter();
 
   const check = useCallback(async () => {
     const { data } = await supabase.auth.getSession();
-    if (!data.session) return setState("login");
-    if (area === "admin") {
+    // Medicos sign in on the Medico login page, and finish registration before professional mode opens.
+    if (!data.session) return area === "professional" ? router.replace("/medico") : setState("login");
+    if (area === "admin" && TWO_STEP) {
       const { data: level } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
       if (level?.currentLevel !== "aal2") return setState("two-step");
     }
     const found = await getMe().catch(() => null);
-    if (!found) return setState("login");
+    if (!found) return area === "professional" ? router.replace("/medico") : setState("login");
     setMe(found);
     if (area === "admin") return setState(found.staff ? "ok" : "denied");
-    if (found.needs_setup) return setState("setup");
-    if (!found.professional) return setState("not-pro");
+    if (!isMedico(found)) return router.replace("/medico/register");
     if (found.last_mode !== "professional") setMode("professional").catch(() => {});
     setState("ok");
-  }, [area]);
+  }, [area, router]);
 
   useEffect(() => {
     // Runs once on mount; `check` only reads the session, so a late result is harmless.
@@ -55,27 +56,8 @@ export function AuthGate({ area, children }: { area: Area; children: ReactNode }
     <div className="flex min-h-screen items-center justify-center bg-wash p-4">
       <div className="w-full max-w-sm rounded-2xl border border-line bg-white p-6">
         <Image src="/brand/logo.svg" alt="Medico To Home" width={132} height={32} className="mb-5 h-7 w-auto" unoptimized />
-        {state === "login" && area === "professional" && (
-          <>
-            <SignInFlow title="Professional login" onSignedIn={check} footer="For approved doctors, nurses, therapists and caregivers." />
-            <p className="mt-4 border-t border-line-soft pt-4 text-center text-[13px] text-muted">
-              New to Medico To Home? <Link href="/join/apply" className="text-navy underline underline-offset-2">Apply to join</Link>
-            </p>
-          </>
-        )}
         {state === "login" && area === "admin" && <StaffLogin onDone={check} />}
         {state === "two-step" && <TwoStep onDone={check} onCancel={leave} />}
-        {state === "setup" && me && <AccountSetup me={me} onDone={check} />}
-        {state === "not-pro" && (
-          <div className="space-y-3 text-sm text-body">
-            <h1 className="text-xl font-medium text-navy">Professional mode is not open yet</h1>
-            <p>{me?.application ? "Your application is still being reviewed. This opens as soon as it is approved." : "Apply as a professional first. It opens once our team approves your application."}</p>
-            <div className="flex gap-4 pt-1">
-              <Link href="/join/apply" className="text-navy underline">{me?.application ? "See application" : "Apply now"}</Link>
-              <Link href="/" className="text-navy underline">Back to patient mode</Link>
-            </div>
-          </div>
-        )}
         {state === "denied" && (
           <>
             <p className="text-sm text-body">This account does not have access to the admin dashboard.</p>

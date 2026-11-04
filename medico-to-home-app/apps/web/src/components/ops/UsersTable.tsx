@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { Card, Chip, Loading, StatTile, StatusPill, Table } from "./ui";
 import { useApi } from "./useApi";
@@ -29,6 +31,7 @@ const date = (d: string | null) =>
   d ? new Date(d).toLocaleDateString("en-IN", { timeZone: "Asia/Kolkata", day: "numeric", month: "short", year: "numeric" }) : "Never";
 
 export function UsersTable() {
+  const router = useRouter();
   const { data, error } = useApi<User[]>("/admin/users");
   const [query, setQuery] = useState("");
   const [role, setRole] = useState("all");
@@ -57,9 +60,10 @@ export function UsersTable() {
       <Card>
         <Table head={["User", "Mobile", "Role", "Joined", "Last login", "Family", "Bookings"]}>
           {rows.map((u) => (
-            <tr key={u.id}>
+            <tr key={u.id} onClick={() => router.push(`/admin/users/${u.id}`)} className="cursor-pointer hover:bg-wash [&_td:first-child]:hover:bg-wash">
               <td>
-                <div className="font-normal">{u.full_name || "No name yet"}</div>
+                {/* The link makes each row reachable by keyboard and screen reader; the row click is a larger target. */}
+                <Link href={`/admin/users/${u.id}`} onClick={(e) => e.stopPropagation()} className="font-normal hover:underline">{u.full_name || "No name yet"}</Link>
                 <div className="text-[13px] text-muted">{u.email}</div>
               </td>
               <td>{u.phone || "—"}</td>
