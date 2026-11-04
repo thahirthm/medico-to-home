@@ -9,7 +9,8 @@ const smtp = () =>
     host: env.SMTP_HOST,
     port: env.SMTP_PORT,
     secure: env.SMTP_PORT === 465,
-    auth: env.SMTP_USER ? { user: env.SMTP_USER, pass: env.SMTP_PASS } : undefined,
+    // Gmail shows app passwords in groups of four ("abcd efgh ijkl mnop"); the spaces are not part of it.
+    auth: env.SMTP_USER ? { user: env.SMTP_USER, pass: env.SMTP_PASS?.replace(/\s+/g, "") } : undefined,
   }));
 
 export const adminEmails = () => env.ADMIN_NOTIFY_EMAIL.split(",").map((e) => e.trim()).filter(Boolean);
