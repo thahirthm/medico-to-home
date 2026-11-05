@@ -22,6 +22,12 @@ export function ProCard({ pro }: { pro: any }) {
           <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: pro.availFg, flex: "none" }}></span>
           <span style={{ overflow: "hidden", textOverflow: "ellipsis" }}>{pro.availShort}</span>
         </div>
+        {pro.hasOnline && (
+          <div className="mth-card-tag mth-card-video" title="Offers online video consultations" style={{ position: "absolute", left: "10px", bottom: "10px", display: "flex", alignItems: "center", gap: "4px", background: "rgba(255,255,255,.94)", borderRadius: "999px", padding: "4px 9px", fontSize: "11px", fontWeight: "500", color: "#02084D", whiteSpace: "nowrap" }}>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#02084D" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" style={{ flex: "none" }}><path d="M15 10l5-3v10l-5-3M4 6h11v12H4z" /></svg>
+            Video
+          </div>
+        )}
         <div className="mth-card-tag mth-card-exp" style={{ position: "absolute", right: "10px", bottom: "10px", background: "rgba(2,8,77,.82)", borderRadius: "999px", padding: "4px 9px", fontSize: "11px", fontWeight: "500", color: "#fff", whiteSpace: "nowrap" }}>{pro.exp} yrs exp</div>
       </div>
       <div className="mth-card-body" style={{ padding: "14px", display: "flex", flexDirection: "column", gap: "6px", flex: "1", minWidth: "0" }}>

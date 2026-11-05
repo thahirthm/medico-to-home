@@ -15,11 +15,16 @@ interface Visit {
   notes: string;
   fee: number;
   status: string;
+  online: boolean;
+  bookingId: string;
   records: { conditions: { n: string }[]; allergies: string[]; medications: { n: string; dose: string }[] } | null;
 }
 
 const labels: Record<string, string> = { scheduled: "New request", accepted: "Accepted", on_the_way: "On the way", arrived: "Arrived", in_session: "In session", completed: "Completed", no_show: "No show" };
 const actions: Record<string, string> = { scheduled: "Accept visit", accepted: "Start travel", on_the_way: "I have arrived", arrived: "Start session", in_session: "Complete visit" };
+// An online consultation has no travel: accepting it, then the call, then completing it.
+const onlineActions: Record<string, string> = { scheduled: "Accept consultation", accepted: "Start video call", in_session: "Complete consultation" };
+const callPage = (bookingId: string) => window.open(`/call/${bookingId}`, "_blank", "noopener");
 
 export function TodayVisits() {
   const { data, error, reload } = useApi<Visit[]>("/pro/visits");
@@ -32,7 +37,7 @@ export function TodayVisits() {
     <>
       <PageHead title="Visits" note={data.length ? `${data.length} ${data.length === 1 ? "visit" : "visits"} in the next 14 days` : "No visits in the next 14 days"} />
       {data.map((v) => {
-        const action = actions[v.status];
+        const action = (v.online ? onlineActions : actions)[v.status];
         return (
           <Card key={v.id}>
             <div className="p-4">
@@ -42,7 +47,11 @@ export function TodayVisits() {
               </div>
               <div className="mt-2 text-[15px] font-normal">{v.patient}{v.age ? `, ${v.age}` : ""}</div>
               <div className="text-[13px] text-muted">{v.service} · {rupees(v.fee)}</div>
-              <div className="mt-3 text-[13px] text-ink">{v.address}</div>
+              {v.online ? (
+                <div className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-[#EAF3FB] px-2.5 py-1 text-[12px] text-[#1F6FB2]">Online video consultation</div>
+              ) : (
+                <div className="mt-3 text-[13px] text-ink">{v.address}</div>
+              )}
               {v.notes && <div className="mt-1 text-[13px] text-muted">{v.notes}</div>}
               {v.records && (
                 <div className="mt-3 rounded-xl bg-wash p-3 text-[13px] text-ink">
@@ -58,8 +67,18 @@ export function TodayVisits() {
                   <textarea rows={3} value={notes[v.id] ?? ""} onChange={(e) => setNotes((n) => ({ ...n, [v.id]: e.target.value }))} className="mt-1 block w-full rounded-xl border border-line p-3 text-sm text-navy outline-none focus:border-navy" />
                 </label>
               )}
+              {v.online && v.status === "in_session" && (
+                <button onClick={() => callPage(v.bookingId)} className="mt-4 w-full cursor-pointer rounded-full border border-navy px-4 py-3 text-sm font-normal text-navy hover:bg-wash">Rejoin video call</button>
+              )}
               {action && (
-                <button onClick={() => next(v.id)} className="mt-4 w-full cursor-pointer rounded-full bg-navy px-4 py-3 text-sm font-normal text-white hover:bg-navy-soft">{action}</button>
+                <button
+                  onClick={() => {
+                    // The call opens in a new tab straight from the click, so the browser does not block it.
+                    if (v.online && v.status === "accepted") callPage(v.bookingId);
+                    next(v.id);
+                  }}
+                  className="mt-4 w-full cursor-pointer rounded-full bg-navy px-4 py-3 text-sm font-normal text-white hover:bg-navy-soft"
+                >{action}</button>
               )}
             </div>
           </Card>

@@ -85,6 +85,8 @@ export interface MedicoService {
   /** What the family pays per visit, session or shift, in rupees. */
   price: number;
   duration: string;
+  /** Given over a video call instead of at the patient's home. */
+  online?: boolean;
 }
 
 /** A typical starting charge per category in Kerala, which the suggested services scale from. */

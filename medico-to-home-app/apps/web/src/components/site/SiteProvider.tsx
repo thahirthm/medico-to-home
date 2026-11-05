@@ -36,7 +36,7 @@ function fromPath(path) {
 class SiteStore extends Component {
   state = { gridLimit: GRID_PAGE, proId: 'p12', ...fromPath(this.props.pathname), ready: true, w: 1280, authReady: false, patients: [], addresses: [], bookings: [], me: null, live: null, booking: false, scrolled: false, menu: false,
     loc: 'Nadakkavu', locLoading: true, locOpen: false, q: '', qApplied: '', qOpen: false, when: 'Today', whenDate: null, whenOpen: false,
-    cat: 'all', sort: 'near', availNow: false, find: '', filtersOpen: false, f: { price: 1600, gender: 'Any', langs: [], exp: 0, rating: 0, dist: 0 },
+    cat: 'all', sort: 'near', availNow: false, onlineOnly: false, find: '', filtersOpen: false, f: { price: 1600, gender: 'Any', langs: [], exp: 0, rating: 0, dist: 0 },
     gridLoading: true, sos: false, login: false, user: null, therapy: 'knee', toast: '',
     b: null, track: 0, eta: 12, earnS: 20, earnP: 650, faq: -1, proTab: 'about' };
 
@@ -216,6 +216,7 @@ class SiteStore extends Component {
       availText: p.today === '24×7' ? 'Available now · 24×7' : now ? 'Available now · ' + next : next ? 'Available today · ' + next : (() => { const fo = L.firstOpen(p); return 'Next: ' + L.fdl(fo.d) + ', ' + fo.t; })(),
       // Short form for the chip on the card photo.
       availShort: p.today === '24×7' ? 'Open 24×7' : now ? 'Available now' : next ? 'Today ' + next : (() => { const fo = L.firstOpen(p); return L.DOW[fo.d.getDay()] + ' ' + fo.t; })(),
+      hasOnline: p.svcs.some(x => x.o),
       availBg: today ? '#E8F5EF' : '#F1F2F6', availFg: today ? '#1F9D6B' : '#6B7085',
       priceText: L.inr(p.price), unitText: '/ ' + c.unit,
       open: () => this.openPro(p.id), book: (e) => { if (e && e.stopPropagation) e.stopPropagation(); this.startBook(p.id); } };
@@ -229,7 +230,7 @@ class SiteStore extends Component {
     if (s.qApplied) { const q = s.qApplied.toLowerCase(); list = list.filter(p => (p.name + ' ' + p.qual + ' ' + M.CATS[p.cat].label + ' ' + p.svcs.map(x => x.n).join(' ')).toLowerCase().includes(q) || q.split(' ').some(w => w.length > 3 && M.CATS[p.cat].label.toLowerCase().includes(w.slice(0, 5)))); }
     list = list.filter(p => p.price <= f.price || f.price >= 1600).filter(p => f.gender === 'Any' || (f.gender === 'Female' ? p.g === 'F' : p.g === 'M'))
       .filter(p => f.langs.every(l => p.langs.includes(l))).filter(p => p.exp >= f.exp).filter(p => p.rating >= f.rating)
-      .filter(p => !f.dist || L.km(p, this.at()) <= f.dist).filter(p => !s.availNow || L.availableNow(p));
+      .filter(p => !f.dist || L.km(p, this.at()) <= f.dist).filter(p => !s.availNow || L.availableNow(p)).filter(p => !s.onlineOnly || p.svcs.some(x => x.o));
     // Nearest first by default; ratings break ties, and distance breaks ties between equal ratings.
     const at = this.at(), k = new Map(list.map(p => [p.id, L.km(p, at)]));
     const byR = (a, b) => b.rating - a.rating || b.reviews - a.reviews || k.get(a.id) - k.get(b.id); const byK = (a, b) => k.get(a.id) - k.get(b.id) || b.rating - a.rating;
@@ -277,10 +278,10 @@ class SiteStore extends Component {
       find: s.find, hasFind: !!s.find, onFind: (e) => this.setState({ find: e.target.value }), clearFind: () => this.setState({ find: '' }),
       qAppliedText: s.qApplied ? 'Results for “' + s.qApplied + '”' : '', hasQApplied: !!s.qApplied,
       emptyText: s.find.trim() ? 'No ' + plural + ' match “' + s.find.trim() + '”. Check the spelling, or try a category or service.' : 'No ' + plural + ' available at this time — try another date or nearby area.',
-      resetFilters: () => { this.setState({ f: { price: 1600, gender: 'Any', langs: [], exp: 0, rating: 0, dist: 0 }, availNow: false }); this.flash(); },
-      resetAll: () => { this.setState({ f: { price: 1600, gender: 'Any', langs: [], exp: 0, rating: 0, dist: 0 }, availNow: false, qApplied: '', cat: 'all', find: '' }); this.flash(); },
-      sortTop: chip(s.sort === 'top'), sortNear: chip(s.sort === 'near'), availChip: chip(s.availNow),
-      setTop: () => { this.setState({ sort: 'top' }); this.flash(); }, setNear: () => { this.setState({ sort: 'near' }); this.flash(); }, togAvail: () => { this.setState(x => ({ availNow: !x.availNow })); this.flash(); },
+      resetFilters: () => { this.setState({ f: { price: 1600, gender: 'Any', langs: [], exp: 0, rating: 0, dist: 0 }, availNow: false, onlineOnly: false }); this.flash(); },
+      resetAll: () => { this.setState({ f: { price: 1600, gender: 'Any', langs: [], exp: 0, rating: 0, dist: 0 }, availNow: false, onlineOnly: false, qApplied: '', cat: 'all', find: '' }); this.flash(); },
+      sortTop: chip(s.sort === 'top'), sortNear: chip(s.sort === 'near'), availChip: chip(s.availNow), onlineChip: chip(s.onlineOnly),
+      setTop: () => { this.setState({ sort: 'top' }); this.flash(); }, setNear: () => { this.setState({ sort: 'near' }); this.flash(); }, togAvail: () => { this.setState(x => ({ availNow: !x.availNow })); this.flash(); }, togOnline: () => { this.setState(x => ({ onlineOnly: !x.onlineOnly })); this.flash(); },
       filtersOpen: s.filtersOpen, openFilters: () => this.setState({ filtersOpen: true }), closeFilters: () => this.setState({ filtersOpen: false }),
       fc, hasFc: fc > 0, fPrice: f.price, fPriceText: f.price >= 1600 ? 'Any price' : 'Up to ' + L.inr(f.price), onPrice: (e) => this.setF('price', +e.target.value),
       fGender: seg('gender', ['Any', 'Female', 'Male']), fExp: seg('exp', [0, 3, 5, 10], o => o ? o + '+ yrs' : 'Any'), fRating: seg('rating', [0, 4.5, 4.8], o => o ? '★ ' + o + '+' : 'Any'),
@@ -312,7 +313,8 @@ class SiteStore extends Component {
   setB(patch) { this.setState(s => ({ b: { ...s.b, ...patch, err: '' } })); }
   startBook(id, o) {
     o = o || {}; const M = MTH, L = MTHL; const p = M.pros.find(x => x.id === id); const c = M.CATS[p.cat]; const fo = L.firstOpen(p);
-    const plan = o.plan != null ? (c.allowPlan && o.plan) : c.plan; const d = o.date || L.K(fo.d);
+    const online = !!(p.svcs[o.svc || 0] || {}).o;
+    const plan = online ? false : o.plan != null ? (c.allowPlan && o.plan) : c.plan; const d = o.date || L.K(fo.d);
     const lc = M.LOCS[this.state.loc] || M.LOCS['Nadakkavu'];
     const saved = this.state.addresses[0]; const self = this.state.patients.find(x => x.rel === 'Me');
     const b = { step: 0, svc: o.svc || 0, plan, ...this.addrFields(saved), pin: saved ? this.addrFields(saved).pin : lc[3],
@@ -333,7 +335,7 @@ class SiteStore extends Component {
     const similar = M.pros.filter(x => x.cat === p.cat && x.id !== p.id).sort((a, b) => L.km(a, this.at()) - L.km(b, this.at())).slice(0, 4).map(x => this.card(x));
     return {
       pp: { ...this.card(p), qual: p.qual, reg: p.reg, bio: p.bio, role: c.one, brand: c.brand, locality: p.locality, district: M.LOCS[p.locality][2], radius: p.radius, towns: (p.towns || []).join(', '), km: km.toFixed(1), langsList: p.langs, roleQual: c.one + ' · ' + p.qual },
-      ppSvcs: p.svcs.map((x, i) => ({ n: x.n, d: x.d, price: L.inr(x.p), unit: '/ ' + c.unit, book: () => this.startBook(p.id, { svc: i }) })),
+      ppSvcs: p.svcs.map((x, i) => ({ n: x.n, d: x.d, price: L.inr(x.p), unit: '/ ' + (x.o ? 'consultation' : c.unit), online: !!x.o, book: () => this.startBook(p.id, { svc: i }) })),
       ppRevs: p.revs.map(r => ({ ...r, starsTxt: '★★★★★'.slice(0, r.stars) + '☆☆☆☆☆'.slice(0, 5 - r.stars), initial: r.name[0] })),
       week, pslots, hasSlots: pslots.length > 0, noSlots: pslots.length === 0, selDayText: L.fdl(dsel),
       similar, hasSimilar: similar.length > 0, ppBook: () => this.startBook(p.id), ppPlanBook: () => this.startBook(p.id, { plan: true }), ppCanPlan: c.allowPlan,
@@ -345,9 +347,11 @@ class SiteStore extends Component {
     const s = this.state; const out = this.proVals(); if (!s.b) return out;
     const M = MTH, L = MTHL; const b = s.b; const p = M.pros.find(x => x.id === s.proId); const c = M.CATS[p.cat]; const mode = c.mode;
     const N = '#02084D', chip = (on) => ({ bg: on ? N : '#fff', fg: on ? '#fff' : N, bd: on ? N : '#E6E8EF' });
-    const STEPS = ['Service', 'Location', 'Schedule', 'Patient', 'Review & pay'];
-    const steps = STEPS.map((t, i) => ({ t, n: i < b.step ? '✓' : String(i + 1), dotBg: i <= b.step ? N : '#fff', dotFg: i <= b.step ? '#fff' : '#9A9EB3', dotBd: i <= b.step ? N : '#E6E8EF', fg: i === b.step ? N : i < b.step ? '#4A4F6A' : '#9A9EB3', w: i === b.step ? 500 : 400, bar: i < b.step ? N : '#E6E8EF', last: i === 4, notLast: i !== 4, flex: i === 4 ? 'none' : '1 1 auto', lblDisp: s.w < 860 && i !== b.step ? 'none' : 'inline', go: () => { if (i < b.step) this.setB({ step: i }); } }));
-    const svcs = p.svcs.map((x, i) => ({ n: x.n, d: x.d, price: L.inr(x.p), ...chip(false), sel: i === b.svc, rbd: i === b.svc ? N : '#E6E8EF', rbg: i === b.svc ? '#F6F7FA' : '#fff', dot: i === b.svc ? N : '#fff', dotBd: i === b.svc ? N : '#C9CCD8', pick: () => this.setB({ svc: i }) }));
+    // An online consultation needs no address: the Location step is skipped.
+    const online = !!(p.svcs[b.svc] || p.svcs[0]).o;
+    const STEPS = ['Service', online ? 'Video call' : 'Location', 'Schedule', 'Patient', 'Review & pay'];
+    const steps = STEPS.map((t, i) => ({ t, n: i < b.step ? '✓' : String(i + 1), dotBg: i <= b.step ? N : '#fff', dotFg: i <= b.step ? '#fff' : '#9A9EB3', dotBd: i <= b.step ? N : '#E6E8EF', fg: i === b.step ? N : i < b.step ? '#4A4F6A' : '#9A9EB3', w: i === b.step ? 500 : 400, bar: i < b.step ? N : '#E6E8EF', last: i === 4, notLast: i !== 4, flex: i === 4 ? 'none' : '1 1 auto', lblDisp: s.w < 860 && i !== b.step ? 'none' : 'inline', go: () => { if (i < b.step) this.setB({ step: online && i === 1 ? 0 : i }); } }));
+    const svcs = p.svcs.map((x, i) => ({ n: x.n, d: x.d, price: L.inr(x.p), ...chip(false), sel: i === b.svc, rbd: i === b.svc ? N : '#E6E8EF', rbg: i === b.svc ? '#F6F7FA' : '#fff', dot: i === b.svc ? N : '#fff', dotBd: i === b.svc ? N : '#C9CCD8', online: !!x.o, pick: () => this.setB(x.o ? { svc: i, plan: false } : { svc: i }) }));
     const sess = L.sessions(b, mode); const keys = new Set(sess.map(L.K));
     const base = b.plan ? L.P(b.start) : L.P(b.date); const mb = new Date(base.getFullYear(), base.getMonth() + b.calOff, 1); const mo = L.month(mb);
     const t0 = L.K(L.T0);
@@ -386,19 +390,19 @@ class SiteStore extends Component {
     const famOpts = famList.map(f => ({ l: f.rel, sub: f.name, ...chip(b.fam === f.id), pick: () => this.setB({ fam: f.id, patientId: f.id, pname: f.name, age: f.age, gender: f.gender }) }));
     const addFam = () => this.setB({ fam: 'new', patientId: undefined, pname: '', age: '', gender: '' });
     const genderOpts = ['Female', 'Male', 'Other'].map(g => ({ l: g, ...chip(b.gender === g), pick: () => this.setB({ gender: g }) }));
-    const PAY = [['later', 'Pay after first visit', 'Cash or UPI to the professional. Online payment is coming soon.']];
+    const PAY = [['later', online ? 'Pay after the consultation' : 'Pay after first visit', online ? 'UPI to the professional. Online payment is coming soon.' : 'Cash or UPI to the professional. Online payment is coming soon.']];
     const payOpts = PAY.map(([k, l, sub]) => ({ l, sub, rbd: b.pay === k ? N : '#E6E8EF', rbg: b.pay === k ? '#F6F7FA' : '#fff', dot: b.pay === k ? N : '#fff', dotBd: b.pay === k ? N : '#C9CCD8', pick: () => this.setB({ pay: k }) }));
     const schedAll = sess.map((d, i) => ({ n: String(i + 1).padStart(2, '0'), d: L.fdl(d), t: b.slot }));
     const sched = b.listOpen ? schedAll : schedAll.slice(0, 4);
-    const next = () => { if (b.step === 3 && !b.pname.trim()) { this.setState(x => ({ b: { ...x.b, err: 'Please enter the patient’s name.' } })); return; } if (b.step === 1 && !/^\d{6}$/.test(String(b.pin || '').trim())) { this.setState(x => ({ b: { ...x.b, err: 'Please enter a 6-digit pincode.' } })); return; } if (b.step === 1 && !b.house.trim()) { this.setState(x => ({ b: { ...x.b, err: 'Please enter your house or flat name.' } })); return; } if (b.step === 4) { this.confirm(); return; } this.setB({ step: b.step + 1 }); window.scrollTo({ top: 0, behavior: 'smooth' }); };
+    const next = () => { if (b.step === 3 && !b.pname.trim()) { this.setState(x => ({ b: { ...x.b, err: 'Please enter the patient’s name.' } })); return; } if (b.step === 1 && !/^\d{6}$/.test(String(b.pin || '').trim())) { this.setState(x => ({ b: { ...x.b, err: 'Please enter a 6-digit pincode.' } })); return; } if (b.step === 1 && !b.house.trim()) { this.setState(x => ({ b: { ...x.b, err: 'Please enter your house or flat name.' } })); return; } if (b.step === 4) { this.confirm(); return; } this.setB({ step: online && b.step === 0 ? 2 : b.step + 1 }); window.scrollTo({ top: 0, behavior: 'smooth' }); };
     const STAT = ['Accepted', 'On the way', 'Arrived', 'In session', 'Completed'];
     return { ...out,
       b, steps, st0: b.step === 0, st1: b.step === 1, st2: b.step === 2, st3: b.step === 3, st4: b.step === 4, stepTitle: STEPS[b.step], stepNo: 'Step ' + (b.step + 1) + ' of 5',
-      bkPro: this.card(p), bkRole: c.one, bkBrand: c.brand, svcs, canPlan: c.allowPlan, single: !b.plan, plan: b.plan, care: mode === 'care', sessMode: mode !== 'care',
+      bkPro: this.card(p), bkRole: c.one, bkBrand: c.brand, svcs, canPlan: c.allowPlan && !online, bkOnline: online, bkHome: !online, single: !b.plan, plan: b.plan, care: mode === 'care', sessMode: mode !== 'care',
       planSession: b.plan && mode !== 'care', planCare: b.plan && mode === 'care',
       planSingleChip: chip(!b.plan), planMultiChip: chip(b.plan), setSingle: () => this.setB({ plan: false, calOff: 0 }), setPlan: () => this.setB({ plan: true, calOff: 0, start: b.date }),
       planNote: mode === 'care' ? 'Most families book 7 days or more — 10% off from 10 days.' : c.plan ? 'Most patients need 10–15 sessions. 10% off from 10 sessions.' : 'Plans get 10% off from 10 visits.',
-      planLabel: b.plan ? (mode === 'care' ? 'Care plan' : 'Treatment plan') : 'Single visit', multiLabel: mode === 'care' ? 'Care plan (multiple days)' : 'Treatment plan (multiple days)',
+      planLabel: online ? 'Video call' : b.plan ? (mode === 'care' ? 'Care plan' : 'Treatment plan') : 'Single visit', multiLabel: mode === 'care' ? 'Care plan (multiple days)' : 'Treatment plan (multiple days)',
       addrOpts, house: b.house, street: b.street, landmark: b.landmark, locality: b.locality, pin: b.pin, onHouse: fld('house'), onStreet: fld('street'), onLandmark: fld('landmark'), onLocality: fld('locality'), onPin: fld('pin'),
       locNames: Object.keys(M.LOCS), addrShort: [b.house, b.street, b.locality].filter(Boolean).join(', '), addrDistrict: (M.LOCS[b.locality] || [])[2] || '',
       calLabel: mo.label, cells, calPrev: () => { if (canPrev) this.setB({ calOff: b.calOff - 1 }); }, calNext: () => this.setB({ calOff: b.calOff + 1 }), prevOp: canPrev ? 1 : .3, wkHdr: ['M', 'T', 'W', 'T', 'F', 'S', 'S'],
@@ -409,7 +413,7 @@ class SiteStore extends Component {
       files: b.files.map(f => ({ f, rm: () => this.setB({ files: b.files.filter(x => x !== f) }) })), hasFiles: b.files.length > 0, addFile: () => this.setB({ files: [...b.files, ['Discharge_summary_Oct.pdf', 'Xray_knee_right.jpg', 'Blood_report.pdf'][b.files.length % 3]] }),
       share: b.share, shareBg: b.share ? N : '#D9DCE6', shareX: b.share ? '20px' : '2px', togShare: () => this.setB({ share: !b.share }),
       payOpts, payCard: b.pay === 'card', payLater: b.pay === 'later', sched, hasMoreSched: schedAll.length > 4, schedToggle: b.listOpen ? 'Show less' : 'Show all ' + schedAll.length + ' dates', togSched: () => this.setB({ listOpen: !b.listOpen }),
-      err: b.err, hasErr: !!b.err, next, nextDisabled: s.booking, back: () => { if (b.step === 0) this.go('pro'); else this.setB({ step: b.step - 1 }); }, nextLabel: b.step === 4 ? (s.booking ? 'Booking…' : 'Confirm booking') : 'Continue', backLabel: b.step === 0 ? 'Back to profile' : 'Back',
+      err: b.err, hasErr: !!b.err, next, nextDisabled: s.booking, back: () => { if (b.step === 0) this.go('pro'); else this.setB({ step: online && b.step === 2 ? 0 : b.step - 1 }); }, nextLabel: b.step === 4 ? (s.booking ? 'Booking…' : 'Confirm booking') : 'Continue', backLabel: b.step === 0 ? 'Back to profile' : 'Back',
       bookingId: s.bookingId,
       ...this.liveVals(STAT, N, L), trackFallback: STAT.map((t, i) => ({ t, dotBg: i <= s.track ? N : '#fff', dotBd: i <= s.track ? N : '#D9DCE6', fg: i <= s.track ? N : '#9A9EB3', w: i === s.track ? 500 : 300, bar: i < s.track ? N : '#E6E8EF', notLast: i < 4, sub: i === s.track ? (i === 0 ? 'Just now' : i === 1 ? 'ETA ' + s.eta + ' min' : i === 2 ? 'At your door' : i === 3 ? 'Started ' + b.slot : 'Notes added to records') : '' })),
        canAdvance: false, advance: () => {},
@@ -488,7 +492,8 @@ class SiteStore extends Component {
       etaText: cancelled ? 'Cancelled' : idx < 0 ? 'Waiting' : idx === 0 ? 'Accepted' : idx === 1 ? 'On the way' : idx === 2 ? 'Arrived' : idx === 3 ? 'In session' : 'Done', trackPct: Math.max(0, idx) * 25 + '%' };
     if (!v) return out;
     const sched = visits.map((x, i) => ({ n: String(i + 1).padStart(2, '0'), d: fmtDate(x.starts_at), t: fmtTime(x.starts_at) }));
-    return { ...out, liveTotal: L.inr(v.total_paise / 100), liveSvc: v.service_name, liveSummary: cur ? fmtDate(cur.starts_at) + ' · ' + fmtTime(cur.starts_at) : '', liveSched: s.b && s.b.listOpen ? sched : sched.slice(0, 4), liveCount: sched.length, liveStatus: cancelled ? 'Cancelled' : 'Pay after first visit' };
+    return { ...out, liveTotal: L.inr(v.total_paise / 100), liveSvc: v.service_name, liveSummary: cur ? fmtDate(cur.starts_at) + ' · ' + fmtTime(cur.starts_at) : '', liveSched: s.b && s.b.listOpen ? sched : sched.slice(0, 4), liveCount: sched.length, liveStatus: cancelled ? 'Cancelled' : v.mode === 'online' ? 'Pay after the consultation' : 'Pay after first visit',
+      liveOnline: v.mode === 'online', liveHome: v.mode !== 'online', joinCall: () => window.location.assign('/call/' + v.id) };
   }
   acctBookings() {
     const s = this.state; const L = MTHL; const fmt = (d) => new Date(d).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', weekday: 'short', day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit', hour12: true });
@@ -496,6 +501,7 @@ class SiteStore extends Component {
       return { id: b.id, img: b.photo_url, name: b.professional_name, t: b.service_name + (b.is_plan ? ' · ' + b.sessions + ' sessions' : ''), w: open ? fmt(open.starts_at) : fmt(b.created_at), who: b.patient_name, amt: L.inr(b.total_paise / 100), statusText: b.status === 'cancelled' ? 'Cancelled' : 'Completed',
         canRate: !!last && !b.reviewed && !this._rated?.[b.id],
         rate: (n) => api(`/visits/${last.id}/review`, { body: { stars: n } }).then(() => { (this._rated = this._rated || {})[b.id] = true; this.toast('Thank you for your review'); this.forceUpdate(); }).catch(e => this.toast(e.message)),
+        online: b.mode === 'online', home: b.mode !== 'online', join: () => window.location.assign('/call/' + b.id),
         track: () => this.go('done', { bookingId: b.id, proId: b.professional_id, live: null }), open: () => p && this.openPro(p.id), rebook: () => p && this.startBook(p.id),
         cancel: () => { if (window.confirm('Cancel this booking?')) api(`/bookings/${b.id}/cancel`, { method: 'POST', body: {} }).then(() => this.refreshBookings()).then(() => this.toast('Booking cancelled')).catch(e => this.toast(e.message)); } }; };
     const on = s.bookings.filter(b => ['confirmed', 'active', 'pending_payment'].includes(b.status)); const past = s.bookings.filter(b => !['confirmed', 'active', 'pending_payment'].includes(b.status));
@@ -506,11 +512,12 @@ class SiteStore extends Component {
     if (!s.user) { this._afterLogin = 'confirm'; this.setState({ login: true }); return; }
     if (s.me.needs_setup) { this._afterLogin = 'confirm'; this.toSetup(); return; }
     if (s.booking) return; this.setState({ booking: true });
+    const online = !!(p.svcs[b.svc] || {}).o;
     const dates = L.sessions(b, mode).map(L.K);
     try {
-      const r = await api('/bookings', { body: { professionalId: p.id, serviceIndex: b.svc, plan: !!b.plan, dates, slot: b.slot, hours: b.hours, notes: b.notes, share: b.share, payMethod: b.pay,
+      const r = await api('/bookings', { body: { professionalId: p.id, serviceIndex: b.svc, plan: !online && !!b.plan, dates, slot: b.slot, hours: b.hours, notes: b.notes, share: b.share, payMethod: b.pay,
         patient: { id: b.patientId, name: b.pname.trim(), age: b.age, gender: b.gender, relation: b.who === 'self' ? 'Me' : (b.pname.trim().split(' ')[0] || 'Family') },
-        address: { addressId: b.addressId, label: 'Home', house: b.house, street: b.street, landmark: b.landmark, locality: b.locality, pincode: String(b.pin || '').trim() } } });
+        address: online ? undefined : { addressId: b.addressId, label: 'Home', house: b.house, street: b.street, landmark: b.landmark, locality: b.locality, pincode: String(b.pin || '').trim() } } });
       await this.afterAuth(); this._loadedFor = null;
       this.go('done', { bookingId: r.id, live: null, booking: false });
     } catch (e) {

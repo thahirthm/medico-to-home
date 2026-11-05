@@ -1,5 +1,5 @@
 import Anthropic from "@anthropic-ai/sdk";
-import { bioFacts, COUNCILS, spokenLanguages, inDayOrder, MAX_SERVICES, SLOT_TIMES, servicePrice, TYPICAL_PRICE, WEEKDAYS, displayName, KERALA_DISTRICTS, MEDICO_CATEGORY, MEDICO_GENDERS, MEDICO_LANGUAGES, MEDICO_SLOTS, normaliseMedico, RADIUS_KM, templateBio, totalYears, YEARS_MAX, type MedicoProfile } from "@medico/shared";
+import { bioFacts, canConsultOnline, onlineConsultation, onlineServices, COUNCILS, spokenLanguages, inDayOrder, MAX_SERVICES, SLOT_TIMES, servicePrice, TYPICAL_PRICE, WEEKDAYS, displayName, KERALA_DISTRICTS, MEDICO_CATEGORY, MEDICO_GENDERS, MEDICO_LANGUAGES, MEDICO_SLOTS, normaliseMedico, RADIUS_KM, templateBio, totalYears, YEARS_MAX, type MedicoProfile } from "@medico/shared";
 import type { FastifyInstance } from "fastify";
 import { randomUUID } from "node:crypto";
 import { z } from "zod";
@@ -48,6 +48,7 @@ const profileBody = z.object({
     name: z.string().trim().min(1, "Every service needs a name.").max(80),
     price: z.coerce.number().int("Charges are whole rupees.").min(0).max(100000, "Please check the charge for each service."),
     duration: text(30),
+    online: z.boolean().default(false),
   })).max(MAX_SERVICES, `Up to ${MAX_SERVICES} services.`).default([]),
   languages: z.array(z.enum(MEDICO_LANGUAGES)).max(MEDICO_LANGUAGES.length).default([]),
   otherLanguages: text(120),
@@ -92,9 +93,11 @@ async function writeBio(profile: MedicoProfile, log: { warn: (o: unknown, m: str
 }
 
 /** The listing's prices and services from a profile: their own services, with the lowest as the "from" price. */
-export function listingServices(p: Pick<MedicoProfile, "services">) {
-  const services = (p.services ?? []).filter((x) => x.name && x.price > 0);
-  return { services, basePrice: services.length ? Math.min(...services.map((x) => x.price)) : 500 };
+export function listingServices(p: Pick<MedicoProfile, "services" | "role">) {
+  const services = onlineServices(MEDICO_CATEGORY[p.role] ?? "", (p.services ?? []).filter((x) => x.name && x.price > 0));
+  // The "from" price is for a home visit; online consultations are listed separately.
+  const priced = services.some((x) => !x.online) ? services.filter((x) => !x.online) : services;
+  return { services, basePrice: priced.length ? Math.min(...priced.map((x) => x.price)) : 500 };
 }
 
 // An approved Medico's edits go straight to their live listing. Role, council and number stay as verified.
@@ -142,7 +145,7 @@ export async function medicoRoutes(app: FastifyInstance) {
     await requireUser(request);
     const { role } = z.object({ role: z.string() }).parse(request.query);
     const category = MEDICO_CATEGORY[role];
-    if (!category) return { unit: "visit", services: [] };
+    if (!category) return { unit: "visit", services: [], online: false };
     const [cat, svcs] = await Promise.all([
       pool.query("select unit from categories where key = $1", [category]),
       pool.query("select name, multiplier, duration from service_templates where category_key = $1 order by sort_order, id", [category]),
@@ -150,7 +153,11 @@ export async function medicoRoutes(app: FastifyInstance) {
     const base = TYPICAL_PRICE[category] ?? 500;
     return {
       unit: cat.rows[0]?.unit ?? "visit",
-      services: svcs.rows.map((s) => ({ name: s.name, price: servicePrice(base, Number(s.multiplier)), duration: s.duration })),
+      services: [
+        ...svcs.rows.map((s) => ({ name: s.name, price: servicePrice(base, Number(s.multiplier)), duration: s.duration, online: false })),
+        ...(canConsultOnline(category) ? [onlineConsultation(base)] : []),
+      ],
+      online: canConsultOnline(category),
     };
   });
 

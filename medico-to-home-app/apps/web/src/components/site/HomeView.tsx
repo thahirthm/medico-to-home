@@ -243,6 +243,11 @@ export function HomeView() {
                     Available now
                   </button>
                   {" "}
+                  <button onClick={v.togOnline} style={{ border: `1px solid ${v.onlineChip.bd}`, background: v.onlineChip.bg, color: v.onlineChip.fg, borderRadius: "999px", padding: "8px 14px", font: "inherit", fontSize: "13px", cursor: "pointer", display: "flex", alignItems: "center", gap: "7px", transition: "all .2s" }}>
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" style={{ flex: "none" }}><path d="M15 10l5-3v10l-5-3M4 6h11v12H4z" /></svg>
+                    Video consult
+                  </button>
+                  {" "}
                   <button onClick={v.openFilters} style={{ border: "1px solid #E6E8EF", background: "#fff", color: "#02084D", borderRadius: "999px", padding: "8px 14px", font: "inherit", fontSize: "13px", cursor: "pointer", display: "flex", alignItems: "center", gap: "7px", transition: "border-color .2s" }} className="mth-hover-1">
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#02084D" strokeWidth="1.5" strokeLinecap="round">
                       <path d="M4 6h16M7 12h10M10 18h4" />

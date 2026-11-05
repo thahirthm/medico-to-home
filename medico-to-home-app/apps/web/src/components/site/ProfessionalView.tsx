@@ -130,8 +130,8 @@ export function ProfessionalView() {
                   <Fragment key={i0}>
                     <div style={{ display: "flex", alignItems: "center", gap: "16px", padding: "16px 20px", borderBottom: "1px solid #F0F1F5", transition: "background .2s" }} className="mth-hover-6">
                       <div style={{ flex: "1", display: "flex", flexDirection: "column", gap: "2px" }}>
-                        <span style={{ fontSize: "15px", fontWeight: "400" }}>{sv.n}</span>
-                        <span style={{ fontSize: "13px", color: "#6B7085" }}>{sv.d}</span>
+                        <span style={{ fontSize: "15px", fontWeight: "400" }}>{sv.n}{sv.online && <span style={{ display: "inline-flex", alignItems: "center", gap: "4px", marginLeft: "8px", verticalAlign: "middle", fontSize: "11px", fontWeight: "500", color: "#1F6FB2", background: "#EAF3FB", borderRadius: "999px", padding: "2px 8px" }}><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#1F6FB2" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" style={{ flex: "none" }}><path d="M15 10l5-3v10l-5-3M4 6h11v12H4z" /></svg>Online</span>}</span>
+                        <span style={{ fontSize: "13px", color: "#6B7085" }}>{sv.online ? sv.d + " · video call" : sv.d}</span>
                       </div>
                       <div style={{ fontSize: "15px", whiteSpace: "nowrap" }}>
                         <span style={{ fontWeight: "600" }}>{sv.price}</span>

@@ -4,7 +4,7 @@ export const GST_RATE = 0.18;
 export const CARE_HOUR_FACTORS = { 4: 0.45, 8: 0.75, 12: 1, 24: 1.8 } as const;
 export type CareHours = keyof typeof CARE_HOUR_FACTORS;
 
-const roundToTen = (amount: number) => Math.round(amount / 10) * 10;
+export const roundToTen = (amount: number) => Math.round(amount / 10) * 10;
 
 /** Professional's base price × service multiplier, rounded to ₹10. */
 export function servicePrice(basePrice: number, multiplier: number): number {

@@ -1,4 +1,4 @@
-import { hasTimetable, servicePrice, weekdayOf, type MedicoService } from "@medico/shared";
+import { hasTimetable, offeredServices, servicePrice, weekdayOf, type MedicoService } from "@medico/shared";
 import type { FastifyInstance } from "fastify";
 import { z } from "zod";
 import { pool } from "../db";
@@ -70,10 +70,10 @@ export async function catalogueRoutes(app: FastifyInstance) {
         reg: `${cats.rows.find((c) => c.key === p.category_key)?.registration_label ?? ""} ${p.registration_no}`.trim(),
         bio: p.bio,
         radius: p.radius_km,
-        // Their own services and charges when they set them, else the category's at their base price.
-        svcs: (p.services as MedicoService[]).length
-          ? (p.services as MedicoService[]).map((s) => ({ n: s.name, p: s.price, d: s.duration }))
-          : (bySvc.get(p.category_key) ?? []).map((s) => ({ n: s.name, p: servicePrice(p.base_price, Number(s.multiplier)), d: s.duration })),
+        // Their own services and charges when they set them, else the category's at their base price. o: given over video.
+        svcs: offeredServices(p.category_key, p.base_price, p.services as MedicoService[],
+          (bySvc.get(p.category_key) ?? []).map((s) => ({ name: s.name, price: servicePrice(p.base_price, Number(s.multiplier)), duration: s.duration })),
+        ).map((s) => ({ n: s.name, p: s.price, d: s.duration, ...(s.online ? { o: true } : {}) })),
         revs: (byRev.get(p.id) ?? []).slice(0, 4).map((r) => ({ name: r.author_name, place: r.place, stars: r.stars, text: r.body })),
       })),
       THER: ther.rows.map((t) => ({ id: t.id, label: t.label, cat: t.category_key, brand: t.brand, helps: t.helps, steps: t.steps, plan: t.plan })),

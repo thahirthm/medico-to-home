@@ -117,7 +117,7 @@ export function ProfileDetails({ p }: { p: MedicoProfile }) {
       {(p.services ?? []).length ? (
         <ul className="grid gap-2 text-[14px]">
           {p.services.map((x) => (
-            <li key={x.name} className="flex justify-between gap-4"><span>{x.name}{x.duration && <span className="text-muted"> · {x.duration}</span>}</span><span className="font-medium">₹{x.price.toLocaleString("en-IN")}</span></li>
+            <li key={x.name} className="flex justify-between gap-4"><span>{x.name}{x.online && <span className="ml-1.5 rounded-full bg-[#EAF3FB] px-2 py-0.5 text-[11px] text-[#1F6FB2]">Online</span>}{x.duration && <span className="text-muted"> · {x.duration}</span>}</span><span className="font-medium">₹{x.price.toLocaleString("en-IN")}</span></li>
           ))}
         </ul>
       ) : <p className="text-[14px] text-faint">Not added</p>}

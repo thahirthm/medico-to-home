@@ -7,6 +7,8 @@ import { formatIst, startOfIstDay, startOfIstWeek } from "../time";
 import { COMMISSION_RATE, weeklyEarnings } from "./earnings";
 
 const NEXT: Record<string, string> = { scheduled: "accepted", accepted: "on_the_way", on_the_way: "arrived", arrived: "in_session", in_session: "completed" };
+// An online consultation has no travel: once accepted, the call starts the session.
+const NEXT_ONLINE: Record<string, string> = { scheduled: "accepted", accepted: "in_session", in_session: "completed" };
 const DAY_MS = 86_400_000;
 const UPCOMING_DAYS = 14;
 
@@ -31,13 +33,13 @@ export async function proRoutes(app: FastifyInstance) {
     const from = startOfIstDay();
     const [today, requests, week] = await Promise.all([
       pool.query(
-        `select v.id, v.starts_at, v.status, b.patient_name, b.service_name, b.address->>'locality' locality
+        `select v.id, v.starts_at, v.status, b.patient_name, b.service_name, case when b.mode = 'online' then 'Online video' else b.address->>'locality' end locality
          from visits v join bookings b on b.id = v.booking_id
          where v.professional_id = $1 and v.starts_at >= $2 and v.starts_at < $3 and v.status not in ('skipped', 'cancelled') order by v.starts_at`,
         [pro.id, from, new Date(from.getTime() + DAY_MS)],
       ),
       pool.query(
-        `select v.id, v.starts_at, b.patient_name, b.service_name, b.address->>'locality' locality, round((b.subtotal_paise - b.discount_paise)::numeric / b.sessions / 100) fee
+        `select v.id, v.starts_at, b.patient_name, b.service_name, case when b.mode = 'online' then 'Online video' else b.address->>'locality' end locality, round((b.subtotal_paise - b.discount_paise)::numeric / b.sessions / 100) fee
          from visits v join bookings b on b.id = v.booking_id
          where v.professional_id = $1 and v.status = 'scheduled' and v.starts_at >= $2 order by v.starts_at limit 10`,
         [pro.id, new Date()],
@@ -69,7 +71,7 @@ export async function proRoutes(app: FastifyInstance) {
     const pro = await professional(user);
     const from = startOfIstDay();
     const { rows } = await pool.query(
-      `select v.*, b.patient_name, b.service_name, b.sessions, b.address, b.notes booking_notes, b.share_records, b.is_plan,
+      `select v.*, b.patient_name, b.service_name, b.sessions, b.address, b.mode, b.notes booking_notes, b.share_records, b.is_plan,
          b.subtotal_paise, b.discount_paise, pa.age, pa.conditions, pa.allergies, pa.medications, pa.share_records patient_shares
        from visits v join bookings b on b.id = v.booking_id left join patients pa on pa.id = b.patient_id
        where v.professional_id = $1 and v.starts_at >= $2 and v.starts_at < $3 and v.status not in ('skipped', 'cancelled') order by v.starts_at`,
@@ -87,6 +89,8 @@ export async function proRoutes(app: FastifyInstance) {
         age: v.age,
         service: v.is_plan ? `${v.service_name} · session ${v.sequence} of ${v.sessions}` : v.service_name,
         address: [a.house, a.street, a.landmark, a.locality].filter(Boolean).join(", "),
+        online: v.mode === "online",
+        bookingId: v.booking_id,
         notes: v.booking_notes,
         fee: Math.round((Number(v.subtotal_paise) - Number(v.discount_paise)) / v.sessions / 100),
         status: v.status,
@@ -124,12 +128,12 @@ export async function proRoutes(app: FastifyInstance) {
     const pro = await professional(user);
     const body = z.object({ notes: z.string().default("") }).parse(request.body ?? {});
     const { rows } = await pool.query(
-      `select v.*, b.patient_id, b.service_name from visits v join bookings b on b.id = v.booking_id where v.id = $1 and v.professional_id = $2`,
+      `select v.*, b.patient_id, b.service_name, b.mode from visits v join bookings b on b.id = v.booking_id where v.id = $1 and v.professional_id = $2`,
       [request.params.id, pro.id],
     );
     const visit = rows[0];
     if (!visit) throw new ApiError(404, "Visit not found.");
-    const next = NEXT[visit.status];
+    const next = (visit.mode === "online" ? NEXT_ONLINE : NEXT)[visit.status];
     if (!next) throw new ApiError(409, "This visit is already finished.");
 
     await pool.query("update visits set status = $2, notes = case when $3 = '' then notes else $3 end where id = $1", [visit.id, next, body.notes]);

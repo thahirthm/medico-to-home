@@ -19,6 +19,9 @@ const schema = z.object({
   SMTP_USER: z.string().optional(),
   SMTP_PASS: z.string().optional(),
   MAIL_FROM: z.string().default("Medico To Home <no-reply@medicotohome.com>"),
+  // Online video consultations (Agora). Without both, booking still works but calls cannot start.
+  AGORA_APP_ID: z.string().optional(),
+  AGORA_APP_CERTIFICATE: z.string().optional(),
   // Who hears about new bookings, accounts and registrations. Comma-separated.
   ADMIN_NOTIFY_EMAIL: z.string().default(""),
 });

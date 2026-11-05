@@ -38,7 +38,7 @@ function firstOpen(p){for(let i=0;i<30;i++){const d=add(today(),i);if(!offDay(p,
 function matches(b,d,i){const dw=d.getDay();if(b.freq==='daily')return true;if(b.freq==='alt')return i%2===0;if(b.freq==='week')return dw>=1&&dw<=5;return b.days.includes((dw+6)%7)}
 function sessions(b,mode){if(!b.plan)return [P(b.date)];const n=mode==='care'?b.ndays:(b.sessions==='custom'?Math.max(1,Math.min(60,+b.customN||1)):b.sessions);const out=[];const st=P(b.start);const skip=new Set(b.skip);for(let i=0;i<240&&out.length<n;i++){const d=add(st,i);if(mode==='care'||matches(b,d,i)){if(!skip.has(K(d)))out.push(d)}}return out}
 function price(p,b,mode){const svc=p.svcs[b.svc]||p.svcs[0];const S=sessions(b,mode);let unit=svc.p,n=1,unitLabel='visit';const c=MTH.CATS[p.cat];
- if(b.plan){n=S.length;if(mode==='care'){unit=Math.round(svc.p*HF[b.hours]/10)*10;unitLabel='day ('+b.hours+' hrs)'}else unitLabel=c.unit}else unitLabel=mode==='care'?'12-hr shift':c.unit;
+ if(b.plan){n=S.length;if(mode==='care'){unit=Math.round(svc.p*HF[b.hours]/10)*10;unitLabel='day ('+b.hours+' hrs)'}else unitLabel=c.unit}else unitLabel=svc.o?'consultation':mode==='care'?'12-hr shift':c.unit;
  const sub=unit*n;const rate=b.plan?(n>=20?.15:n>=10?.10:0):0;const disc=Math.round(sub*rate);const fee=49;const gst=Math.round(fee*.18);
  return {unit,n,sub,rate,disc,fee,gst,total:sub-disc+fee+gst,unitLabel,svc}}
 function month(base){const y=base.getFullYear(),m=base.getMonth();const first=new Date(y,m,1);const lead=(first.getDay()+6)%7;const days=new Date(y,m+1,0).getDate();const cells=[];for(let i=0;i<lead;i++)cells.push(null);for(let i=1;i<=days;i++)cells.push(new Date(y,m,i));return {cells,label:MONL[m]+' '+y}}

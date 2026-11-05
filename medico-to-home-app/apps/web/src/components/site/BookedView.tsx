@@ -44,55 +44,80 @@ export function BookedView() {
           </div>
         </div>
         <div style={{ display: "flex", flexWrap: "wrap", gap: "20px", alignItems: "stretch" }}>
+          {v.liveOnline && (
+            <div style={{ flex: "1.4 1 480px", border: "1px solid #E6E8EF", borderRadius: "20px", padding: "clamp(22px,3vw,32px)", display: "flex", flexDirection: "column", gap: "18px", background: "linear-gradient(160deg,#F4F8FD 0%,#fff 60%)" }}>
+              <span style={{ fontSize: "12px", letterSpacing: ".08em", textTransform: "uppercase", color: "#6B7085", fontWeight: "500" }}>Online video consultation</span>
+              <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+                <span style={{ width: "56px", height: "56px", borderRadius: "16px", background: "#02084D", display: "flex", alignItems: "center", justifyContent: "center", flex: "none" }}>
+                  <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M15 10l5-3v10l-5-3M4 6h11v12H4z" /></svg>
+                </span>
+                <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
+                  <span style={{ fontSize: "clamp(20px,2.4vw,26px)", fontWeight: "500", letterSpacing: "-.02em" }}>{v.liveSummary}</span>
+                  <span style={{ fontSize: "14px", color: "#4A4F6A" }}>The call opens 10 minutes before. Join from here or from My bookings.</span>
+                </div>
+              </div>
+              <button onClick={v.joinCall} style={{ alignSelf: "flex-start", display: "flex", alignItems: "center", gap: "8px", background: "#02084D", color: "#fff", border: "none", borderRadius: "999px", padding: "14px 24px", font: "inherit", fontSize: "15px", fontWeight: "500", cursor: "pointer" }} className="mth-hover-7">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M15 10l5-3v10l-5-3M4 6h11v12H4z" /></svg>
+                Join video call
+              </button>
+              <ul style={{ margin: "0", padding: "0 0 0 18px", display: "flex", flexDirection: "column", gap: "6px", fontSize: "14px", color: "#4A4F6A", lineHeight: "1.5" }}>
+                <li>Use a phone or laptop with a camera, in a quiet, well-lit place.</li>
+                <li>Allow the camera and microphone when your browser asks.</li>
+                <li>Keep reports and the medicines you take nearby to show.</li>
+              </ul>
+            </div>
+          )}
+          {v.liveHome && (
           <div style={{ flex: "1.4 1 480px", border: "1px solid #E6E8EF", borderRadius: "20px", overflow: "hidden", display: "flex", flexDirection: "column" }}>
-            <div style={{ padding: "20px 22px", display: "flex", justifyContent: "space-between", alignItems: "center", gap: "12px", borderBottom: "1px solid #F0F1F5", flexWrap: "wrap" }}>
-              <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
-                <span style={{ fontSize: "12px", letterSpacing: ".08em", textTransform: "uppercase", color: "#6B7085", fontWeight: "500" }}>Track visit</span>
-                <span style={{ fontSize: "15px" }}>Next visit · {v.liveSummary}</span>
-              </div>
-              {v.canAdvance && (
-                <>
-                  <button onClick={v.advance} style={{ border: "1px solid #E6E8EF", background: "#fff", borderRadius: "999px", padding: "8px 14px", font: "inherit", fontSize: "12px", color: "#4A4F6A", cursor: "pointer" }} className="mth-hover-1">Demo: next status →</button>
-                </>
-              )}
-            </div>
-            <div style={{ display: "flex", flexWrap: "wrap", flex: "1" }}>
-              <div style={{ flex: "1 1 280px", minHeight: "260px", backgroundColor: "#EEF0F6", backgroundImage: "repeating-linear-gradient(0deg,transparent 0 39px,#E3E6EF 39px 40px),repeating-linear-gradient(90deg,transparent 0 39px,#E3E6EF 39px 40px)", position: "relative", overflow: "hidden" }}>
-                <div style={{ position: "absolute", left: "18%", top: "72%", right: "22%", height: "2px", background: "#C9CCD8" }}></div>
-                <div style={{ position: "absolute", left: "18%", top: "72%", width: v.trackPct, maxWidth: "60%", height: "2px", background: "#02084D", transition: "width 1s ease" }}></div>
-                <div style={{ position: "absolute", left: "calc(18% - 7px)", top: "calc(72% - 7px)", width: "16px", height: "16px", borderRadius: "50%", background: "#fff", border: "2px solid #02084D" }}></div>
-                <div style={{ position: "absolute", right: "calc(22% - 10px)", top: "calc(72% - 28px)" }}>
-                  <svg width="26" height="26" viewBox="0 0 24 24" fill="#1F9D6B" stroke="#fff" strokeWidth="1">
-                    <path d="M12 22s-7-6.2-7-12a7 7 0 0 1 14 0c0 5.8-7 12-7 12z" />
-                  </svg>
+              <div style={{ padding: "20px 22px", display: "flex", justifyContent: "space-between", alignItems: "center", gap: "12px", borderBottom: "1px solid #F0F1F5", flexWrap: "wrap" }}>
+                <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
+                  <span style={{ fontSize: "12px", letterSpacing: ".08em", textTransform: "uppercase", color: "#6B7085", fontWeight: "500" }}>Track visit</span>
+                  <span style={{ fontSize: "15px" }}>Next visit · {v.liveSummary}</span>
                 </div>
-                <div style={{ position: "absolute", left: "16px", top: "16px", background: "#fff", borderRadius: "14px", padding: "12px 16px", display: "flex", flexDirection: "column", gap: "2px" }}>
-                  <span style={{ fontSize: "12px", color: "#6B7085" }}>ETA</span>
-                  <span style={{ fontSize: "30px", fontWeight: "300", letterSpacing: "-.03em", lineHeight: "1" }}>{v.etaText}</span>
+                {v.canAdvance && (
+                  <>
+                    <button onClick={v.advance} style={{ border: "1px solid #E6E8EF", background: "#fff", borderRadius: "999px", padding: "8px 14px", font: "inherit", fontSize: "12px", color: "#4A4F6A", cursor: "pointer" }} className="mth-hover-1">Demo: next status →</button>
+                  </>
+                )}
+              </div>
+              <div style={{ display: "flex", flexWrap: "wrap", flex: "1" }}>
+                <div style={{ flex: "1 1 280px", minHeight: "260px", backgroundColor: "#EEF0F6", backgroundImage: "repeating-linear-gradient(0deg,transparent 0 39px,#E3E6EF 39px 40px),repeating-linear-gradient(90deg,transparent 0 39px,#E3E6EF 39px 40px)", position: "relative", overflow: "hidden" }}>
+                  <div style={{ position: "absolute", left: "18%", top: "72%", right: "22%", height: "2px", background: "#C9CCD8" }}></div>
+                  <div style={{ position: "absolute", left: "18%", top: "72%", width: v.trackPct, maxWidth: "60%", height: "2px", background: "#02084D", transition: "width 1s ease" }}></div>
+                  <div style={{ position: "absolute", left: "calc(18% - 7px)", top: "calc(72% - 7px)", width: "16px", height: "16px", borderRadius: "50%", background: "#fff", border: "2px solid #02084D" }}></div>
+                  <div style={{ position: "absolute", right: "calc(22% - 10px)", top: "calc(72% - 28px)" }}>
+                    <svg width="26" height="26" viewBox="0 0 24 24" fill="#1F9D6B" stroke="#fff" strokeWidth="1">
+                      <path d="M12 22s-7-6.2-7-12a7 7 0 0 1 14 0c0 5.8-7 12-7 12z" />
+                    </svg>
+                  </div>
+                  <div style={{ position: "absolute", left: "16px", top: "16px", background: "#fff", borderRadius: "14px", padding: "12px 16px", display: "flex", flexDirection: "column", gap: "2px" }}>
+                    <span style={{ fontSize: "12px", color: "#6B7085" }}>ETA</span>
+                    <span style={{ fontSize: "30px", fontWeight: "300", letterSpacing: "-.03em", lineHeight: "1" }}>{v.etaText}</span>
+                  </div>
+                </div>
+                <div style={{ flex: "1 1 220px", padding: "22px", display: "flex", flexDirection: "column" }}>
+                  {v.tracks.map((tk: any, i0: number) => (
+                    <Fragment key={i0}>
+                      <div style={{ display: "flex", gap: "14px" }}>
+                        <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+                          <span style={{ width: "14px", height: "14px", borderRadius: "50%", background: tk.dotBg, border: `1px solid ${tk.dotBd}`, transition: "all .4s", flex: "none", marginTop: "3px" }}></span>
+                          {tk.notLast && (
+                            <>
+                              <span style={{ width: "1px", flex: "1", minHeight: "26px", background: tk.bar, transition: "background .4s" }}></span>
+                            </>
+                          )}
+                        </div>
+                        <div style={{ display: "flex", flexDirection: "column", gap: "2px", paddingBottom: "14px" }}>
+                          <span style={{ fontSize: "15px", color: tk.fg, fontWeight: tk.w }}>{tk.t}</span>
+                          <span style={{ fontSize: "12px", color: "#6B7085" }}>{tk.sub}</span>
+                        </div>
+                      </div>
+                    </Fragment>
+                  ))}
                 </div>
               </div>
-              <div style={{ flex: "1 1 220px", padding: "22px", display: "flex", flexDirection: "column" }}>
-                {v.tracks.map((tk: any, i0: number) => (
-                  <Fragment key={i0}>
-                    <div style={{ display: "flex", gap: "14px" }}>
-                      <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-                        <span style={{ width: "14px", height: "14px", borderRadius: "50%", background: tk.dotBg, border: `1px solid ${tk.dotBd}`, transition: "all .4s", flex: "none", marginTop: "3px" }}></span>
-                        {tk.notLast && (
-                          <>
-                            <span style={{ width: "1px", flex: "1", minHeight: "26px", background: tk.bar, transition: "background .4s" }}></span>
-                          </>
-                        )}
-                      </div>
-                      <div style={{ display: "flex", flexDirection: "column", gap: "2px", paddingBottom: "14px" }}>
-                        <span style={{ fontSize: "15px", color: tk.fg, fontWeight: tk.w }}>{tk.t}</span>
-                        <span style={{ fontSize: "12px", color: "#6B7085" }}>{tk.sub}</span>
-                      </div>
-                    </div>
-                  </Fragment>
-                ))}
-              </div>
             </div>
-          </div>
+          )}
           <div style={{ flex: "1 1 320px", display: "flex", flexDirection: "column", gap: "20px" }}>
             <div style={{ border: "1px solid #E6E8EF", borderRadius: "20px", padding: "20px", display: "flex", gap: "14px", alignItems: "center" }}>
               <div style={{ width: "64px", height: "80px", borderRadius: "12px", overflow: "hidden", background: "#EEF0F6", flex: "none", display: "flex", alignItems: "center", justifyContent: "center" }}>

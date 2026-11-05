@@ -50,6 +50,7 @@ input,select,textarea,button{font-family:inherit}
   .mth-card-tag { font-size: 10px !important; padding: 3px 7px !important; }
   .mth-card-avail { left: 6px !important; top: 6px !important; max-width: calc(100% - 12px) !important; }
   .mth-card-exp { right: 6px !important; bottom: 6px !important; }
+  .mth-card-video { left: 6px !important; bottom: 30px !important; }
   .mth-card-body { padding: 12px 14px !important; gap: 6px !important; min-width: 0; }
   .mth-steps button { gap: 6px !important; }
   .mth-step-bar { min-width: 10px !important; margin: 0 6px !important; }

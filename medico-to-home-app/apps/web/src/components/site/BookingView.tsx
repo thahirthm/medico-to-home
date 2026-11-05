@@ -61,8 +61,8 @@ export function BookingView() {
                           </span>
                           {" "}
                           <span style={{ flex: "1", display: "flex", flexDirection: "column", gap: "2px" }}>
-                            <span style={{ fontSize: "15px", fontWeight: "400" }}>{sv.n}</span>
-                            <span style={{ fontSize: "13px", color: "#6B7085" }}>{sv.d}</span>
+                            <span style={{ fontSize: "15px", fontWeight: "400" }}>{sv.n}{sv.online && <span style={{ display: "inline-flex", alignItems: "center", gap: "4px", marginLeft: "8px", verticalAlign: "middle", fontSize: "11px", fontWeight: "500", color: "#1F6FB2", background: "#EAF3FB", borderRadius: "999px", padding: "2px 8px" }}><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#1F6FB2" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" style={{ flex: "none" }}><path d="M15 10l5-3v10l-5-3M4 6h11v12H4z" /></svg>Online</span>}</span>
+                            <span style={{ fontSize: "13px", color: "#6B7085" }}>{sv.online ? sv.d + " · video call, no travel" : sv.d}</span>
                           </span>
                           {" "}
                           <span style={{ fontSize: "15px", fontWeight: "600" }}>{sv.price}</span>
@@ -428,8 +428,8 @@ export function BookingView() {
                       )}
                     </div>
                     <div style={{ padding: "18px 20px", display: "flex", flexDirection: "column", gap: "4px" }}>
-                      <span style={{ fontSize: "12px", color: "#6B7085" }}>Address</span>
-                      <span style={{ fontSize: "15px" }}>{v.addrShort}, {v.addrDistrict} {v.pin}</span>
+                      <span style={{ fontSize: "12px", color: "#6B7085" }}>{v.bkOnline ? "Where" : "Address"}</span>
+                      <span style={{ fontSize: "15px" }}>{v.bkOnline ? "Online video call. Join from My bookings, from 10 minutes before your time." : `${v.addrShort}, ${v.addrDistrict} ${v.pin}`}</span>
                     </div>
                   </div>
                   <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
@@ -450,7 +450,7 @@ export function BookingView() {
                     ))}
                     {v.payLater && (
                       <>
-                        <div style={{ fontSize: "13px", color: "#6B7085" }}>Pay the professional after your first visit. Remaining sessions are billed weekly.</div>
+                        <div style={{ fontSize: "13px", color: "#6B7085" }}>{v.bkOnline ? "Pay the professional by UPI after the consultation." : "Pay the professional after your first visit. Remaining sessions are billed weekly."}</div>
                       </>
                     )}
                   </div>
@@ -521,7 +521,7 @@ export function BookingView() {
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6B7085" strokeWidth="1.5">
                 <path d="M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM12 7v5l3 2" />
               </svg>
-              Free cancellation up to 4 hours before a visit
+              {v.bkOnline ? "Free cancellation up to 4 hours before the consultation" : "Free cancellation up to 4 hours before a visit"}
             </div>
           </aside>
         </div>

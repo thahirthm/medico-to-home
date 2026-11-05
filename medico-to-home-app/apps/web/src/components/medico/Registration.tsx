@@ -1,7 +1,7 @@
 "use client";
 
 import {
-  councilsFor, DAY_PARTS, displayName, hasTimetable, inDayOrder, MAX_SERVICES, shortTime, SLOT_TIMES, timetableSummary, WEEKDAYS, weeklySlotCount,
+  canConsultOnline, councilsFor, DAY_PARTS, MEDICO_CATEGORY, displayName, hasTimetable, inDayOrder, MAX_SERVICES, shortTime, SLOT_TIMES, timetableSummary, WEEKDAYS, weeklySlotCount,
   type MedicoService, type Weekday,
    emptyMedicoProfile, KERALA_DISTRICTS, MEDICO_GENDERS, MEDICO_LANGUAGES, MEDICO_ROLES,
   medicoPlace, MEDICO_SUGGESTIONS, normaliseMedico, registrationFor, spokenLanguages, templateBio, totalYears, townsIn, YEARS_MAX, type MedicoProfile, type MedicoRole,
@@ -623,7 +623,7 @@ function AvailabilityStep({ p, set }: StepProps) {
   );
 }
 
-type Suggested = { unit: string; services: MedicoService[] };
+type Suggested = { unit: string; services: MedicoService[]; online?: boolean };
 
 /** Services and charges, started from the profession's usual services. Every row can be changed or removed. */
 function ServicesStep({ p, set, onEdit }: StepProps & { onEdit: (step: number) => void }) {
@@ -654,6 +654,7 @@ function ServicesStep({ p, set, onEdit }: StepProps & { onEdit: (step: number) =
   const edit = (i: number, patch: Partial<MedicoService>) => set({ services: p.services.map((x, j) => (j === i ? { ...x, ...patch } : x)) });
   const missing = suggested?.services.filter((x) => !p.services.some((y) => y.name === x.name)) ?? [];
   const unit = suggested?.unit ?? "visit";
+  const canOnline = canConsultOnline(MEDICO_CATEGORY[p.role] ?? "");
 
   if (!p.role) {
     return <p className="rounded-[14px] bg-wash px-4 py-3 text-[14px] text-body">Choose what you do in step 1 and we will suggest your services and charges. <button type="button" onClick={() => onEdit(0)} className="cursor-pointer text-navy underline">Choose it now</button></p>;
@@ -662,23 +663,30 @@ function ServicesStep({ p, set, onEdit }: StepProps & { onEdit: (step: number) =
     <div className="grid gap-5">
       <p className="rounded-[14px] bg-[#E8F5EF] px-4 py-3 text-[14px] leading-relaxed text-[#2E7D5B]">
         We filled in what {p.role.toLowerCase()}s usually offer, at typical Kerala charges. Change any price, remove what you don&apos;t do, or add your own.
+        {canOnline && " Tick “Online video consultation” for anything you can do over a video call, so families anywhere can book you."}
       </p>
       {failed && !p.services.length && <p className="text-[13px] text-muted">Suggestions could not load. Add your services below.</p>}
       <ul className="grid gap-3">
         {p.services.map((x, i) => (
           <li key={i} className="grid grid-cols-2 gap-2 rounded-[16px] border border-line p-3 sm:grid-cols-[minmax(0,1fr)_130px_120px_auto] sm:items-end">
             <label className={`${label} col-span-2 sm:col-span-1`}>Service<input className={input} value={x.name} onChange={(e) => edit(i, { name: e.target.value })} maxLength={80} placeholder="E.g. Home visit" /></label>
-            <label className={label}>Charge (₹ per {unit})
+            <label className={label}>Charge (₹ per {x.online ? "consultation" : unit})
               <input className={input} inputMode="numeric" value={x.price || ""} onChange={(e) => edit(i, { price: Number(e.target.value.replace(/\D/g, "").slice(0, 6)) || 0 })} placeholder="500" />
             </label>
             <label className={label}>Takes<input className={input} value={x.duration} onChange={(e) => edit(i, { duration: e.target.value })} maxLength={30} placeholder="30 min" /></label>
+            {canOnline && (
+              <label className="col-span-2 flex cursor-pointer items-center gap-2 text-[13px] text-body sm:order-last sm:col-span-4">
+                <input type="checkbox" className="size-4 accent-navy" checked={!!x.online} onChange={(e) => edit(i, { online: e.target.checked })} />
+                Online video consultation <span className="text-muted">· families join a video call, no travel</span>
+              </label>
+            )}
             <button type="button" onClick={() => set({ services: p.services.filter((_, j) => j !== i) })} aria-label={`Remove ${x.name || "service"}`}
               className="col-span-2 cursor-pointer justify-self-end px-1 py-1 text-[13px] text-muted underline hover:text-bad sm:col-span-1 sm:px-3 sm:py-2.5">Remove</button>
           </li>
         ))}
       </ul>
       <div className="flex flex-wrap items-center gap-2">
-        {p.services.length < MAX_SERVICES && <button type="button" onClick={() => set({ services: [...p.services, { name: "", price: 0, duration: "" }] })} className={`${secondary} py-2 text-[14px]`}>+ Add a service</button>}
+        {p.services.length < MAX_SERVICES && <button type="button" onClick={() => set({ services: [...p.services, { name: "", price: 0, duration: "", online: false }] })} className={`${secondary} py-2 text-[14px]`}>+ Add a service</button>}
         {missing.map((x) => <button key={x.name} type="button" onClick={() => set({ services: [...p.services, x] })} className="cursor-pointer rounded-full border border-dashed border-line px-3.5 py-2 text-[13px] text-navy hover:border-navy">+ {x.name}</button>)}
       </div>
       <p className="text-[12px] text-muted">Families see these charges on your profile. You receive each charge less our 12% platform commission.</p>
@@ -707,7 +715,7 @@ function BioStep({ p, set, onEdit }: StepProps & { onEdit: (step: number) => voi
     ["Photo", p.photoUrl ? "Added" : "", 1], ["Registration", [p.council, p.registrationNo].filter(Boolean).join(" · "), 2],
     ["Area", medicoPlace(p), 3], ["Experience", totalYears(p) ? `${totalYears(p)} years` : "", 4], ["Awards", p.awards.filter((a) => a.title).map((a) => a.title).join(", "), 5],
     ["Timetable", timetableSummary(p).join(" · "), 6],
-    ["Languages", spokenLanguages(p).join(", "), 6], ["Services", p.services.filter((x) => x.name).map((x) => `${x.name} ₹${x.price}`).join(", "), 7],
+    ["Languages", spokenLanguages(p).join(", "), 6], ["Services", p.services.filter((x) => x.name).map((x) => `${x.name}${x.online ? " (online)" : ""} ₹${x.price}`).join(", "), 7],
   ];
   return (
     <div className="grid gap-6">

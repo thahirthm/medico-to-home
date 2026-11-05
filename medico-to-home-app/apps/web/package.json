@@ -12,6 +12,7 @@
   "dependencies": {
     "@medico/shared": "*",
     "@supabase/supabase-js": "^2.118.0",
+    "agora-rtc-sdk-ng": "^4.24.9",
     "next": "16.4.3",
     "react": "19.3.0",
     "react-dom": "19.3.0",

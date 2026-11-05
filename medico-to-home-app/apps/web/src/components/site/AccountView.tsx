@@ -384,14 +384,18 @@ export function AccountView() {
                       <div style={{ border: "1px solid #E6E8EF", borderRadius: "16px", padding: "clamp(18px,2.4vw,24px)", display: "flex", background: "#fff", flexDirection: "row", flexWrap: "wrap", alignItems: "center", gap: "16px" }}>
                         <div style={{ width: "56px", height: "70px", borderRadius: "12px", flex: "none", backgroundColor: "#EEF0F6", backgroundImage: `url(${u.img})`, backgroundSize: "cover", backgroundPosition: "center" }}></div>
                         <div style={{ flex: "1 1 160px", minWidth: "0", display: "flex", flexDirection: "column", gap: "3px" }}>
-                          <span style={{ fontSize: "16px", fontWeight: "500" }}>{u.t}</span>
+                          <span style={{ fontSize: "16px", fontWeight: "500" }}>{u.t}{u.online && <span style={{ marginLeft: "8px", verticalAlign: "middle", fontSize: "11px", fontWeight: "500", color: "#1F6FB2", background: "#EAF3FB", borderRadius: "999px", padding: "2px 8px" }}>Online</span>}</span>
                           <span style={{ fontSize: "13px", color: "#6B7085" }}>{u.name} · for {u.who}</span>
                           <span style={{ fontSize: "13px", color: "#1F9D6B" }}>{u.w}</span>
                         </div>
                         <div style={{ display: "flex", gap: "8px" }}>
                           <button onClick={u.open} style={{ border: "1px solid #E6E8EF", background: "#fff", color: "#02084D", borderRadius: "999px", padding: "10px 16px", font: "inherit", fontSize: "13px", cursor: "pointer" }} className="mth-hover-1">Profile</button>
                           <button onClick={u.cancel} style={{ border: "1px solid #E6E8EF", background: "#fff", color: "#02084D", borderRadius: "999px", padding: "8px 14px", font: "inherit", fontSize: "13px", cursor: "pointer" }}>Cancel</button>
-                          <button onClick={u.track} style={{ background: "#02084D", color: "#fff", border: "none", borderRadius: "999px", padding: "10px 18px", font: "inherit", fontSize: "13px", fontWeight: "500", cursor: "pointer" }} className="mth-hover-7">Track</button>
+                          {u.online ? (
+                            <button onClick={u.join} style={{ display: "flex", alignItems: "center", gap: "6px", background: "#02084D", color: "#fff", border: "none", borderRadius: "999px", padding: "10px 18px", font: "inherit", fontSize: "13px", fontWeight: "500", cursor: "pointer" }} className="mth-hover-7"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" style={{ flex: "none" }}><path d="M15 10l5-3v10l-5-3M4 6h11v12H4z" /></svg>Join call</button>
+                          ) : (
+                            <button onClick={u.track} style={{ background: "#02084D", color: "#fff", border: "none", borderRadius: "999px", padding: "10px 18px", font: "inherit", fontSize: "13px", fontWeight: "500", cursor: "pointer" }} className="mth-hover-7">Track</button>
+                          )}
                         </div>
                       </div>
                     </Fragment>

@@ -9,6 +9,7 @@ import { ApiError } from "./errors";
 import { accountRoutes } from "./modules/account";
 import { adminRoutes } from "./modules/admin";
 import { bookingRoutes } from "./modules/bookings";
+import { callRoutes } from "./modules/calls";
 import { catalogueRoutes } from "./modules/catalogue";
 import { medicoRoutes } from "./modules/medico";
 import { proRoutes } from "./modules/pro";
@@ -59,6 +60,7 @@ export async function buildApp() {
   await app.register(catalogueRoutes);
   await app.register(accountRoutes);
   await app.register(bookingRoutes);
+  await app.register(callRoutes);
   await app.register(proRoutes);
   await app.register(medicoRoutes);
   await app.register(adminRoutes);
