@@ -427,14 +427,14 @@ class SiteStore extends Component {
     const m = A.members[A.member]; const mm = (fn) => { set(a => fn(a.members[a.member])); this.savePatient(A.member); };
     const D = A.d; const dset = (k) => (e) => { const v = e.target.value; set(a => { a.d[k] = v; }); };
     const bmi = (+m.h && +m.w) ? (m.w / Math.pow(m.h / 100, 2)).toFixed(1) : '—';
-    const tabs = [['records', 'Medical records'], ['bookings', 'Bookings'], ['details', 'Personal details'], ['addresses', 'Addresses']].map(([k, l]) => ({ l, ...chip(A.tab === k), pick: () => set(a => { a.tab = k; }) }));
+    const tabs = [['records', 'Medical records'], ['consults', 'Consultations'], ['bookings', 'Bookings'], ['details', 'Personal details'], ['addresses', 'Addresses']].map(([k, l]) => ({ l, ...chip(A.tab === k), pick: () => set(a => { a.tab = k; }) }));
     const members = Object.keys(A.members).map(k => { const x = A.members[k]; return { l: x.rel === 'Me' ? 'Me' : (x.name || x.rel).split(' ')[0], sub: x.rel === 'Me' ? x.name : x.rel, init: ((x.name || x.rel)[0] || '?').toUpperCase(), on: A.member === k, ...chip(A.member === k), pick: () => set(a => { a.member = k; a.edit = false; }) }; });
     const fld = (k) => (e) => { const v = e.target.value; mm(x => { x[k] = v; }); };
     const ifld = (k) => (e) => { const v = e.target.value; set(a => { a.info[k] = v; }); };
     const upcoming = s.b && s.view !== 'book' && this._booked ? [] : [];
     const L = MTHL;
     return {
-      acTabs: tabs, acRecords: A.tab === 'records', acBookings: A.tab === 'bookings', acDetails: A.tab === 'details', acAddr: A.tab === 'addresses',
+      acTabs: tabs, acRecords: A.tab === 'records', acConsults: A.tab === 'consults', acBookings: A.tab === 'bookings', acDetails: A.tab === 'details', acAddr: A.tab === 'addresses',
       acMembers: members, acM: m, acIsMe: m.rel === 'Me', acEdit: A.edit, acView: !A.edit, acBmi: bmi, acEditBtn: A.edit ? 'Done' : 'Edit',
       acTogEdit: () => { set(a => { a.edit = !a.edit; }); if (A.edit) { this.savePatient(A.member); this.toast('Health profile saved'); } },
       acOnAge: fld('age'), acOnBlood: fld('blood'), acOnH: fld('h'), acOnW: fld('w'), acOnName: fld('name'),

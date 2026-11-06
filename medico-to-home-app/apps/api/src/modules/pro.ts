@@ -12,13 +12,25 @@ const NEXT_ONLINE: Record<string, string> = { scheduled: "accepted", accepted: "
 const DAY_MS = 86_400_000;
 const UPCOMING_DAYS = 14;
 
-async function professional(user: User) {
+export async function professional(user: User) {
   const { rows } = await pool.query(
     `select p.*, l.name locality, c.one role from professionals p join localities l on l.id = p.locality_id join categories c on c.key = p.category_key where p.profile_id = $1`,
     [user.id],
   );
   if (!rows[0]) throw new ApiError(403, "This account is not linked to a professional profile.");
   return rows[0];
+}
+
+/** Marks a visit completed, closes the booking when no visits are left, and adds it to the patient's history. */
+export async function completeVisit(visit: { id: string; booking_id: string; patient_id: string | null; service_name: string }, proName: string, actor: string, note: string) {
+  await pool.query("update visits set status = 'completed', notes = case when $2 = '' then notes else $2 end where id = $1", [visit.id, note]);
+  await pool.query("insert into visit_events (visit_id, status, actor) values ($1, 'completed', $2)", [visit.id, actor]);
+  const left = await pool.query("select 1 from visits where booking_id = $1 and status not in ('completed', 'skipped', 'cancelled', 'no_show') limit 1", [visit.booking_id]);
+  if (!left.rowCount) await pool.query("update bookings set status = 'completed' where id = $1", [visit.booking_id]);
+  if (visit.patient_id) {
+    const entry = { date: formatIst(new Date(), { day: "2-digit", month: "short", year: "numeric" }), title: visit.service_name, by: proName, note };
+    await pool.query("update patients set history = $2::jsonb || history where id = $1", [visit.patient_id, JSON.stringify([entry])]);
+  }
 }
 
 export async function proRoutes(app: FastifyInstance) {
@@ -72,7 +84,8 @@ export async function proRoutes(app: FastifyInstance) {
     const from = startOfIstDay();
     const { rows } = await pool.query(
       `select v.*, b.patient_name, b.service_name, b.sessions, b.address, b.mode, b.notes booking_notes, b.share_records, b.is_plan,
-         b.subtotal_paise, b.discount_paise, pa.age, pa.conditions, pa.allergies, pa.medications, pa.share_records patient_shares
+         b.subtotal_paise, b.discount_paise, pa.age, pa.conditions, pa.allergies, pa.medications, pa.share_records patient_shares,
+       (select r.status from consultation_reports r where r.visit_id = v.id) report
        from visits v join bookings b on b.id = v.booking_id left join patients pa on pa.id = b.patient_id
        where v.professional_id = $1 and v.starts_at >= $2 and v.starts_at < $3 and v.status not in ('skipped', 'cancelled') order by v.starts_at`,
       [pro.id, from, new Date(from.getTime() + UPCOMING_DAYS * DAY_MS)],
@@ -90,6 +103,7 @@ export async function proRoutes(app: FastifyInstance) {
         service: v.is_plan ? `${v.service_name} · session ${v.sequence} of ${v.sessions}` : v.service_name,
         address: [a.house, a.street, a.landmark, a.locality].filter(Boolean).join(", "),
         online: v.mode === "online",
+        report: v.report as "draft" | "submitted" | null,
         bookingId: v.booking_id,
         notes: v.booking_notes,
         fee: Math.round((Number(v.subtotal_paise) - Number(v.discount_paise)) / v.sessions / 100),
@@ -136,17 +150,13 @@ export async function proRoutes(app: FastifyInstance) {
     const next = (visit.mode === "online" ? NEXT_ONLINE : NEXT)[visit.status];
     if (!next) throw new ApiError(409, "This visit is already finished.");
 
+    if (next === "completed") {
+      await completeVisit(visit, pro.name, user.id, body.notes);
+      return { status: next };
+    }
     await pool.query("update visits set status = $2, notes = case when $3 = '' then notes else $3 end where id = $1", [visit.id, next, body.notes]);
     await pool.query("insert into visit_events (visit_id, status, actor) values ($1, $2, $3)", [visit.id, next, user.id]);
     if (next === "in_session") await pool.query("update bookings set status = 'active' where id = $1 and status = 'confirmed'", [visit.booking_id]);
-    if (next === "completed") {
-      const left = await pool.query("select 1 from visits where booking_id = $1 and status not in ('completed', 'skipped', 'cancelled', 'no_show') limit 1", [visit.booking_id]);
-      if (!left.rowCount) await pool.query("update bookings set status = 'completed' where id = $1", [visit.booking_id]);
-      if (visit.patient_id) {
-        const entry = { date: formatIst(new Date(), { day: "2-digit", month: "short", year: "numeric" }), title: visit.service_name, by: pro.name, note: body.notes };
-        await pool.query("update patients set history = $2::jsonb || history where id = $1", [visit.patient_id, JSON.stringify([entry])]);
-      }
-    }
     return { status: next };
   });
 }

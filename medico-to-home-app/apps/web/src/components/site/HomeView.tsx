@@ -14,8 +14,8 @@ export function HomeView() {
         <section style={{ padding: "clamp(48px,9vw,120px) clamp(18px,4vw,48px) clamp(40px,6vw,72px)", marginTop: "-72px", paddingTop: "calc(72px + clamp(48px,8vw,110px))" }}>
           <div style={{ maxWidth: "1100px", margin: "0 auto", display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center", gap: "22px" }}>
             <div style={{ display: "flex", alignItems: "center", gap: "8px", border: "1px solid #E6E8EF", borderRadius: "999px", padding: "6px 14px 6px 8px", fontSize: "13px", fontWeight: "400", color: "#4A4F6A" }}>
-              <span style={{ background: "#E8F5EF", color: "#1F9D6B", borderRadius: "999px", padding: "2px 8px", fontSize: "12px", fontWeight: "500" }}>New</span>
-              Book trusted Medicos
+              <span style={{ background: "#E8F5EF", color: "#1F9D6B", borderRadius: "999px", padding: "2px 8px", fontSize: "12px", fontWeight: "500" }}>Available now</span>
+              Online video consultation
             </div>
             <h1 style={{ margin: "0", fontSize: "clamp(46px,8.4vw,112px)", lineHeight: ".98", fontWeight: "300", letterSpacing: "-.045em", color: "#02084D", textWrap: "balance" }}>
               Care that comes{" "}

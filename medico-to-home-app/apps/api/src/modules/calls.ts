@@ -49,6 +49,11 @@ export async function callRoutes(app: FastifyInstance) {
     const seconds = Math.max(600, Math.round((ends.getTime() + CALL_GRACE_MIN * 60_000 - Date.now()) / 1000));
     const uid = UID[side];
     const token = RtcTokenBuilder.buildTokenWithUid(env.AGORA_APP_ID, env.AGORA_APP_CERTIFICATE, b.id, uid, RtcRole.PUBLISHER, seconds, seconds);
+    // The builder returns an empty token when the App ID or certificate is not a 32-character hex code.
+    if (!token) {
+      request.log.error("Agora token is empty: check AGORA_APP_ID and AGORA_APP_CERTIFICATE (32 hex characters each, no quotes or spaces)");
+      throw new ApiError(503, "Video calls are not set up correctly yet. Please try again later.");
+    }
     return {
       appId: env.AGORA_APP_ID, channel: b.id, uid, token, peerUid: side === "pro" ? UID.patient : UID.pro,
       side, visitId: visit.id, service: b.service_name, when,

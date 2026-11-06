@@ -1,0 +1,51 @@
+/**
+ * Searchable suggestions for the report form's medicine and test columns. Common in Indian practice;
+ * a professional can always type a name that is not here.
+ */
+export const MEDICINES = [
+  "Paracetamol 500 mg", "Paracetamol 650 mg", "Ibuprofen 400 mg", "Diclofenac 50 mg", "Aceclofenac 100 mg", "Aceclofenac + Paracetamol", "Tramadol 50 mg", "Naproxen 500 mg",
+  "Amoxicillin 500 mg", "Amoxicillin + Clavulanic acid 625 mg", "Azithromycin 500 mg", "Cefixime 200 mg", "Cefuroxime 500 mg", "Ciprofloxacin 500 mg", "Levofloxacin 500 mg",
+  "Doxycycline 100 mg", "Metronidazole 400 mg", "Nitrofurantoin 100 mg", "Cefpodoxime 200 mg", "Linezolid 600 mg", "Clindamycin 300 mg",
+  "Fluconazole 150 mg", "Albendazole 400 mg", "Ivermectin 12 mg", "Acyclovir 400 mg", "Oseltamivir 75 mg",
+  "Cetirizine 10 mg", "Levocetirizine 5 mg", "Fexofenadine 120 mg", "Montelukast 10 mg", "Montelukast + Levocetirizine", "Chlorpheniramine 4 mg",
+  "Pantoprazole 40 mg", "Omeprazole 20 mg", "Rabeprazole 20 mg", "Esomeprazole 40 mg", "Ranitidine 150 mg", "Domperidone 10 mg", "Ondansetron 4 mg",
+  "Antacid gel", "ORS sachet", "Loperamide 2 mg", "Lactulose syrup", "Bisacodyl 5 mg", "Probiotic capsule", "Drotaverine 80 mg", "Dicyclomine 20 mg",
+  "Metformin 500 mg", "Metformin 1000 mg", "Glimepiride 1 mg", "Glimepiride 2 mg", "Gliclazide 80 mg", "Sitagliptin 100 mg", "Vildagliptin 50 mg", "Teneligliptin 20 mg",
+  "Dapagliflozin 10 mg", "Empagliflozin 10 mg", "Insulin glargine", "Insulin regular", "Insulin premix 30/70",
+  "Amlodipine 5 mg", "Telmisartan 40 mg", "Losartan 50 mg", "Olmesartan 20 mg", "Metoprolol 25 mg", "Atenolol 50 mg", "Bisoprolol 5 mg", "Enalapril 5 mg", "Ramipril 5 mg",
+  "Hydrochlorothiazide 12.5 mg", "Furosemide 40 mg", "Torsemide 10 mg", "Spironolactone 25 mg", "Telmisartan + Amlodipine", "Telmisartan + Hydrochlorothiazide",
+  "Atorvastatin 10 mg", "Atorvastatin 20 mg", "Rosuvastatin 10 mg", "Aspirin 75 mg", "Clopidogrel 75 mg", "Aspirin + Clopidogrel", "Warfarin 5 mg", "Apixaban 5 mg",
+  "Isosorbide mononitrate 20 mg", "Nitroglycerin 0.5 mg (sublingual)", "Digoxin 0.25 mg",
+  "Levothyroxine 25 mcg", "Levothyroxine 50 mcg", "Levothyroxine 100 mcg", "Carbimazole 5 mg",
+  "Salbutamol inhaler", "Budesonide inhaler", "Budesonide + Formoterol inhaler", "Tiotropium inhaler", "Salbutamol nebulisation", "Ipratropium nebulisation", "Budesonide nebulisation",
+  "Prednisolone 10 mg", "Methylprednisolone 4 mg", "Dexamethasone 4 mg", "Hydrocortisone 100 mg injection",
+  "Ambroxol syrup", "Dextromethorphan syrup", "Cough syrup (expectorant)",
+  "Vitamin D3 60,000 IU", "Calcium + Vitamin D3", "Vitamin B12 1500 mcg", "Folic acid 5 mg", "Iron + Folic acid", "Multivitamin", "Zinc 50 mg", "Vitamin C 500 mg",
+  "Alprazolam 0.25 mg", "Clonazepam 0.5 mg", "Escitalopram 10 mg", "Sertraline 50 mg", "Fluoxetine 20 mg", "Amitriptyline 10 mg", "Mirtazapine 15 mg", "Quetiapine 25 mg", "Olanzapine 5 mg",
+  "Gabapentin 300 mg", "Pregabalin 75 mg", "Levetiracetam 500 mg", "Sodium valproate 500 mg", "Phenytoin 100 mg", "Carbamazepine 200 mg",
+  "Donepezil 5 mg", "Levodopa + Carbidopa", "Betahistine 16 mg", "Cinnarizine 25 mg",
+  "Tamsulosin 0.4 mg", "Finasteride 5 mg", "Allopurinol 100 mg", "Febuxostat 40 mg", "Colchicine 0.5 mg",
+  "Thiocolchicoside 4 mg", "Methocarbamol 750 mg", "Diclofenac gel", "Mupirocin ointment", "Silver sulfadiazine cream", "Povidone-iodine ointment", "Clotrimazole cream", "Hydrocortisone cream",
+  "Chlorhexidine mouthwash 0.2%", "Benzocaine oral gel", "Metronidazole + Chlorhexidine gel", "Amoxicillin 250 mg", "Ketorolac 10 mg",
+  "Moxifloxacin eye drops", "Carboxymethylcellulose eye drops", "Ciprofloxacin ear drops",
+  "Enoxaparin 40 mg injection", "Heparin injection", "Ceftriaxone 1 g injection", "Normal saline 500 mL", "Ringer lactate 500 mL", "Dextrose 5% 500 mL",
+  "Pantoprazole 40 mg injection", "Ondansetron 4 mg injection", "Tramadol 50 mg injection", "Diclofenac 75 mg injection", "Vitamin B12 injection", "Tetanus toxoid injection",
+];
+
+export const TESTS = [
+  "Complete blood count (CBC)", "Haemoglobin", "ESR", "CRP", "Peripheral smear", "Platelet count", "Blood group & Rh",
+  "Fasting blood sugar (FBS)", "Post-prandial blood sugar (PPBS)", "Random blood sugar (RBS)", "HbA1c", "Oral glucose tolerance test",
+  "Lipid profile", "Liver function test (LFT)", "Kidney function test (KFT)", "Serum creatinine", "Blood urea", "Serum electrolytes", "Serum uric acid", "Serum calcium",
+  "Thyroid profile (T3, T4, TSH)", "TSH", "Vitamin D (25-OH)", "Vitamin B12", "Serum iron studies", "Serum ferritin",
+  "Urine routine & microscopy", "Urine culture & sensitivity", "Urine albumin-creatinine ratio", "Stool routine", "Stool occult blood",
+  "Dengue NS1 antigen", "Dengue IgM / IgG", "Malaria antigen", "Typhoid (Widal)", "Leptospirosis IgM", "Scrub typhus IgM", "COVID-19 RT-PCR", "Influenza A/B",
+  "HIV 1 & 2", "HBsAg", "Anti-HCV", "VDRL",
+  "Blood culture & sensitivity", "Sputum culture", "Sputum AFB", "Throat swab culture",
+  "PT / INR", "APTT", "D-dimer", "Troponin I", "CK-MB", "BNP / NT-proBNP",
+  "PSA", "Beta hCG", "Prolactin", "Cortisol", "Rheumatoid factor", "Anti-CCP", "ANA", "Amylase / Lipase", "Arterial blood gas (ABG)",
+  "ECG", "2D Echo", "Treadmill test (TMT)", "Holter monitoring", "Spirometry (PFT)",
+  "Chest X-ray", "X-ray knee", "X-ray spine", "X-ray (other)", "Ultrasound abdomen", "Ultrasound pelvis", "Doppler (venous / arterial)",
+  "CT brain", "CT chest", "CT abdomen", "MRI brain", "MRI spine", "MRI knee", "Mammogram", "Bone density (DEXA)",
+  "Dental X-ray (IOPA)", "OPG (panoramic dental X-ray)", "CBCT (dental)",
+  "Audiometry", "Nerve conduction study", "EEG", "Swallow study (VFSS)",
+];

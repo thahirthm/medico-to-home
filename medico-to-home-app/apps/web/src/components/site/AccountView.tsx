@@ -5,6 +5,7 @@
 import { Fragment } from "react";
 import { FamilyMemberSetup } from "@/components/auth/FamilyMemberSetup";
 import { MedicoCard } from "@/components/auth/MedicoCard";
+import { ConsultationHistory } from "@/components/reports/ConsultationHistory";
 import { useSite } from "./SiteProvider";
 
 const PAGE = { maxWidth: "1320px", margin: "0 auto", padding: "clamp(24px,4vw,48px) clamp(16px,4vw,48px) 100px", animation: "mthIn .35s ease" };
@@ -373,6 +374,7 @@ export function AccountView() {
               </div>
             </>
           )}
+          {v.acConsults && <ConsultationHistory />}
           {v.acBookings && (
             <>
               <div style={{ display: "flex", flexDirection: "column", gap: "28px", animation: "mthIn .3s ease" }}>

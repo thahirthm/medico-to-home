@@ -5,3 +5,5 @@ export * from "./councils";
 export * from "./kerala";
 export * from "./availability";
 export * from "./online";
+export * from "./reports";
+export * from "./clinical-lists";

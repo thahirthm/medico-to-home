@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import Link from "next/link";
 import { api } from "@/lib/api";
 import { Card, Loading, PageHead, rupees, StatusPill } from "./ui";
 import { useApi } from "./useApi";
@@ -17,21 +17,22 @@ interface Visit {
   status: string;
   online: boolean;
   bookingId: string;
+  report: "draft" | "submitted" | null;
   records: { conditions: { n: string }[]; allergies: string[]; medications: { n: string; dose: string }[] } | null;
 }
 
 const labels: Record<string, string> = { scheduled: "New request", accepted: "Accepted", on_the_way: "On the way", arrived: "Arrived", in_session: "In session", completed: "Completed", no_show: "No show" };
-const actions: Record<string, string> = { scheduled: "Accept visit", accepted: "Start travel", on_the_way: "I have arrived", arrived: "Start session", in_session: "Complete visit" };
+// A session ends with its report: "Write report & complete" replaces a plain "Complete" button.
+const actions: Record<string, string> = { scheduled: "Accept visit", accepted: "Start travel", on_the_way: "I have arrived", arrived: "Start session" };
 // An online consultation has no travel: accepting it, then the call, then completing it.
-const onlineActions: Record<string, string> = { scheduled: "Accept consultation", accepted: "Start video call", in_session: "Complete consultation" };
+const onlineActions: Record<string, string> = { scheduled: "Accept consultation", accepted: "Start video call" };
 const callPage = (bookingId: string) => window.open(`/call/${bookingId}`, "_blank", "noopener");
 
 export function TodayVisits() {
   const { data, error, reload } = useApi<Visit[]>("/pro/visits");
-  const [notes, setNotes] = useState<Record<string, string>>({});
   if (!data) return <Loading error={error} />;
 
-  const next = (id: string) => api(`/pro/visits/${id}/status`, { body: { notes: notes[id] ?? "" } }).then(reload).catch((e: Error) => alert(e.message));
+  const next = (id: string) => api(`/pro/visits/${id}/status`, { body: {} }).then(reload).catch((e: Error) => alert(e.message));
 
   return (
     <>
@@ -61,11 +62,13 @@ export function TodayVisits() {
                   <div>Medicines: {v.records.medications.map((m) => `${m.n} ${m.dose}`).join(", ") || "None added"}</div>
                 </div>
               )}
-              {v.status === "in_session" && (
-                <label className="mt-3 block text-[13px] text-muted">
-                  Session notes
-                  <textarea rows={3} value={notes[v.id] ?? ""} onChange={(e) => setNotes((n) => ({ ...n, [v.id]: e.target.value }))} className="mt-1 block w-full rounded-xl border border-line p-3 text-sm text-navy outline-none focus:border-navy" />
-                </label>
+              {(v.status === "in_session" || (v.status === "completed" && v.report !== "submitted")) && (
+                <Link href={`/pro/visits/${v.id}/report`} className="mt-4 flex w-full items-center justify-center rounded-full bg-navy px-4 py-3 text-sm font-normal text-white hover:bg-navy-soft">
+                  {v.report === "draft" ? "Continue report" : v.status === "in_session" ? "Write report & complete" : "Write report"}
+                </Link>
+              )}
+              {v.report === "submitted" && (
+                <Link href={`/pro/visits/${v.id}/report`} className="mt-4 flex w-full items-center justify-center rounded-full border border-line px-4 py-3 text-sm font-normal text-navy hover:border-navy">View report</Link>
               )}
               {v.online && v.status === "in_session" && (
                 <button onClick={() => callPage(v.bookingId)} className="mt-4 w-full cursor-pointer rounded-full border border-navy px-4 py-3 text-sm font-normal text-navy hover:bg-wash">Rejoin video call</button>
