@@ -216,6 +216,8 @@ class SiteStore extends Component {
       availText: p.today === '24×7' ? 'Available now · 24×7' : now ? 'Available now · ' + next : next ? 'Available today · ' + next : (() => { const fo = L.firstOpen(p); return 'Next: ' + L.fdl(fo.d) + ', ' + fo.t; })(),
       // Short form for the chip on the card photo.
       availShort: p.today === '24×7' ? 'Open 24×7' : now ? 'Available now' : next ? 'Today ' + next : (() => { const fo = L.firstOpen(p); return L.DOW[fo.d.getDay()] + ' ' + fo.t; })(),
+      // The line under the price on the phone booking bar.
+      nextSlot: p.today === '24×7' ? 'Available 24×7' : now ? 'Available now' : next ? 'Next slot: Today, ' + next : (() => { const fo = L.firstOpen(p); return 'Next slot: ' + L.fdl(fo.d) + ', ' + fo.t; })(),
       hasOnline: p.svcs.some(x => x.o),
       availBg: today ? '#E8F5EF' : '#F1F2F6', availFg: today ? '#1F9D6B' : '#6B7085',
       priceText: L.inr(p.price), unitText: '/ ' + c.unit,

@@ -97,7 +97,7 @@ a, button, input, select, textarea, label, summary, [role="button"] {
 
 /* On phones the keyboard pushes bottom-fixed bars up over the form, so they step aside while a field is in use */
 @media (pointer: coarse) and (max-width: 1023px) {
-  body:has(input:focus, textarea:focus, select:focus) .keyboard-hide { display: none !important; }
+  body:has(input:focus:not([type="checkbox"], [type="radio"], [type="range"], [type="file"]), textarea:focus, select:focus) .keyboard-hide { display: none !important; }
 }
 
 /* Consultation reports print on their own: everything else on the page is hidden. */
